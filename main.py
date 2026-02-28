@@ -16,7 +16,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 import streamlit as st
 
-from ui import page_chat, page_neo4j, page_graphrag, page_rag
+from ui import page_chat, page_neo4j, page_graphrag, page_rag, page_benchmark
 
 # ── Page config (must be first Streamlit call) ────────────────────────────────
 
@@ -31,7 +31,7 @@ st.set_page_config(
 st.sidebar.title("🎭 GraphRAGv2")
 page = st.sidebar.radio(
     "Điều hướng",
-    ["💬 Chat", "🔗 Neo4j", "🔍 GraphRAG", "📚 RAG"],
+    ["💬 Chat", "🔗 Neo4j", "🔍 GraphRAG", "📚 RAG", "📊 Benchmark"],
     label_visibility="collapsed",
 )
 st.sidebar.divider()
@@ -53,3 +53,5 @@ elif page == "🔍 GraphRAG":
     page_graphrag.render()
 elif page == "📚 RAG":
     page_rag.render()
+elif page == "📊 Benchmark":
+    page_benchmark.render()

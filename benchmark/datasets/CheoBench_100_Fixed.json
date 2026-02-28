@@ -1,0 +1,1589 @@
+{
+  "metadata": {
+    "version": "5.1-Fixed",
+    "description": "Bộ Benchmark chuẩn 100 câu (Auto-Backfill)",
+    "total_cases": 100
+  },
+  "categories": {
+    "local": "Truy xuất cục bộ (Local Queries)",
+    "community": "Truy xuất cộng đồng (Community Queries)",
+    "global": "Truy xuất toàn cục (Global Queries)"
+  },
+  "test_cases": [
+    {
+      "id": "CASE_001",
+      "category": "local_queries",
+      "subcategory": "factual_retrieval",
+      "question": "Mô tả đặc điểm nhân vật Lý Trưởng?",
+      "ground_truth": {
+        "answer": "Là người đứng đầu làng, Lý Trưởng thể hiện sự quyền uy và luôn tìm cách giữ thể diện cho dòng họ. Ông ra lệnh cho Mẹ Mõ rao tin về việc Thị Mầu có thai nhưng muốn xử lý kín đáo. Nhân vật này đại diện cho tầng lớp cai trị bảo thủ, thường áp đặt quyền lực lên người dân.",
+        "related_entities": [
+          "Lý Trưởng"
+        ],
+        "must_include_keywords": [
+          "Lý Trưởng"
+        ]
+      }
+    },
+    {
+      "id": "CASE_002",
+      "category": "local_queries",
+      "subcategory": "factual_retrieval",
+      "question": "Mô tả đặc điểm nhân vật Trinh Nguyên?",
+      "ground_truth": {
+        "answer": "Trinh Nguyên là vợ hai của Tôn Dân, tuy nhiên chồng mất sớm để lại người vợ trẻ và hai đứa con. Nàng Trinh Nguyên ở vậy một mình nuôi dạy con chồng là Tôn Mạnh và con đẻ là Tôn Trọng. Trinh Nguyên là người tài đức vẹn toàn; một mình tảo tần nuôi hai con thơ trưởng thành không phân biệt máu mủ, yêu thương cả hai bằng tấm lòng bao dung và tình mẫu tử rộng lớn.",
+        "related_entities": [
+          "Trinh Nguyên"
+        ],
+        "must_include_keywords": [
+          "Trinh Nguyên"
+        ]
+      }
+    },
+    {
+      "id": "CASE_003",
+      "category": "local_queries",
+      "subcategory": "factual_retrieval",
+      "question": "Mô tả đặc điểm nhân vật Hỷ đồng?",
+      "ground_truth": {
+        "answer": "...",
+        "related_entities": [
+          "Hỷ đồng"
+        ],
+        "must_include_keywords": [
+          "Hỷ đồng"
+        ]
+      }
+    },
+    {
+      "id": "CASE_004",
+      "category": "local_queries",
+      "subcategory": "factual_retrieval",
+      "question": "Mô tả đặc điểm nhân vật Trương Viên?",
+      "ground_truth": {
+        "answer": "Người con hiếu nghĩa, người chồng thủy chung. Văn võ song toàn, được vua tin tưởng sai đi dẹp loạn giặc. Sau mười tám năm xa quê, chàng trở về trong nỗi cô quạnh, rồi nhờ tiếng hát xẩm mà nhận ra vợ và mẹ. Khi đôi ngọc lưu ly hợp lại, Thị Phương sáng mắt, gia đình trọn vẹn sum vầy.",
+        "related_entities": [
+          "Trương Viên"
+        ],
+        "must_include_keywords": [
+          "Trương Viên"
+        ]
+      }
+    },
+    {
+      "id": "CASE_005",
+      "category": "local_queries",
+      "subcategory": "factual_retrieval",
+      "question": "Mô tả đặc điểm nhân vật Khoèo?",
+      "ground_truth": {
+        "answer": "...",
+        "related_entities": [
+          "Khoèo"
+        ],
+        "must_include_keywords": [
+          "Khoèo"
+        ]
+      }
+    },
+    {
+      "id": "CASE_006",
+      "category": "local_queries",
+      "subcategory": "factual_retrieval",
+      "question": "Mô tả đặc điểm nhân vật Thiệt Thê?",
+      "ground_truth": {
+        "answer": "Nhân vật Thiệt Thê trong vở diễn được khắc họa một cách nông nổi, đứng núi này trông núi nọ, vì ham muốn vật chất tầm thường trước mắt nên đã phải trả giá cho những sai lầm.",
+        "related_entities": [
+          "Thiệt Thê"
+        ],
+        "must_include_keywords": [
+          "Thiệt Thê"
+        ]
+      }
+    },
+    {
+      "id": "CASE_007",
+      "category": "local_queries",
+      "subcategory": "factual_retrieval",
+      "question": "Mô tả đặc điểm nhân vật Mụ Quán?",
+      "ground_truth": {
+        "answer": "Một bà mối “có số má” trong làng, chuyên dắt mối, môi giới tình duyên.",
+        "related_entities": [
+          "Mụ Quán"
+        ],
+        "must_include_keywords": [
+          "Mụ Quán"
+        ]
+      }
+    },
+    {
+      "id": "CASE_008",
+      "category": "local_queries",
+      "subcategory": "factual_retrieval",
+      "question": "Mô tả đặc điểm nhân vật Súy Vân?",
+      "ground_truth": {
+        "answer": "Là con gái của huyện Tể, được gả cho Kim Nham. Sau khi cưới nhau, Kim Nham lại lên kinh đô theo đuổi công danh, còn Súy Vân lẻ bóng ở nhà và rất buồn trong cảnh chờ đợi. Bị Trần Phương xúi giục, Súy Vân giả điên để thoát khỏi Kim Nham, tìm kiếm hạnh phúc cho riêng mình.",
+        "related_entities": [
+          "Súy Vân"
+        ],
+        "must_include_keywords": [
+          "Súy Vân"
+        ]
+      }
+    },
+    {
+      "id": "CASE_009",
+      "category": "local_queries",
+      "subcategory": "factual_retrieval",
+      "question": "Mô tả đặc điểm nhân vật Hề áo xanh (Dương Lễ tiễn Châu Long đi nuôi bạn)?",
+      "ground_truth": {
+        "answer": "",
+        "related_entities": [
+          "Hề áo xanh (Dương Lễ tiễn Châu Long đi nuôi bạn)"
+        ],
+        "must_include_keywords": [
+          "Hề áo xanh (Dương Lễ tiễn Châu Long đi nuôi bạn)"
+        ]
+      }
+    },
+    {
+      "id": "CASE_010",
+      "category": "local_queries",
+      "subcategory": "factual_retrieval",
+      "question": "Mô tả đặc điểm nhân vật Phú Ông?",
+      "ground_truth": {
+        "answer": "Phú ông là người giàu có trong làng, nhưng lúc nào cũng uống rượu say xỉn.",
+        "related_entities": [
+          "Phú Ông"
+        ],
+        "must_include_keywords": [
+          "Phú Ông"
+        ]
+      }
+    },
+    {
+      "id": "CASE_011",
+      "category": "local_queries",
+      "subcategory": "factual_retrieval",
+      "question": "Mô tả đặc điểm nhân vật Lưu Bình?",
+      "ground_truth": {
+        "answer": "Người tài hoa nhưng gặp cảnh lận đận, thi hỏng, đời sống cơ cực, lại gặp cảnh loạn lạc. Nhờ sự dìu dắt và hy sinh thầm lặng của Châu Long, chàng quyết chí học hành, cuối cùng đỗ Trạng nguyên. Nhân vật thể hiện ý chí vượt khó, khát vọng lập thân.",
+        "related_entities": [
+          "Lưu Bình"
+        ],
+        "must_include_keywords": [
+          "Lưu Bình"
+        ]
+      }
+    },
+    {
+      "id": "CASE_012",
+      "category": "local_queries",
+      "subcategory": "factual_retrieval",
+      "question": "Mô tả đặc điểm nhân vật Tuần Ty?",
+      "ground_truth": {
+        "answer": "Tuần Ty là viên quan quê miền Trung được bổ nhiệm trên đất Bắc, tằng tịu với người vợ cũ của Chu Mãi Thần, định lấy làm “vợ hai”.",
+        "related_entities": [
+          "Tuần Ty"
+        ],
+        "must_include_keywords": [
+          "Tuần Ty"
+        ]
+      }
+    },
+    {
+      "id": "CASE_013",
+      "category": "local_queries",
+      "subcategory": "factual_retrieval",
+      "question": "Mô tả đặc điểm nhân vật Trương Mẫu?",
+      "ground_truth": {
+        "answer": "Mẹ của Trương Viên, dắt con dâu mù lòa lưu lạc suốt bao năm. Bà tấu trống cho Thị Phương hát, cả hai nương tựa vào nhau mà sống qua ngày.",
+        "related_entities": [
+          "Trương Mẫu"
+        ],
+        "must_include_keywords": [
+          "Trương Mẫu"
+        ]
+      }
+    },
+    {
+      "id": "CASE_014",
+      "category": "local_queries",
+      "subcategory": "factual_retrieval",
+      "question": "Mô tả đặc điểm nhân vật Tôn Trọng?",
+      "ground_truth": {
+        "answer": "Con ruột của Tôn Dân và vợ hai là Trinh Nguyên. Hai anh em bị vu oan tội giết người khi chôn cất một xác người ven đường, nhưng may mắn được Quan Án sát đã giải oan cho hai anh em, để cho mẹ con Trinh Nguyên được đoàn tụ vẹn toàn.",
+        "related_entities": [
+          "Tôn Trọng"
+        ],
+        "must_include_keywords": [
+          "Tôn Trọng"
+        ]
+      }
+    },
+    {
+      "id": "CASE_015",
+      "category": "local_queries",
+      "subcategory": "factual_retrieval",
+      "question": "Mô tả đặc điểm nhân vật Hề (Đưa bạn đi thi)?",
+      "ground_truth": {
+        "answer": "",
+        "related_entities": [
+          "Hề (Đưa bạn đi thi)"
+        ],
+        "must_include_keywords": [
+          "Hề (Đưa bạn đi thi)"
+        ]
+      }
+    },
+    {
+      "id": "CASE_016",
+      "category": "local_queries",
+      "subcategory": "temporal_detail",
+      "question": "Trong video KN.MQTP.02 (1317s-1542s), Khoèo có cảm xúc gì?",
+      "ground_truth": {
+        "answer": "...",
+        "related_entities": [
+          "KN.MQTP.02",
+          "Khoèo"
+        ],
+        "must_include_keywords": [
+          "..."
+        ]
+      }
+    },
+    {
+      "id": "CASE_017",
+      "category": "local_queries",
+      "subcategory": "temporal_detail",
+      "question": "Trong video QATK.TMLC.03 (297s-359s), Thị Màu có cảm xúc gì?",
+      "ground_truth": {
+        "answer": "Happy",
+        "related_entities": [
+          "QATK.TMLC.03",
+          "Thị Màu"
+        ],
+        "must_include_keywords": [
+          "Happy"
+        ]
+      }
+    },
+    {
+      "id": "CASE_018",
+      "category": "local_queries",
+      "subcategory": "temporal_detail",
+      "question": "Trong video QATK.TMLC.01 (860s-1000s), Thị Màu có cảm xúc gì?",
+      "ground_truth": {
+        "answer": "Sad",
+        "related_entities": [
+          "QATK.TMLC.01",
+          "Thị Màu"
+        ],
+        "must_include_keywords": [
+          "Sad"
+        ]
+      }
+    },
+    {
+      "id": "CASE_019",
+      "category": "local_queries",
+      "subcategory": "temporal_detail",
+      "question": "Trong video KN.PTSM.01 (420s-438s), Hỷ đồng có cảm xúc gì?",
+      "ground_truth": {
+        "answer": "Happy",
+        "related_entities": [
+          "KN.PTSM.01",
+          "Hỷ đồng"
+        ],
+        "must_include_keywords": [
+          "Happy"
+        ]
+      }
+    },
+    {
+      "id": "CASE_020",
+      "category": "local_queries",
+      "subcategory": "temporal_detail",
+      "question": "Trong video QATK.TMLC.02 (372s-425s), Thị Kính có cảm xúc gì?",
+      "ground_truth": {
+        "answer": "Other",
+        "related_entities": [
+          "QATK.TMLC.02",
+          "Thị Kính"
+        ],
+        "must_include_keywords": [
+          "Other"
+        ]
+      }
+    },
+    {
+      "id": "CASE_021",
+      "category": "local_queries",
+      "subcategory": "temporal_detail",
+      "question": "Trong video QATK.MNPO.01 (21s-452s), Nô có cảm xúc gì?",
+      "ground_truth": {
+        "answer": "Excited",
+        "related_entities": [
+          "QATK.MNPO.01",
+          "Nô"
+        ],
+        "must_include_keywords": [
+          "Excited"
+        ]
+      }
+    },
+    {
+      "id": "CASE_022",
+      "category": "local_queries",
+      "subcategory": "temporal_detail",
+      "question": "Trong video QATK.TMLC.03 (700s-835s), Thị Màu có cảm xúc gì?",
+      "ground_truth": {
+        "answer": "Happy",
+        "related_entities": [
+          "QATK.TMLC.03",
+          "Thị Màu"
+        ],
+        "must_include_keywords": [
+          "Happy"
+        ]
+      }
+    },
+    {
+      "id": "CASE_023",
+      "category": "local_queries",
+      "subcategory": "temporal_detail",
+      "question": "Trong video QATK.VQ.01 (675s-1375s), Thị Kính có cảm xúc gì?",
+      "ground_truth": {
+        "answer": "Happy",
+        "related_entities": [
+          "QATK.VQ.01",
+          "Thị Kính"
+        ],
+        "must_include_keywords": [
+          "Happy"
+        ]
+      }
+    },
+    {
+      "id": "CASE_024",
+      "category": "local_queries",
+      "subcategory": "temporal_detail",
+      "question": "Trong video QATK.TMLC.02 (776s-890s), Thị Màu có cảm xúc gì?",
+      "ground_truth": {
+        "answer": "Sad",
+        "related_entities": [
+          "QATK.TMLC.02",
+          "Thị Màu"
+        ],
+        "must_include_keywords": [
+          "Sad"
+        ]
+      }
+    },
+    {
+      "id": "CASE_025",
+      "category": "local_queries",
+      "subcategory": "temporal_detail",
+      "question": "Trong video QATK.LTMM.02 (378s-383s), Mẹ Mõ (Đốp) có cảm xúc gì?",
+      "ground_truth": {
+        "answer": "Fear",
+        "related_entities": [
+          "QATK.LTMM.02",
+          "Mẹ Mõ (Đốp)"
+        ],
+        "must_include_keywords": [
+          "Fear"
+        ]
+      }
+    },
+    {
+      "id": "CASE_026",
+      "category": "local_queries",
+      "subcategory": "temporal_detail",
+      "question": "Trong video QATK.TMLC.02 (555s-660s), Thị Màu có cảm xúc gì?",
+      "ground_truth": {
+        "answer": "Excited",
+        "related_entities": [
+          "QATK.TMLC.02",
+          "Thị Màu"
+        ],
+        "must_include_keywords": [
+          "Excited"
+        ]
+      }
+    },
+    {
+      "id": "CASE_027",
+      "category": "local_queries",
+      "subcategory": "temporal_detail",
+      "question": "Trong video QATK.LTMM.02 (629s-785s), Mẹ Mõ (Đốp) có cảm xúc gì?",
+      "ground_truth": {
+        "answer": "Other",
+        "related_entities": [
+          "QATK.LTMM.02",
+          "Mẹ Mõ (Đốp)"
+        ],
+        "must_include_keywords": [
+          "Other"
+        ]
+      }
+    },
+    {
+      "id": "CASE_028",
+      "category": "local_queries",
+      "subcategory": "temporal_detail",
+      "question": "Trong video KN.MQTP.02 (956s-1669s), Súy Vân có cảm xúc gì?",
+      "ground_truth": {
+        "answer": "Sad",
+        "related_entities": [
+          "KN.MQTP.02",
+          "Súy Vân"
+        ],
+        "must_include_keywords": [
+          "Sad"
+        ]
+      }
+    },
+    {
+      "id": "CASE_029",
+      "category": "local_queries",
+      "subcategory": "temporal_detail",
+      "question": "Trong video QATK.CR.02 (11s-1281s), Thị Kính có cảm xúc gì?",
+      "ground_truth": {
+        "answer": "...",
+        "related_entities": [
+          "QATK.CR.02",
+          "Thị Kính"
+        ],
+        "must_include_keywords": [
+          "..."
+        ]
+      }
+    },
+    {
+      "id": "CASE_030",
+      "category": "local_queries",
+      "subcategory": "temporal_detail",
+      "question": "Trong video QATK.MNPO.03 (416s-913s), Phú Ông có cảm xúc gì?",
+      "ground_truth": {
+        "answer": "...",
+        "related_entities": [
+          "QATK.MNPO.03",
+          "Phú Ông"
+        ],
+        "must_include_keywords": [
+          "..."
+        ]
+      }
+    },
+    {
+      "id": "CASE_031",
+      "category": "community_queries",
+      "subcategory": "multi_hop",
+      "question": "An Chinh đóng vai gì trong vở Kim Nham?",
+      "ground_truth": {
+        "answer": "An Chinh đóng vai Hỷ đồng.",
+        "related_entities": [
+          "An Chinh",
+          "Hỷ đồng"
+        ],
+        "must_include_keywords": [
+          "Hỷ đồng"
+        ]
+      }
+    },
+    {
+      "id": "CASE_032",
+      "category": "community_queries",
+      "subcategory": "multi_hop",
+      "question": "Trần Thị Thân đóng vai gì trong vở Quan Âm Thị Kính?",
+      "ground_truth": {
+        "answer": "Trần Thị Thân đóng vai Sùng Bà.",
+        "related_entities": [
+          "Trần Thị Thân",
+          "Sùng Bà"
+        ],
+        "must_include_keywords": [
+          "Sùng Bà"
+        ]
+      }
+    },
+    {
+      "id": "CASE_033",
+      "category": "community_queries",
+      "subcategory": "multi_hop",
+      "question": "Khắc Huy đóng vai gì trong vở Trương Viên?",
+      "ground_truth": {
+        "answer": "Khắc Huy đóng vai Hề (Lớp \"Tiên Nữ - Đoàn tụ).",
+        "related_entities": [
+          "Khắc Huy",
+          "Hề (Lớp \"Tiên Nữ - Đoàn tụ)"
+        ],
+        "must_include_keywords": [
+          "Hề (Lớp \"Tiên Nữ - Đoàn tụ)"
+        ]
+      }
+    },
+    {
+      "id": "CASE_034",
+      "category": "community_queries",
+      "subcategory": "multi_hop",
+      "question": "Văn Quân đóng vai gì trong vở Quan Âm Thị Kính?",
+      "ground_truth": {
+        "answer": "Văn Quân đóng vai Nô.",
+        "related_entities": [
+          "Văn Quân",
+          "Nô"
+        ],
+        "must_include_keywords": [
+          "Nô"
+        ]
+      }
+    },
+    {
+      "id": "CASE_035",
+      "category": "community_queries",
+      "subcategory": "multi_hop",
+      "question": "Vân Quyền đóng vai gì trong vở Quan Âm Thị Kính?",
+      "ground_truth": {
+        "answer": "Vân Quyền đóng vai Thị Màu.",
+        "related_entities": [
+          "Vân Quyền",
+          "Thị Màu"
+        ],
+        "must_include_keywords": [
+          "Thị Màu"
+        ]
+      }
+    },
+    {
+      "id": "CASE_036",
+      "category": "community_queries",
+      "subcategory": "multi_hop",
+      "question": "Huy Toàn đóng vai gì trong vở Quan Âm Thị Kính?",
+      "ground_truth": {
+        "answer": "Huy Toàn đóng vai Thiện Sỹ.",
+        "related_entities": [
+          "Huy Toàn",
+          "Thiện Sỹ"
+        ],
+        "must_include_keywords": [
+          "Thiện Sỹ"
+        ]
+      }
+    },
+    {
+      "id": "CASE_037",
+      "category": "community_queries",
+      "subcategory": "multi_hop",
+      "question": "An Chinh đóng vai gì trong vở Quan Âm Thị Kính?",
+      "ground_truth": {
+        "answer": "An Chinh đóng vai Thị Màu.",
+        "related_entities": [
+          "An Chinh",
+          "Thị Màu"
+        ],
+        "must_include_keywords": [
+          "Thị Màu"
+        ]
+      }
+    },
+    {
+      "id": "CASE_038",
+      "category": "community_queries",
+      "subcategory": "multi_hop",
+      "question": "Tuấn Kha đóng vai gì trong vở Quan Âm Thị Kính?",
+      "ground_truth": {
+        "answer": "Tuấn Kha đóng vai Mãng Ông (bố Thị Kính).",
+        "related_entities": [
+          "Tuấn Kha",
+          "Mãng Ông (bố Thị Kính)"
+        ],
+        "must_include_keywords": [
+          "Mãng Ông (bố Thị Kính)"
+        ]
+      }
+    },
+    {
+      "id": "CASE_039",
+      "category": "community_queries",
+      "subcategory": "multi_hop",
+      "question": "Thanh Ngoan đóng vai gì trong vở Chu Mãi Thần?",
+      "ground_truth": {
+        "answer": "Thanh Ngoan đóng vai Đào Huế.",
+        "related_entities": [
+          "Thanh Ngoan",
+          "Đào Huế"
+        ],
+        "must_include_keywords": [
+          "Đào Huế"
+        ]
+      }
+    },
+    {
+      "id": "CASE_040",
+      "category": "community_queries",
+      "subcategory": "multi_hop",
+      "question": "Ngọc Minh đóng vai gì trong vở Chu Mãi Thần?",
+      "ground_truth": {
+        "answer": "Ngọc Minh đóng vai Tuần Ty.",
+        "related_entities": [
+          "Ngọc Minh",
+          "Tuần Ty"
+        ],
+        "must_include_keywords": [
+          "Tuần Ty"
+        ]
+      }
+    },
+    {
+      "id": "CASE_041",
+      "category": "community_queries",
+      "subcategory": "multi_hop",
+      "question": "Phú Kiên đóng vai gì trong vở Từ Thức?",
+      "ground_truth": {
+        "answer": "Phú Kiên đóng vai Từ Thức.",
+        "related_entities": [
+          "Phú Kiên",
+          "Từ Thức"
+        ],
+        "must_include_keywords": [
+          "Từ Thức"
+        ]
+      }
+    },
+    {
+      "id": "CASE_042",
+      "category": "community_queries",
+      "subcategory": "multi_hop",
+      "question": "Thanh Mai đóng vai gì trong vở Kim Nham?",
+      "ground_truth": {
+        "answer": "Thanh Mai đóng vai Hỷ đồng.",
+        "related_entities": [
+          "Thanh Mai",
+          "Hỷ đồng"
+        ],
+        "must_include_keywords": [
+          "Hỷ đồng"
+        ]
+      }
+    },
+    {
+      "id": "CASE_043",
+      "category": "community_queries",
+      "subcategory": "multi_hop",
+      "question": "Mạnh Phóng đóng vai gì trong vở Quan Âm Thị Kính?",
+      "ground_truth": {
+        "answer": "Mạnh Phóng đóng vai Nô.",
+        "related_entities": [
+          "Mạnh Phóng",
+          "Nô"
+        ],
+        "must_include_keywords": [
+          "Nô"
+        ]
+      }
+    },
+    {
+      "id": "CASE_044",
+      "category": "community_queries",
+      "subcategory": "multi_hop",
+      "question": "Tạ Thị Kim Liên đóng vai gì trong vở Kim Nham?",
+      "ground_truth": {
+        "answer": "Tạ Thị Kim Liên đóng vai Súy Vân.",
+        "related_entities": [
+          "Tạ Thị Kim Liên",
+          "Súy Vân"
+        ],
+        "must_include_keywords": [
+          "Súy Vân"
+        ]
+      }
+    },
+    {
+      "id": "CASE_045",
+      "category": "community_queries",
+      "subcategory": "multi_hop",
+      "question": "Trần Xuân Tài đóng vai gì trong vở Quan Âm Thị Kính?",
+      "ground_truth": {
+        "answer": "Trần Xuân Tài đóng vai Thiện Sỹ.",
+        "related_entities": [
+          "Trần Xuân Tài",
+          "Thiện Sỹ"
+        ],
+        "must_include_keywords": [
+          "Thiện Sỹ"
+        ]
+      }
+    },
+    {
+      "id": "CASE_046",
+      "category": "community_queries",
+      "subcategory": "comparison",
+      "question": "So sánh cảm xúc vai Đào Huế do Thanh Ngoan và Kim Liên đóng?",
+      "ground_truth": {
+        "answer": "Thanh Ngoan: Angry | Kim Liên: ...",
+        "related_entities": [
+          "Đào Huế",
+          "Thanh Ngoan",
+          "Kim Liên"
+        ],
+        "must_include_keywords": [
+          "Angry",
+          "..."
+        ]
+      }
+    },
+    {
+      "id": "CASE_047",
+      "category": "community_queries",
+      "subcategory": "comparison",
+      "question": "So sánh cảm xúc vai Thiệt Thê do Hương Dịu và An Chinh đóng?",
+      "ground_truth": {
+        "answer": "Hương Dịu: Bored | An Chinh: ...",
+        "related_entities": [
+          "Thiệt Thê",
+          "Hương Dịu",
+          "An Chinh"
+        ],
+        "must_include_keywords": [
+          "Bored",
+          "..."
+        ]
+      }
+    },
+    {
+      "id": "CASE_048",
+      "category": "community_queries",
+      "subcategory": "comparison",
+      "question": "So sánh cảm xúc vai Tuần Ty do Ngọc Minh và Phú Kiên đóng?",
+      "ground_truth": {
+        "answer": "Ngọc Minh: ... | Phú Kiên: ...",
+        "related_entities": [
+          "Tuần Ty",
+          "Ngọc Minh",
+          "Phú Kiên"
+        ],
+        "must_include_keywords": [
+          "...",
+          "..."
+        ]
+      }
+    },
+    {
+      "id": "CASE_049",
+      "category": "community_queries",
+      "subcategory": "comparison",
+      "question": "So sánh cảm xúc vai Khoèo do Đăng Toàn và Tuấn Kha đóng?",
+      "ground_truth": {
+        "answer": "Đăng Toàn: ... | Tuấn Kha: Sad",
+        "related_entities": [
+          "Khoèo",
+          "Đăng Toàn",
+          "Tuấn Kha"
+        ],
+        "must_include_keywords": [
+          "...",
+          "Sad"
+        ]
+      }
+    },
+    {
+      "id": "CASE_050",
+      "category": "community_queries",
+      "subcategory": "comparison",
+      "question": "So sánh cảm xúc vai Mụ Quán do Kiều Oanh và Thanh Mạn đóng?",
+      "ground_truth": {
+        "answer": "Kiều Oanh: Angry | Thanh Mạn: ...",
+        "related_entities": [
+          "Mụ Quán",
+          "Kiều Oanh",
+          "Thanh Mạn"
+        ],
+        "must_include_keywords": [
+          "Angry",
+          "..."
+        ]
+      }
+    },
+    {
+      "id": "CASE_051",
+      "category": "community_queries",
+      "subcategory": "comparison",
+      "question": "So sánh cảm xúc vai Súy Vân do Tạ Thị Kim Liên và Thúy Ngần đóng?",
+      "ground_truth": {
+        "answer": "Tạ Thị Kim Liên: Angry | Thúy Ngần: Excited",
+        "related_entities": [
+          "Súy Vân",
+          "Tạ Thị Kim Liên",
+          "Thúy Ngần"
+        ],
+        "must_include_keywords": [
+          "Angry",
+          "Excited"
+        ]
+      }
+    },
+    {
+      "id": "CASE_052",
+      "category": "community_queries",
+      "subcategory": "comparison",
+      "question": "So sánh cảm xúc vai Trần Phương do Bá Dũng và Huy Toàn đóng?",
+      "ground_truth": {
+        "answer": "Bá Dũng: ... | Huy Toàn: Sad",
+        "related_entities": [
+          "Trần Phương",
+          "Bá Dũng",
+          "Huy Toàn"
+        ],
+        "must_include_keywords": [
+          "...",
+          "Sad"
+        ]
+      }
+    },
+    {
+      "id": "CASE_053",
+      "category": "community_queries",
+      "subcategory": "comparison",
+      "question": "So sánh cảm xúc vai Hỷ đồng do An Chinh và Thanh Mai đóng?",
+      "ground_truth": {
+        "answer": "An Chinh: Happy | Thanh Mai: Happy",
+        "related_entities": [
+          "Hỷ đồng",
+          "An Chinh",
+          "Thanh Mai"
+        ],
+        "must_include_keywords": [
+          "Happy",
+          "Happy"
+        ]
+      }
+    },
+    {
+      "id": "CASE_054",
+      "category": "community_queries",
+      "subcategory": "comparison",
+      "question": "So sánh cảm xúc vai Phù thủy do Trần Hải và Tuấn Kha đóng?",
+      "ground_truth": {
+        "answer": "Trần Hải: Angry | Tuấn Kha: Angry",
+        "related_entities": [
+          "Phù thủy",
+          "Trần Hải",
+          "Tuấn Kha"
+        ],
+        "must_include_keywords": [
+          "Angry",
+          "Angry"
+        ]
+      }
+    },
+    {
+      "id": "CASE_055",
+      "category": "community_queries",
+      "subcategory": "comparison",
+      "question": "So sánh cảm xúc vai Châu Long do Ngọc Ánh và Phương Mây đóng?",
+      "ground_truth": {
+        "answer": "Ngọc Ánh: N/A | Phương Mây: N/A",
+        "related_entities": [
+          "Châu Long",
+          "Ngọc Ánh",
+          "Phương Mây"
+        ],
+        "must_include_keywords": [
+          "N/A",
+          "N/A"
+        ]
+      }
+    },
+    {
+      "id": "CASE_056",
+      "category": "community_queries",
+      "subcategory": "comparison",
+      "question": "So sánh cảm xúc vai Lưu Bình do Nguyễn Duy và Hồng Nam đóng?",
+      "ground_truth": {
+        "answer": "Nguyễn Duy: N/A | Hồng Nam: N/A",
+        "related_entities": [
+          "Lưu Bình",
+          "Nguyễn Duy",
+          "Hồng Nam"
+        ],
+        "must_include_keywords": [
+          "N/A",
+          "N/A"
+        ]
+      }
+    },
+    {
+      "id": "CASE_057",
+      "category": "community_queries",
+      "subcategory": "comparison",
+      "question": "So sánh cảm xúc vai Sùng Bà do Thanh Ngoan và Trần Thị Thân đóng?",
+      "ground_truth": {
+        "answer": "Thanh Ngoan: ... | Trần Thị Thân: ...",
+        "related_entities": [
+          "Sùng Bà",
+          "Thanh Ngoan",
+          "Trần Thị Thân"
+        ],
+        "must_include_keywords": [
+          "...",
+          "..."
+        ]
+      }
+    },
+    {
+      "id": "CASE_058",
+      "category": "community_queries",
+      "subcategory": "comparison",
+      "question": "So sánh cảm xúc vai Sùng Ông do Bá Dũng và Ngọc Minh đóng?",
+      "ground_truth": {
+        "answer": "Bá Dũng: ... | Ngọc Minh: ...",
+        "related_entities": [
+          "Sùng Ông",
+          "Bá Dũng",
+          "Ngọc Minh"
+        ],
+        "must_include_keywords": [
+          "...",
+          "..."
+        ]
+      }
+    },
+    {
+      "id": "CASE_059",
+      "category": "community_queries",
+      "subcategory": "comparison",
+      "question": "So sánh cảm xúc vai Thị Kính do Thảo Hiền và Hồng Thắm đóng?",
+      "ground_truth": {
+        "answer": "Thảo Hiền: ... | Hồng Thắm: Other",
+        "related_entities": [
+          "Thị Kính",
+          "Thảo Hiền",
+          "Hồng Thắm"
+        ],
+        "must_include_keywords": [
+          "...",
+          "Other"
+        ]
+      }
+    },
+    {
+      "id": "CASE_060",
+      "category": "community_queries",
+      "subcategory": "comparison",
+      "question": "So sánh cảm xúc vai Thiện Sỹ do Huy Toàn và Trần Xuân Tài đóng?",
+      "ground_truth": {
+        "answer": "Huy Toàn: ... | Trần Xuân Tài: ...",
+        "related_entities": [
+          "Thiện Sỹ",
+          "Huy Toàn",
+          "Trần Xuân Tài"
+        ],
+        "must_include_keywords": [
+          "...",
+          "..."
+        ]
+      }
+    },
+    {
+      "id": "CASE_061",
+      "category": "global_queries",
+      "subcategory": "reasoning",
+      "question": "Phân tích tâm lý Thị Màu qua câu: '(Thị Mầu quay mặt lại đã thấy Thị Kính b...'?",
+      "ground_truth": {
+        "answer": "Thị Mầu khi 5 lần 7 lượt bị từ chối, ả vừa giận dỗi, vừa nũng nịu, thể hiện sự thất vọng nhưng vẫn rất hóm hỉnh, duyên dáng.",
+        "related_entities": [
+          "Thị Màu"
+        ],
+        "must_include_keywords": [
+          "tâm lý"
+        ]
+      }
+    },
+    {
+      "id": "CASE_062",
+      "category": "global_queries",
+      "subcategory": "reasoning",
+      "question": "Phân tích tâm lý Thị Kính qua câu: 'Ngẫm oan trái nhiều phen muốn khóc\nThấy ...'?",
+      "ground_truth": {
+        "answer": "“Ngẫm oan trái nhiều phen muốn khóc. Thấy nhân duyên nghĩ lại nực cười”Thị Kính thể hiện sự buồn bã và nỗi đau âm ỉ của người mang tiếng oan, bị đời hắt hủi phải che giấu thân phận nữ nhi. “À, thôi phải rồi! Hẳn vô tình thế mới trêu ngươi. Vì hữu ý nên rằng hoảng mắt. Chứ có biết đâu, tôi đây cũng chỉ là …” ngầm nói lên sự bốc đồng, nhất thời nhưng chân thật tự nhiên và đầy sức sống của cảm xúc Thị Mầu khi quá si mê chú tiểu Kính Tâm mà không nhận ra nàng là một cô gái.",
+        "related_entities": [
+          "Thị Kính"
+        ],
+        "must_include_keywords": [
+          "tâm lý"
+        ]
+      }
+    },
+    {
+      "id": "CASE_063",
+      "category": "global_queries",
+      "subcategory": "reasoning",
+      "question": "Phân tích tâm lý Thị Màu qua câu: 'Này thầy tiểu ơi!\nMuốn rằng cây cải cho ...'?",
+      "ground_truth": {
+        "answer": "Lời đáp lại tiếng đế của Thị Mầu là sự tung hê những thứ khuôn phép đạo đức “chính chuyên” luôn được “sơn son để thờ” và “tuyên bố” quyền được sống, quyền được yêu bằng cả phần hồn, phần xác của người phụ nữ. Thị Mầu bộc lộ suy nghĩ tự nhiên, bản năng sống chất phác, khoẻ khoắn của mình.",
+        "related_entities": [
+          "Thị Màu"
+        ],
+        "must_include_keywords": [
+          "tâm lý"
+        ]
+      }
+    },
+    {
+      "id": "CASE_064",
+      "category": "global_queries",
+      "subcategory": "reasoning",
+      "question": "Phân tích tâm lý Thị Màu qua câu: 'Phải gió ở đâu ấy.\nNgười đâu trông thấy ...'?",
+      "ground_truth": {
+        "answer": "Tiếng gọi “thầy tiểu ơi!” lặp lại nhiều lần như buộc đối tượng phải quan tâm đến mình, quyết thực hiện bằng được khao khát tỏ bày tình cảm của mình. Tiếng gọi như muốn bộc bạch tất cả sự mê đắm, bật ra tất cả nỗi nhớ nhung, niềm khao khát.",
+        "related_entities": [
+          "Thị Màu"
+        ],
+        "must_include_keywords": [
+          "tâm lý"
+        ]
+      }
+    },
+    {
+      "id": "CASE_065",
+      "category": "global_queries",
+      "subcategory": "reasoning",
+      "question": "Phân tích tâm lý Thị Kính qua câu: 'Niệm Nam Mô A Di Ðà Phật\nNiệm Nam Mô A D...'?",
+      "ground_truth": {
+        "answer": "Trong khi Thị Mầu say mê vẻ đẹp của chú tiểu, lời nói bông đùa, tán tỉnh, thì Kính Tâm vẫn giữ thái độ điềm đạm, không lung lay. Thể hiện sự thuần khiết, một lòng hướng Phật của bậc tu hành.",
+        "related_entities": [
+          "Thị Kính"
+        ],
+        "must_include_keywords": [
+          "tâm lý"
+        ]
+      }
+    },
+    {
+      "id": "CASE_066",
+      "category": "global_queries",
+      "subcategory": "reasoning",
+      "question": "Phân tích tâm lý Thị Màu qua câu: 'Này chị em ơi! (Nền: Sao?)\nTôi lên chùa ...'?",
+      "ground_truth": {
+        "answer": "Thị Mầu bông đùa, bỡn cợt. Chốn cửa chùa linh thiêng, thanh tịnh, nghiêm ngặt nhưng Thị Mầu nhìn người tu hành nào cũng thấy tuổi trẻ, tràn ngập tình yêu. Thể hiện tâm hồn tươi trẻ tràn đầy sức sống của Thị Mầu.",
+        "related_entities": [
+          "Thị Màu"
+        ],
+        "must_include_keywords": [
+          "tâm lý"
+        ]
+      }
+    },
+    {
+      "id": "CASE_067",
+      "category": "global_queries",
+      "subcategory": "reasoning",
+      "question": "Phân tích tâm lý Thị Màu qua câu: 'Thầy tiểu ơi! Ra đây ăn với em một miếng...'?",
+      "ground_truth": {
+        "answer": "Lối nói ví von so sánh thể hiện khát khao yêu đương của Thị Mầu. “Thầy như táo rụng sân đình – Em như gái rở, đi rình của chua”. Cây táo mọc ở sân đình thường cao, sau mùa xuân chín rụng. Vì ít được chăm sóc lại già cỗi nên táo vừa chua, vừa chát. Người đàn bà ăn rở (nghén vì mang thai) mà gặp quả táo, hơn nữa lại là rụng mà rụng ở sân đình thì nỗi khát khao thèm muốn càng tăng thêm gấp bội. Nhặt quả táo lên chắc người con gái ăn dở ấy phải nhai nuốt ngấu nghiến. Việc Thị Mầu ví mình như gái rở, ví tiểu Kính như táo rụng sân đình thì hình ảnh vừa thật vừa rõ nét mà vừa dễ hiểu cho người xem.",
+        "related_entities": [
+          "Thị Màu"
+        ],
+        "must_include_keywords": [
+          "tâm lý"
+        ]
+      }
+    },
+    {
+      "id": "CASE_068",
+      "category": "global_queries",
+      "subcategory": "reasoning",
+      "question": "Phân tích tâm lý Thị Màu qua câu: 'A di đà Phật! … \nTôi Thị Mầu con gái phú...'?",
+      "ground_truth": {
+        "answer": "Thị Mầu đã tự tin xưng danh, không giấu giếm thân phận, thậm chí còn khoe vẻ giàu có, sang trọng (con gái phú ông, tiền cùng gạo lên chùa cúng tiến). Thể hiện tính cách cởi mở, hồn nhiên, thậm chí táo bạo – khác hẳn với khuôn mẫu “phụ nữ đoan trang” thời phong kiến.",
+        "related_entities": [
+          "Thị Màu"
+        ],
+        "must_include_keywords": [
+          "tâm lý"
+        ]
+      }
+    },
+    {
+      "id": "CASE_069",
+      "category": "global_queries",
+      "subcategory": "reasoning",
+      "question": "Phân tích tâm lý Thị Kính qua câu: 'Mô Phật! A di đà Phật!\nTam Bảo Như Lai c...'?",
+      "ground_truth": {
+        "answer": "Kính Tâm thể hiện sự thành tâm và chuyên chú trong việc tu hành, đối lập với tính cách táo bạo, trần tục của Thị Mầu trong phần đối thoại kế tiếp.",
+        "related_entities": [
+          "Thị Kính"
+        ],
+        "must_include_keywords": [
+          "tâm lý"
+        ]
+      }
+    },
+    {
+      "id": "CASE_070",
+      "category": "global_queries",
+      "subcategory": "reasoning",
+      "question": "Phân tích tâm lý Thị Màu qua câu: 'Mô Phật! \n(Nhạc nền)\nNày chị em ơi! (Nền...'?",
+      "ground_truth": {
+        "answer": "Thị Mầu không quan tâm đến việc vào lễ Phật. Thị Mầu khen chú Tiểu: “Người đâu mà đẹp như sao băng thế nhỉ … Mầu thẳng thắn thể hiện sự yêu thích, say mê, và ngưỡng mộ của mình trước vẻ đẹp của chú tiểu Kính Tâm. Cách so sánh “đẹp như sao băng” là một hình ảnh mới lạ, đầy sức gợi, biểu hiện trí tưởng tượng phong phú và cảm xúc mãnh liệt của người con gái đang yêu.\nHai hình ảnh “cổ cao ba ngấn” và “lông mày nét ngang” vốn là chuẩn mực dân gian để miêu tả người có vẻ đẹp thanh tú, phúc hậu. Khi đem những đặc điểm ấy áp vào chú tiểu, Thị Mầu đã vô tình “trần thế hóa” hình ảnh nhà sư, biến không gian chùa vốn thanh tịnh thành chốn tràn đầy sức sống, tình cảm. Chính sự “lẫn lộn” giữa vẻ đẹp tu hành – trần tục, nam – nữ ấy đã tạo nên chất hài chèo độc đáo và làm nổi bật tính cách hồn nhiên, táo bạo.",
+        "related_entities": [
+          "Thị Màu"
+        ],
+        "must_include_keywords": [
+          "tâm lý"
+        ]
+      }
+    },
+    {
+      "id": "CASE_071",
+      "category": "global_queries",
+      "subcategory": "reasoning",
+      "question": "Phân tích tâm lý Thị Màu qua câu: 'Này chị em ơi! (Nền: Sao?)\nNay mười tư m...'?",
+      "ground_truth": {
+        "answer": "Thị Mầu lên chùa khác với lệ thường, người ta lên chùa vào mười tư, rằm; còn Thị Mầu lên sớm hơn lẽ thường “từ mười ba” thể hiện tâm lý háo hức, rất mong ngóng ngày rằm.",
+        "related_entities": [
+          "Thị Màu"
+        ],
+        "must_include_keywords": [
+          "tâm lý"
+        ]
+      }
+    },
+    {
+      "id": "CASE_072",
+      "category": "global_queries",
+      "subcategory": "reasoning",
+      "question": "Phân tích tâm lý Thị Màu qua câu: '(Nền: Mầu ơi! Nhà mày có mấy chị em?)\nNh...'?",
+      "ground_truth": {
+        "answer": "Lời đối đáp giữa Thị Mầu và tiếng đế ngắn gọn nhưng đầy dí dỏm, phản ứng nhanh và thông minh, cho thấy Thị Mầu là người không hề bị động, biết tự bảo vệ mình và thậm chí biết đùa lại một cách khéo léo. Qua những lời đáp ấy, ta thấy Thị Mầu không hề xấu hổ hay sợ hãi trước dư luận. Nàng không quan tâm đến những quy tắc lễ giáo gò bó, cũng chẳng che giấu lòng mình — đó là biểu hiện của một người phụ nữ bản lĩnh, dám sống thật. Thái độ sống phóng khoáng, đi ngược định kiến xã hội của Thị Mầu.\n\nHành động mời giầu: ăn với em miếng trầu đã nào – một nghi thức giao duyên, chủ động tỏ tình → Hành động vừa táo bạo vừa duyên dáng bộc lộ khao khát kết đôi của Thị Mầu.",
+        "related_entities": [
+          "Thị Màu"
+        ],
+        "must_include_keywords": [
+          "tâm lý"
+        ]
+      }
+    },
+    {
+      "id": "CASE_073",
+      "category": "global_queries",
+      "subcategory": "reasoning",
+      "question": "Phân tích tâm lý Thị Màu qua câu: 'Đây rồi đừng hòng trốn em nữa!\n(Thị Kính...'?",
+      "ground_truth": {
+        "answer": "Đòi quét sân chùa cho thầy tiểu, Thị Mầu lấy cớ làm việc giúp để hợp thức hóa mong muốn được tiếp xúc, được gần gũi người mình thương. Chuỗi hành động “nắm tận tay”, “quét sân chùa thay thầy tiểu”, “mời thầy tiểu ăn giầu” là sự táo bạo, sỗ sàng của người đang yêu thật lòng, khao khát được kết duyên.",
+        "related_entities": [
+          "Thị Màu"
+        ],
+        "must_include_keywords": [
+          "tâm lý"
+        ]
+      }
+    },
+    {
+      "id": "CASE_074",
+      "category": "global_queries",
+      "subcategory": "reasoning",
+      "question": "Phân tích tâm lý Thị Màu qua câu: 'À, phải rồi! kinh mõ của Thầy tiểu còn b...'?",
+      "ground_truth": {
+        "answer": "Khi phát hiện kinh mõ của chú tiểu còn để lại, Mầu lập tức suy đoán rằng Kính Tâm sẽ quay lại, và ngay lập tức nảy ra ý định lén đi nấp để tìm cách gặp gỡ. Hành động lén nấp chờ thể hiện sự chủ động và tinh nghịch, cho thấy Thị Mầu đang rất háo hức và nôn nóng muốn được tiếp cận người mình thích.",
+        "related_entities": [
+          "Thị Màu"
+        ],
+        "must_include_keywords": [
+          "tâm lý"
+        ]
+      }
+    },
+    {
+      "id": "CASE_075",
+      "category": "global_queries",
+      "subcategory": "reasoning",
+      "question": "Phân tích tâm lý Thị Kính qua câu: 'Trong khi Thị Mầu say mê vẻ đẹp của chú ...'?",
+      "ground_truth": {
+        "answer": "Niệm Nam Mô A Di Ðà Phật\nNiệm Nam Mô A Di Ðà Phật\n(Nền: Mầu ơi! Nhà mày mất bò rồi đấy!)\n(Thị Mầu: Mất bò ấy à, Nhà tao còn ối trâu!)",
+        "related_entities": [
+          "Thị Kính"
+        ],
+        "must_include_keywords": [
+          "tâm lý"
+        ]
+      }
+    },
+    {
+      "id": "CASE_076",
+      "category": "global_queries",
+      "subcategory": "counterfactual",
+      "question": "Nếu Thị Màu là vai 'Hề' thay vì 'Đào', hành động sẽ khác sao?",
+      "ground_truth": {
+        "answer": "Vai Hề đối lập Đào, hành động sẽ ngược lại.",
+        "related_entities": [
+          "Thị Màu"
+        ],
+        "must_include_keywords": [
+          "Hề"
+        ]
+      }
+    },
+    {
+      "id": "CASE_077",
+      "category": "global_queries",
+      "subcategory": "counterfactual",
+      "question": "Nếu Đào Huế là vai 'Hề' thay vì 'Đào', hành động sẽ khác sao?",
+      "ground_truth": {
+        "answer": "Vai Hề đối lập Đào, hành động sẽ ngược lại.",
+        "related_entities": [
+          "Đào Huế"
+        ],
+        "must_include_keywords": [
+          "Hề"
+        ]
+      }
+    },
+    {
+      "id": "CASE_078",
+      "category": "global_queries",
+      "subcategory": "counterfactual",
+      "question": "Nếu Thiệt Thê là vai 'Hề' thay vì 'Đào', hành động sẽ khác sao?",
+      "ground_truth": {
+        "answer": "Vai Hề đối lập Đào, hành động sẽ ngược lại.",
+        "related_entities": [
+          "Thiệt Thê"
+        ],
+        "must_include_keywords": [
+          "Hề"
+        ]
+      }
+    },
+    {
+      "id": "CASE_079",
+      "category": "global_queries",
+      "subcategory": "counterfactual",
+      "question": "Nếu Thị Phương là vai 'Hề' thay vì 'Đào', hành động sẽ khác sao?",
+      "ground_truth": {
+        "answer": "Vai Hề đối lập Đào, hành động sẽ ngược lại.",
+        "related_entities": [
+          "Thị Phương"
+        ],
+        "must_include_keywords": [
+          "Hề"
+        ]
+      }
+    },
+    {
+      "id": "CASE_080",
+      "category": "global_queries",
+      "subcategory": "counterfactual",
+      "question": "Nếu Thị Kính là vai 'Hề' thay vì 'Đào', hành động sẽ khác sao?",
+      "ground_truth": {
+        "answer": "Vai Hề đối lập Đào, hành động sẽ ngược lại.",
+        "related_entities": [
+          "Thị Kính"
+        ],
+        "must_include_keywords": [
+          "Hề"
+        ]
+      }
+    },
+    {
+      "id": "CASE_081",
+      "category": "global_queries",
+      "subcategory": "counterfactual",
+      "question": "Nếu Châu Long là vai 'Hề' thay vì 'Đào', hành động sẽ khác sao?",
+      "ground_truth": {
+        "answer": "Vai Hề đối lập Đào, hành động sẽ ngược lại.",
+        "related_entities": [
+          "Châu Long"
+        ],
+        "must_include_keywords": [
+          "Hề"
+        ]
+      }
+    },
+    {
+      "id": "CASE_082",
+      "category": "global_queries",
+      "subcategory": "counterfactual",
+      "question": "Nếu Súy Vân là vai 'Hề' thay vì 'Đào', hành động sẽ khác sao?",
+      "ground_truth": {
+        "answer": "Vai Hề đối lập Đào, hành động sẽ ngược lại.",
+        "related_entities": [
+          "Súy Vân"
+        ],
+        "must_include_keywords": [
+          "Hề"
+        ]
+      }
+    },
+    {
+      "id": "CASE_083",
+      "category": "global_queries",
+      "subcategory": "counterfactual",
+      "question": "Nếu Trinh Nguyên là vai 'Hề' thay vì 'Đào', hành động sẽ khác sao?",
+      "ground_truth": {
+        "answer": "Vai Hề đối lập Đào, hành động sẽ ngược lại.",
+        "related_entities": [
+          "Trinh Nguyên"
+        ],
+        "must_include_keywords": [
+          "Hề"
+        ]
+      }
+    },
+    {
+      "id": "CASE_084",
+      "category": "global_queries",
+      "subcategory": "pragmatic",
+      "question": "Viết lại câu thoại của Thị Màu 'A di đà Phật! … \nTôi Thị Mầu con gái phú ông\nThầy ...' theo phong cách Gen Z?",
+      "ground_truth": {
+        "answer": "Context gốc: A di đà Phật! … \nTôi Thị Mầu con gái phú ông\nThầy mẹ tôi, tôn kính một lòng\nTiền cùng gạo, tôi lên chùa tiến cúng.\nA di đà Phật!\n==================\nA di đà Phật!\nBạch nhà sư trong ấy, cho chú tiểu ra nhận lễ, để cho tôi còn về nào.. Yêu cầu: Style transfer.",
+        "related_entities": [
+          "Thị Màu"
+        ],
+        "must_include_keywords": [
+          "Gen Z"
+        ]
+      }
+    },
+    {
+      "id": "CASE_085",
+      "category": "global_queries",
+      "subcategory": "pragmatic",
+      "question": "Viết lại câu thoại của Thị Màu 'Đây rồi đừng hòng trốn em nữa!\n(Thị Kính: Mô Phật!...' theo phong cách Gen Z?",
+      "ground_truth": {
+        "answer": "Context gốc: Đây rồi đừng hòng trốn em nữa!\n(Thị Kính: Mô Phật!)\nThôi, bỏ Mô Phật đi!\n(Thị Kính: A Di Đà Phật! Cô buông ra để tôi quét chùa kẻo sư phụ người quở chết!)\nĐưa chổi đây em quét rồi em nói chuyện này cho mà nghe!\n(Thị Kính: Mô Phật!)\nNày chú tiểu ơi! \nQuét sao cho sách trần duyên\nTu chi cho bận mầu thiền ai ơi !\nTuổi xanh sao vội chán đời ?\nThầy tiểu ! Thầy tiểu !\n(Thị Kính: buông chổi)\nThầy tiểu ơi! Ăn với em một miếng chầu rồi!\nĐưa chổi em quét cho nào! Này!. Yêu cầu: Style transfer.",
+        "related_entities": [
+          "Thị Màu"
+        ],
+        "must_include_keywords": [
+          "Gen Z"
+        ]
+      }
+    },
+    {
+      "id": "CASE_086",
+      "category": "global_queries",
+      "subcategory": "pragmatic",
+      "question": "Viết lại câu thoại của Thị Màu 'Này chị em ơi! (Nền: Sao?)\nNay mười tư mai đã là r...' theo phong cách Gen Z?",
+      "ground_truth": {
+        "answer": "Context gốc: Này chị em ơi! (Nền: Sao?)\nNay mười tư mai đã là rằm\nAi muốn ăn oản thì năng lên chùa.\nCác giả lên chùa từ bao giờ nhỉ? (Nền: Mười tư, rằm)\n=================\nẤy thế mà Mầu tôi mang tiếng lẳng lơ\nĐò đưa cấm gió …\nTôi lên chùa từ mười ba\n(Nhạc nền). Yêu cầu: Style transfer.",
+        "related_entities": [
+          "Thị Màu"
+        ],
+        "must_include_keywords": [
+          "Gen Z"
+        ]
+      }
+    },
+    {
+      "id": "CASE_087",
+      "category": "global_queries",
+      "subcategory": "pragmatic",
+      "question": "Viết lại câu thoại của Thị Màu 'Này thầy tiểu ơi!\nMuốn rằng cây cải cho xanh\nThài ...' theo phong cách Gen Z?",
+      "ground_truth": {
+        "answer": "Context gốc: Này thầy tiểu ơi!\nMuốn rằng cây cải cho xanh\nThài lài, rau rệu, tám thành bờ tre\nLắng tai tôi nói cho mà nghe…\nTri âm chưa tỏ tri âm\nĐể tôi mong vụng nhớ thầm sầu riêng!\n====================\nÀ, thôi phải rồi, chi cho bằng\nTrâu ta ăn cỏ đồng ta\nChứ ai lại hoài thóc ta cho gà người bới\nNhà tôi có anh Nô là người ở\nTôi mà về phen này, Nô đừng hòng thoát khỏi tay tôi\n(Nền: Sao lẳng lơ thế Mầu ơi)\nLẳng lơ ấy à,\nĐây cũng chẳng mòn lẳng lơ\nChính chuyên cũng chẳng sơn son để thờ.. Yêu cầu: Style transfer.",
+        "related_entities": [
+          "Thị Màu"
+        ],
+        "must_include_keywords": [
+          "Gen Z"
+        ]
+      }
+    },
+    {
+      "id": "CASE_088",
+      "category": "global_queries",
+      "subcategory": "pragmatic",
+      "question": "Viết lại câu thoại của Thị Màu '(Thị Mầu quay mặt lại đã thấy Thị Kính bỏ đi. Thị ...' theo phong cách Gen Z?",
+      "ground_truth": {
+        "answer": "Context gốc: (Thị Mầu quay mặt lại đã thấy Thị Kính bỏ đi. Thị Mầu tức giận ném chổi)\nPhải gió ở đâu ấy! Chạy từ bao giờ rồi ấy! Thế có tức không cơ chứ!\nMình đã nắm được tận tay thầy tiểu rồi thế mà còn chạy được.. Yêu cầu: Style transfer.",
+        "related_entities": [
+          "Thị Màu"
+        ],
+        "must_include_keywords": [
+          "Gen Z"
+        ]
+      }
+    },
+    {
+      "id": "CASE_089",
+      "category": "global_queries",
+      "subcategory": "pragmatic",
+      "question": "Viết lại câu thoại của Thị Màu 'À, phải rồi! kinh mõ của Thầy tiểu còn bỏ đây, thể...' theo phong cách Gen Z?",
+      "ground_truth": {
+        "answer": "Context gốc: À, phải rồi! kinh mõ của Thầy tiểu còn bỏ đây, thể nào mà Thầy tiểu chẳng phải ra cất kinh cất mõ.\nChi cho bằng …Tôi ra tìm chỗ nấp, tôi đợi thầy tiểu ra đây, tôi phải nắm được tận tay thầy tiểu thì tôi mới nghe!\n(Thị Mầu nấp). Yêu cầu: Style transfer.",
+        "related_entities": [
+          "Thị Màu"
+        ],
+        "must_include_keywords": [
+          "Gen Z"
+        ]
+      }
+    },
+    {
+      "id": "CASE_090",
+      "category": "global_queries",
+      "subcategory": "pragmatic",
+      "question": "Viết lại câu thoại của Thị Màu 'Này chị em ơi! (Nền: Sao?)\nTôi lên chùa thấy tiểu ...' theo phong cách Gen Z?",
+      "ground_truth": {
+        "answer": "Context gốc: Này chị em ơi! (Nền: Sao?)\nTôi lên chùa thấy tiểu mười ba\nThấy sư mười bốn, … , vãi già mười lăm\n(Nhạc nền)\n===========\nNày chị em ơi! (Nền: Sao?)\nTôi, tôi muốn cho một tháng\nĐôi rằm\nÐể, để tôi trước vào lễ Phật\nSau thăm vãi già.\n(Nhạc nền). Yêu cầu: Style transfer.",
+        "related_entities": [
+          "Thị Màu"
+        ],
+        "must_include_keywords": [
+          "Gen Z"
+        ]
+      }
+    },
+    {
+      "id": "CASE_091",
+      "category": "global_queries",
+      "subcategory": "pragmatic",
+      "question": "Viết lại câu thoại của Thị Màu '(Nền: Mầu ơi! Nhà mày có mấy chị em?)\nNhà tao có c...' theo phong cách Gen Z?",
+      "ground_truth": {
+        "answer": "Context gốc: (Nền: Mầu ơi! Nhà mày có mấy chị em?)\nNhà tao có chín chị em\n(Nền: Thế có ai như mày không?)\nChỉ có mỗi mình tao là chín chắn nhất nhà thôi đấy!\n(Nền: Ôi dào ơi!)\nMặc kệ tao!\nThầy tiểu ơi! Ra đây ăn với em miếng trầu đã nào…\nRồi…rồi bỏ mõ đấy, em gõ cho nào.\nNày thầy tiểu ơi!\nCau non em tiện chũm lòng đào\nMà trầu têm cánh phượng để thiếp trao cho chàng\nChứ thầy tiểu ơi!\n(Nhạc nền)\n(Thị Kính: Niệm Nam Mô A Di Ðà Phật …)\nRa đây ăn với em một miếng trầu, rồi… rồi bỏ mõ đấy em gõ cho nào!\n(Thị Kính bỏ đi)\nThầy tiểu, thầy tiểu…. Yêu cầu: Style transfer.",
+        "related_entities": [
+          "Thị Màu"
+        ],
+        "must_include_keywords": [
+          "Gen Z"
+        ]
+      }
+    },
+    {
+      "id": "CASE_092",
+      "category": "global_queries",
+      "subcategory": "pragmatic",
+      "question": "Viết lại câu thoại của Thị Màu 'Phải gió ở đâu ấy.\nNgười đâu trông thấy gái lại cứ...' theo phong cách Gen Z?",
+      "ground_truth": {
+        "answer": "Context gốc: Phải gió ở đâu ấy.\nNgười đâu trông thấy gái lại cứ chạy. Chỉ Mô Phật mãi thôi!\nNày thầy tiểu ơi! Ra đây ăn với em một miếng trầu đã nào...\nLại Mô Phật nữa đi nhớ (???)\nNày thầy tiểu ơi! Bỏ em đứng trước cửa chùa\nEm gọi thầy tiểu. Chả thưa, em buồn đấy Thầy tiểu ơi!\n=============\nTrúc xinh trúc mọc sân đình\nEm xinh em đứng một mình chẳng xinh!\n(Nhạc nền). Yêu cầu: Style transfer.",
+        "related_entities": [
+          "Thị Màu"
+        ],
+        "must_include_keywords": [
+          "Gen Z"
+        ]
+      }
+    },
+    {
+      "id": "CASE_093",
+      "category": "global_queries",
+      "subcategory": "pragmatic",
+      "question": "Viết lại câu thoại của Thị Màu 'Thầy tiểu ơi! Ra đây ăn với em một miếng trầu nào ...' theo phong cách Gen Z?",
+      "ground_truth": {
+        "answer": "Context gốc: Thầy tiểu ơi! Ra đây ăn với em một miếng trầu nào …\n(Thị Kính: Nam Mô A Di Đà Phật …)\nNày thầy tiểu ơi!\nThầy như táo rụng sân đình\nCòn em như gái rở, đi rình của chua...\nChứ thầy tiểu ơi!\nTáo rụng ấy mấy đình thế mà sân đình\nThầy, thầy tiểu ơi!\nTáo rụng ấy mấy đình ấy mà sân đình\nEm ý như a thế mà này em như gái rở ơ ớ\nEm đi tìm ối y a\nỐi y để em đi tìm, chứ em đi tìm của chua\nẤy mấy thầy, thầy tiểu ơi !\n(Thị Kính: Nam Mô A Di Đà Phật …)\nChỉ Mô Phật mãi thôi!\n(Nhạc nền). Yêu cầu: Style transfer.",
+        "related_entities": [
+          "Thị Màu"
+        ],
+        "must_include_keywords": [
+          "Gen Z"
+        ]
+      }
+    },
+    {
+      "id": "CASE_094",
+      "category": "community_queries",
+      "subcategory": "multihop_backfill",
+      "question": "Ngọc Minh đóng vai gì trong vở Kim Nham?",
+      "ground_truth": {
+        "answer": "Ngọc Minh đóng vai Hề (Mụ Quán Trần Phương).",
+        "related_entities": [
+          "Ngọc Minh"
+        ],
+        "must_include_keywords": [
+          "Hề (Mụ Quán Trần Phương)"
+        ]
+      }
+    },
+    {
+      "id": "CASE_095",
+      "category": "local_queries",
+      "subcategory": "factual_backfill",
+      "question": "Mô tả đặc điểm nhân vật Châu Long?",
+      "ground_truth": {
+        "answer": "Vợ ba của Dương Lễ. Nàng giàu lòng vị tha, chấp nhận rời chồng để âm thầm nuôi dưỡng bạn của chồng ăn học. Trong ba năm, nàng tận tụy lo toan, giữ trọn tiết hạnh, là biểu tượng cho đức hy sinh, thủy chung và nhân nghĩa.",
+        "related_entities": [
+          "Châu Long"
+        ],
+        "must_include_keywords": [
+          "Châu Long"
+        ]
+      }
+    },
+    {
+      "id": "CASE_096",
+      "category": "local_queries",
+      "subcategory": "factual_backfill",
+      "question": "Mô tả đặc điểm nhân vật Trương Viên?",
+      "ground_truth": {
+        "answer": "Người con hiếu nghĩa, người chồng thủy chung. Văn võ song toàn, được vua tin tưởng sai đi dẹp loạn giặc. Sau mười tám năm xa quê, chàng trở về trong nỗi cô quạnh, rồi nhờ tiếng hát xẩm mà nhận ra vợ và mẹ. Khi đôi ngọc lưu ly hợp lại, Thị Phương sáng mắt, gia đình trọn vẹn sum vầy.",
+        "related_entities": [
+          "Trương Viên"
+        ],
+        "must_include_keywords": [
+          "Trương Viên"
+        ]
+      }
+    },
+    {
+      "id": "CASE_097",
+      "category": "local_queries",
+      "subcategory": "factual_backfill",
+      "question": "Mô tả đặc điểm nhân vật Thị Màu?",
+      "ground_truth": {
+        "answer": "Thị Mầu là con gái phú ông trong làng, ả năm lần bảy lượt cưa cẩm Kính Tâm không thành, lại nhỡ ăn nằm cùng gia nhân trong nhà mà có chửa. Lúc này, Thị Mầu bị làng phạt vạ, ả bèn đổ cái thai cho Kính Tâm,  khiến Thị Kính phải gánh thêm nỗi oan.",
+        "related_entities": [
+          "Thị Màu"
+        ],
+        "must_include_keywords": [
+          "Thị Màu"
+        ]
+      }
+    },
+    {
+      "id": "CASE_098",
+      "category": "local_queries",
+      "subcategory": "factual_backfill",
+      "question": "Mô tả đặc điểm nhân vật Tôn Trọng?",
+      "ground_truth": {
+        "answer": "Con ruột của Tôn Dân và vợ hai là Trinh Nguyên. Hai anh em bị vu oan tội giết người khi chôn cất một xác người ven đường, nhưng may mắn được Quan Án sát đã giải oan cho hai anh em, để cho mẹ con Trinh Nguyên được đoàn tụ vẹn toàn.",
+        "related_entities": [
+          "Tôn Trọng"
+        ],
+        "must_include_keywords": [
+          "Tôn Trọng"
+        ]
+      }
+    },
+    {
+      "id": "CASE_099",
+      "category": "local_queries",
+      "subcategory": "factual_backfill",
+      "question": "Mô tả đặc điểm nhân vật Trần Phương?",
+      "ground_truth": {
+        "answer": "Trần Phương, một gã nhà giàu đàng điếm ở Đông Ngàn, Bắc Ninh. Đem lòng yêu thích, luôn tìm cách tán tỉnh Súy Vân, xui nàng giả điên dại để thoát khỏi người chồng là Kim Nham.",
+        "related_entities": [
+          "Trần Phương"
+        ],
+        "must_include_keywords": [
+          "Trần Phương"
+        ]
+      }
+    },
+    {
+      "id": "CASE_100",
+      "category": "community_queries",
+      "subcategory": "multihop_backfill",
+      "question": "Trần Hải đóng vai gì trong vở Kim Nham?",
+      "ground_truth": {
+        "answer": "Trần Hải đóng vai Phù thủy.",
+        "related_entities": [
+          "Trần Hải"
+        ],
+        "must_include_keywords": [
+          "Phù thủy"
+        ]
+      }
+    }
+  ]
+}

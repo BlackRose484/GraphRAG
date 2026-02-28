@@ -6,6 +6,8 @@ from __future__ import annotations
 
 import streamlit as st
 
+from ui.components import render_retrieval_detail as _render_retrieval_detail
+
 
 # ── Helper ────────────────────────────────────────────────────────────────────
 
@@ -79,6 +81,12 @@ def render() -> None:
         help="Expand / decompose complex queries before retrieval",
     )
 
+    show_detail = st.sidebar.toggle(
+        "Hiện chi tiết retrieval",
+        value=True,
+        help="Hiển thị nodes, triplets, paths, context đã thu thập được",
+    )
+
     if st.sidebar.button("🗑️ Xóa lịch sử"):
         st.session_state.graphrag_history = []
         st.rerun()
@@ -92,16 +100,9 @@ def render() -> None:
             st.markdown(item["query"])
         with st.chat_message("assistant"):
             st.markdown(item["answer"])
-            with st.expander("📊 Chi tiết retrieval"):
-                col1, col2, col3 = st.columns(3)
-                col1.metric("Nodes",    item["num_nodes"])
-                col2.metric("Triplets", item["num_triplets"])
-                col3.metric("Paths",    item["num_paths"])
-                st.caption(
-                    f"Retrieval: {item['retrieval_time']:.2f}s | "
-                    f"Generation: {item['gen_time']:.2f}s | "
-                    f"Total: {item['total_time']:.2f}s"
-                )
+            if show_detail:
+                with st.expander("📊 Chi tiết retrieval", expanded=False):
+                    _render_retrieval_detail(item)
 
     # ── Guards ────────────────────────────────────────────────────────────────
     if not retrieval_methods:
@@ -137,27 +138,29 @@ def render() -> None:
                         )
                         st.error(f"❌ Pipeline thất bại: {err}")
 
-                    with st.expander("📊 Chi tiết retrieval"):
-                        c1, c2, c3 = st.columns(3)
-                        c1.metric("Nodes",    result.retrieval.num_nodes)
-                        c2.metric("Triplets", result.retrieval.num_triplets)
-                        c3.metric("Paths",    result.retrieval.num_paths)
-                        st.caption(
-                            f"Retrieval: {result.retrieval.retrieval_time:.2f}s | "
-                            f"Generation: {result.generation.generation_time:.2f}s | "
-                            f"Total: {result.total_time:.2f}s"
-                        )
+                    # ── Build history item with full retrieval data ─────────
+                    history_item = {
+                        "query":               query,
+                        "answer":              result.answer,
+                        "num_nodes":           result.retrieval.num_nodes,
+                        "num_triplets":        result.retrieval.num_triplets,
+                        "num_paths":           result.retrieval.num_paths,
+                        "retrieval_time":      result.retrieval.retrieval_time,
+                        "gen_time":            result.generation.generation_time,
+                        "total_time":          result.total_time,
+                        # Detailed data
+                        "processed_query":     dict(result.retrieval.processed_query),
+                        "nodes":               list(result.retrieval.graph_data.get("nodes", [])),
+                        "triplets":            list(result.retrieval.graph_data.get("triplets", [])),
+                        "paths":               list(result.retrieval.graph_data.get("paths", [])),
+                        "formatted_contexts":  dict(result.retrieval.formatted_contexts),
+                    }
 
-                    st.session_state.graphrag_history.append({
-                        "query":          query,
-                        "answer":         result.answer,
-                        "num_nodes":      result.retrieval.num_nodes,
-                        "num_triplets":   result.retrieval.num_triplets,
-                        "num_paths":      result.retrieval.num_paths,
-                        "retrieval_time": result.retrieval.retrieval_time,
-                        "gen_time":       result.generation.generation_time,
-                        "total_time":     result.total_time,
-                    })
+                    if show_detail:
+                        with st.expander("📊 Chi tiết retrieval", expanded=True):
+                            _render_retrieval_detail(history_item)
+
+                    st.session_state.graphrag_history.append(history_item)
 
                 except Exception as exc:
                     st.error(f"❌ Lỗi: {exc}")
