@@ -148,7 +148,7 @@ class GenerationStrategy:
     POST = "post"
 
     ALL: list[str] = [PRE, MID, POST]
-    DEFAULT: str   = PRE
+    DEFAULT: str   = MID  # mid provides the best structured guidance
 
 
 # ── Retrieval / generation numeric limits ─────────────────────────────────────
@@ -160,6 +160,12 @@ class Limit:
     FALLBACK_TRIPLETS     = 50   # fallback triplet limit
     PATH_HOPS_MAX         = 3    # max relationship hops for path queries
     SUBGRAPH_HOPS_MAX     = 2    # max hops for subgraph neighborhood
+
+    # Per-method retrieval result caps (used in graph_retriever)
+    NODE_QUERY     = 50  # max nodes returned per name per label (mirrors NODE_SEARCH_PER_NAME)
+    TRIPLET_QUERY  = 50   # max triplets per name per relationship pattern
+    PATH_QUERY     = 30   # max paths per name
+    SUBGRAPH_QUERY = 10   # max subgraph expansions per name
 
     # Query processing
     FALLBACK_NAMES_COUNT  = 3    # how many names to use in broad fallback search
