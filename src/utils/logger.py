@@ -1,12 +1,19 @@
 """
 Centralized logging setup for GraphRAGv2.
 
+Log structure (per-run, per-day):
+    logs/
+      2026-02-28/
+        run_14-30-45.log      ← mỗi lần chạy app/script = 1 file riêng
+        run_15-12-03.log
+      2026-03-01/
+        run_09-00-12.log
+
 Features:
-- Rotating file handler  → logs/graphrag.log  (10 MB / 5 backups)
-- Daily archive handler  → logs/archive/graphrag-YYYY-MM-DD.log
-- Console handler        → stderr, color-coded by level
-- Log level configurable via env var LOG_LEVEL (default INFO)
-- Single call: get_logger(__name__) in any module
+- Per-run file handler  → logs/YYYY-MM-DD/run_HH-MM-SS.log
+- Console handler       → stdout, color-coded by level
+- Log level configurable via env var LOG_LEVEL  (default: INFO)
+- LOG_TO_FILE / LOG_TO_STDOUT toggles via env
 
 Usage::
 
@@ -23,32 +30,31 @@ from __future__ import annotations
 import logging
 import os
 import sys
-from logging.handlers import RotatingFileHandler, TimedRotatingFileHandler
+from datetime import datetime
 from pathlib import Path
 
 # ── Config ────────────────────────────────────────────────────────────────────
 
-_PROJECT_ROOT = Path(__file__).parent.parent.parent
-_LOG_DIR       = _PROJECT_ROOT / "logs"
-_ARCHIVE_DIR   = _LOG_DIR / "archive"
-_LOG_FILE      = _LOG_DIR / "graphrag.log"
+_PROJECT_ROOT  = Path(__file__).parent.parent.parent
+_LOG_ROOT      = _PROJECT_ROOT / "logs"
 
 _LOG_LEVEL     = os.getenv("LOG_LEVEL", "INFO").upper()
-_LOG_TO_FILE   = os.getenv("LOG_TO_FILE", "true").lower() != "false"
+_LOG_TO_FILE   = os.getenv("LOG_TO_FILE",   "true").lower() != "false"
 _LOG_TO_STDOUT = os.getenv("LOG_TO_STDOUT", "true").lower() != "false"
+
+# Timestamp captured once at process start → shared by all loggers in this run
+_RUN_START     = datetime.now()
+_DATE_FOLDER   = _RUN_START.strftime("%Y-%m-%d")          # e.g. 2026-02-28
+_RUN_FILENAME  = _RUN_START.strftime("run_%H-%M-%S.log")  # e.g. run_14-30-45.log
+_RUN_LOG_FILE  = _LOG_ROOT / _DATE_FOLDER / _RUN_FILENAME
 
 # ── Formats ───────────────────────────────────────────────────────────────────
 
-_FILE_FORMAT = (
-    "%(asctime)s | %(levelname)-8s | %(name)s | %(message)s"
-)
-_FILE_DATE_FMT = "%Y-%m-%d %H:%M:%S"
+_FILE_FORMAT    = "%(asctime)s | %(levelname)-8s | %(name)s | %(message)s"
+_FILE_DATE_FMT  = "%H:%M:%S"
 
-_CONSOLE_FORMAT = (
-    "%(asctime)s | %(levelname)-8s | %(name)s | %(message)s"
-)
+_CONSOLE_FORMAT   = "%(asctime)s | %(levelname)-8s | %(name)s | %(message)s"
 _CONSOLE_DATE_FMT = "%H:%M:%S"
-
 
 # ── ANSI color wrapper for console ────────────────────────────────────────────
 
@@ -63,56 +69,48 @@ _RESET = "\033[0m"
 
 
 class _ColorFormatter(logging.Formatter):
-    """Add ANSI colors to level name in console output."""
+    """Attach ANSI color to the level name for console output."""
 
     def format(self, record: logging.LogRecord) -> str:
-        color  = _LEVEL_COLORS.get(record.levelname, "")
+        # Work on a copy so we don't mutate the shared LogRecord
+        record = logging.makeLogRecord(record.__dict__)
+        color = _LEVEL_COLORS.get(record.levelname, "")
         record.levelname = f"{color}{record.levelname}{_RESET}"
         return super().format(record)
 
 
-# ── Root logger setup (called once at import) ─────────────────────────────────
+# ── Root logger setup (called once at module import) ─────────────────────────
 
 def _setup_root_logger() -> None:
-    """Configure the root 'graphrag' logger. Called once at module import."""
     root = logging.getLogger("graphrag")
 
-    # Avoid adding duplicate handlers if already configured
-    if root.handlers:
+    if root.handlers:           # already configured (e.g. Streamlit hot-reload)
         return
 
     root.setLevel(getattr(logging, _LOG_LEVEL, logging.INFO))
     root.propagate = False
 
+    # ── Per-run file handler ───────────────────────────────────────────────
     if _LOG_TO_FILE:
-        _LOG_DIR.mkdir(parents=True, exist_ok=True)
-        _ARCHIVE_DIR.mkdir(parents=True, exist_ok=True)
-
-        # ── Rotating by size (main log) ────────────────────────────────────
-        rotate_handler = RotatingFileHandler(
-            filename=_LOG_FILE,
-            maxBytes=10 * 1024 * 1024,   # 10 MB
-            backupCount=5,
+        _RUN_LOG_FILE.parent.mkdir(parents=True, exist_ok=True)
+        file_handler = logging.FileHandler(
+            filename=str(_RUN_LOG_FILE),
+            mode="w",           # new file each run
             encoding="utf-8",
         )
-        rotate_handler.setFormatter(
+        file_handler.setFormatter(
             logging.Formatter(_FILE_FORMAT, datefmt=_FILE_DATE_FMT)
         )
-        root.addHandler(rotate_handler)
+        root.addHandler(file_handler)
 
-        # ── Daily archive ──────────────────────────────────────────────────
-        daily_handler = TimedRotatingFileHandler(
-            filename=str(_ARCHIVE_DIR / "graphrag.log"),
-            when="midnight",
-            backupCount=30,
-            encoding="utf-8",
+        # Write a header so it's easy to identify the run in a log viewer
+        root.info(
+            "══ Run started at %s ══  log → %s",
+            _RUN_START.strftime("%Y-%m-%d %H:%M:%S"),
+            _RUN_LOG_FILE.relative_to(_PROJECT_ROOT),
         )
-        daily_handler.suffix = "%Y-%m-%d.log"
-        daily_handler.setFormatter(
-            logging.Formatter(_FILE_FORMAT, datefmt=_FILE_DATE_FMT)
-        )
-        root.addHandler(daily_handler)
 
+    # ── Console handler ────────────────────────────────────────────────────
     if _LOG_TO_STDOUT:
         console_handler = logging.StreamHandler(sys.stdout)
         console_handler.setFormatter(
@@ -123,26 +121,23 @@ def _setup_root_logger() -> None:
 
 _setup_root_logger()
 
-# Suppress noisy third-party loggers
-logging.getLogger("httpx").setLevel(logging.WARNING)
-logging.getLogger("httpcore").setLevel(logging.WARNING)
-logging.getLogger("litellm").setLevel(logging.WARNING)
-logging.getLogger("neo4j").setLevel(logging.WARNING)
-logging.getLogger("chromadb").setLevel(logging.WARNING)
+# ── Suppress noisy third-party loggers ───────────────────────────────────────
+for _lib in ("httpx", "httpcore", "litellm", "neo4j", "chromadb", "urllib3"):
+    logging.getLogger(_lib).setLevel(logging.WARNING)
 
 
 # ── Public API ────────────────────────────────────────────────────────────────
 
 def get_logger(name: str) -> logging.Logger:
     """
-    Return a child logger under the 'graphrag' hierarchy.
+    Return a child logger under the ``graphrag`` hierarchy.
 
     Args:
         name: Typically ``__name__`` of the calling module.
-              e.g. 'src.core.settings' → logger name 'graphrag.src.core.settings'
 
     Returns:
-        A configured :class:`logging.Logger` instance.
+        A :class:`logging.Logger` whose output goes to the current run's
+        log file (``logs/YYYY-MM-DD/run_HH-MM-SS.log``) and to stdout.
 
     Example::
 
@@ -150,6 +145,11 @@ def get_logger(name: str) -> logging.Logger:
         logger = get_logger(__name__)
         logger.info("Ready")
     """
-    # Strip project-relative prefix so names stay readable in log files
     clean = name.removeprefix("src.").removeprefix("GraphRAGv2.")
     return logging.getLogger(f"graphrag.{clean}")
+
+
+def current_log_path() -> Path:
+    """Return the absolute path of the log file for this run."""
+    return _RUN_LOG_FILE
+
