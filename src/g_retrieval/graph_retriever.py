@@ -146,7 +146,7 @@ class GraphRetriever:
                     f"WHERE toLower({alias}.{prop}) CONTAINS toLower($name) "
                     f"RETURN {alias} LIMIT {Limit.NODE_QUERY}"
                 )
-                for record in self._client.read(cypher, name=name):
+                for record in self._client.read(cypher, {"name": name}):
                     node = dict(record[alias])
                     uid = str(node)
                     if uid not in seen:
@@ -166,7 +166,7 @@ class GraphRetriever:
                               WHERE toLower(toString(n[p])) CONTAINS toLower($term))
                     RETURN n LIMIT $lim
                 """
-                for record in self._client.read(cypher, term=term, lim=Limit.FALLBACK_NODES):
+                for record in self._client.read(cypher, {"term": term, "lim": Limit.FALLBACK_NODES}):
                     node = dict(record["n"])
                     uid = str(node)
                     if uid not in seen:
@@ -192,7 +192,7 @@ class GraphRetriever:
                 RETURN c.{NodeProp.CHAR_NAME} AS subj, '{RelType.PERFORMED_BY}' AS rel, a.{NodeProp.ACTOR_NAME} AS obj
                 LIMIT $lim
             """
-            for r in self._client.read(cypher, name=name, lim=Limit.TRIPLET_QUERY):
+            for r in self._client.read(cypher, {"name": name, "lim": Limit.TRIPLET_QUERY}):
                 t: Triplet = (r["subj"] or "", r["rel"], r["obj"] or "")
                 if t not in seen:
                     seen.add(t)
@@ -206,7 +206,7 @@ class GraphRetriever:
                 RETURN p.{NodeProp.TITLE} AS subj, '{RelType.HAS_CHARACTER}' AS rel, c.{NodeProp.CHAR_NAME} AS obj
                 LIMIT $lim
             """
-            for r in self._client.read(cypher, name=name, lim=Limit.TRIPLET_QUERY):
+            for r in self._client.read(cypher, {"name": name, "lim": Limit.TRIPLET_QUERY}):
                 t = (r["subj"] or "", r["rel"], r["obj"] or "")
                 if t not in seen:
                     seen.add(t)
@@ -220,7 +220,7 @@ class GraphRetriever:
                 RETURN p.{NodeProp.TITLE} AS subj, '{RelType.HAS_SCENE}' AS rel, s.{NodeProp.SCENE_NAME} AS obj
                 LIMIT $lim
             """
-            for r in self._client.read(cypher, name=name, lim=Limit.TRIPLET_QUERY):
+            for r in self._client.read(cypher, {"name": name, "lim": Limit.TRIPLET_QUERY}):
                 t = (r["subj"] or "", r["rel"], r["obj"] or "")
                 if t not in seen:
                     seen.add(t)
@@ -233,7 +233,7 @@ class GraphRetriever:
                 RETURN c.{NodeProp.CHAR_NAME} AS subj, '{RelType.PERFORMED_BY}' AS rel, a.{NodeProp.ACTOR_NAME} AS obj
                 LIMIT $lim
             """
-            for r in self._client.read(cypher, lim=Limit.FALLBACK_TRIPLETS):
+            for r in self._client.read(cypher, {"lim": Limit.FALLBACK_TRIPLETS}):
                 t = (r["subj"] or "", r["rel"], r["obj"] or "")
                 if t not in seen:
                     seen.add(t)
@@ -262,7 +262,7 @@ class GraphRetriever:
             LIMIT $lim
         """
         for name in names:
-            for r in self._client.read(cypher, name=name, lim=Limit.PATH_QUERY):
+            for r in self._client.read(cypher, {"name": name, "lim": Limit.PATH_QUERY}):
                 key = tuple(r["path_nodes"])
                 if key not in seen:
                     seen.add(key)
@@ -297,7 +297,7 @@ class GraphRetriever:
             LIMIT $lim
         """
         for name in names:
-            for record in self._client.read(cypher, name=name, lim=Limit.SUBGRAPH_QUERY):
+            for record in self._client.read(cypher, {"name": name, "lim": Limit.SUBGRAPH_QUERY}):
                 # Center node
                 center = dict(record["center"])
                 c_id = str(center)
