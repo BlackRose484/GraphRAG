@@ -1,0 +1,28 @@
+# Graph Database
+neo4j==5.14.1
+rdflib==7.0.0
+
+# LLM — provider-agnostic via LiteLLM
+litellm>=1.56.0
+
+# Optional provider SDKs — install only what you need:
+# pip install google-generativeai   (for gemini/...)
+# pip install anthropic             (for anthropic/...)
+# pip install openai                (for openai/...)
+
+# Vector Store
+chromadb==0.4.18
+
+# UI
+streamlit==1.29.0
+
+# Utils
+python-dotenv==1.0.0
+pydantic==2.5.2
+networkx==3.2.1
+pandas==2.1.4
+numpy==1.26.2
+plotly==5.18.0
+
+# Benchmark metrics
+sentence-transformers==2.2.2
