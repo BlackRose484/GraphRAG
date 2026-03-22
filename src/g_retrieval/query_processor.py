@@ -109,7 +109,9 @@ class QueryProcessor(BaseModel):
 
     # ── Public API — Optimised (parallel-friendly) ─────────────────────────────
 
-    def expand_and_extract(self, query: str) -> ExpandAndExtractResult:
+    def expand_and_extract(
+        self, query: str, entity_catalog: str = ""
+    ) -> ExpandAndExtractResult:
         """Single LLM call: expand *query* and extract named entities at once.
 
         Replaces the sequential ``_expand()`` (LLM call #1) +
@@ -118,15 +120,24 @@ class QueryProcessor(BaseModel):
         ``_decompose()`` so both run in parallel.
 
         Args:
-            query: Raw (or original) user query.
+            query:          Raw (or original) user query.
+            entity_catalog: Formatted entity list string from
+                            :class:`~src.g_retrieval.entity_catalog.EntityCatalog`.
+                            Injected into the ``{entity_catalog}`` placeholder
+                            in :data:`~src.constants.promt_engineer.QUERY_EXPAND_AND_EXTRACT`.
+                            When empty the LLM falls back to its own Cheo knowledge.
 
         Returns:
             Dict with:
               - ``expanded``: enriched query string
               - ``entities``: ``{characters, actors, plays, scenes}`` lists
         """
-        prompt = QUERY_EXPAND_AND_EXTRACT.format(query=query)
+        prompt = QUERY_EXPAND_AND_EXTRACT.format(
+            query=query,
+            entity_catalog=entity_catalog,
+        )
         raw = self.safe_generate(prompt).strip()
+
 
         # ── Parse JSON from LLM response ──────────────────────────────────────
         # Strip ```json ... ``` fences if present

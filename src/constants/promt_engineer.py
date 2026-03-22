@@ -36,31 +36,7 @@ Thực hiện đồng thời 2 nhiệm vụ:
 
 === DANH SÁCH THỰC THỂ HỢP LỆ ===
 
-VỞ CHÈO:
-Chu Mãi Thần, Kim Nham, Lưu Bình - Dương Lễ, Quan Âm Thị Kính, Trinh Nguyên, Trương Viên, Từ Thức
-
-TRÍCH ĐOẠN:
-Cắt râu, Đưa bạn đi thi, Dương Lễ tiễn Châu Long đi nuôi bạn, Hề theo Thầy,
-Lớp "Tiên Nữ - Đoàn tụ", Lý trưởng - Mẹ Mõ, Mầu - Nô - Phú Ông,
-Mụ quán - Trần Phương, Phù thủy sợ ma, Súy Vân giả dại, Thầy đồ dạy học,
-Thị Mầu lên chùa, Trần Phương vào chùa, Tuần Ty - Đào Huế, Vu quy
-
-NHÂN VẬT:
-Châu Long, Đào Huế, Dương Lễ, Hề (Đưa bạn đi thi), Hề áo đỏ (Dương Lễ tiễn Châu Long đi nuôi bạn),
-Hề áo xanh (Dương Lễ tiễn Châu Long đi nuôi bạn), Hề (Lớp "Tiên Nữ - Đoàn tụ),
-Hề (Mụ Quán Trần Phương), Hề (Trần Phương vào chùa), Hề gậy (Hề Theo Thầy),
-Hỷ đồng, Khoèo, Lưu Bình, Lý Trưởng, Mãng Ông (bố Thị Kính), Mẹ Mõ (Đốp),
-Mụ Quán, Nô, Phú Ông, Phù thủy, Sùng Bà, Sùng Ông, Súy Vân, Thầy Đồ,
-Thị Kính, Thị Màu, Thị Phương, Thiện Sỹ, Thiệt Thê, Tiên Nữ,
-Tôn Mạnh, Tôn Trọng, Trần Phương, Trinh Nguyên, Trương Mẫu, Trương Viên, Từ Thức, Tuần Ty
-
-DIỄN VIÊN:
-An Chinh, Bá Dũng, Bích Vân, Đăng Toàn, Đào Dũng, Hồng Nam, Hồng Thắm,
-Huy Toàn, Huyền Trang, Hương Dịu, Khắc Huy, Kiều Oanh, Kim Liên, Lê Tuấn,
-Mạnh Phóng, Minh Nhan, Ngọc Ánh, Ngọc Minh, Nguyễn Duy, Phú Kiên, Phương Mây,
-Tạ Thị Kim Liên, Thanh Hương, Thanh Mai, Thanh Mạn, Thanh Ngoan, Thanh Tùng,
-Thảo Hiền, Thu Hòa, Thu Huyền, Thúy Ngần, Trần Hải, Trần Thị Thân, Trần Vinh,
-Trần Xuân Tài, Tuấn Cường, Tuấn Kha, Tuấn Nghĩa, Tử Dương, Văn Quân, Vân Quyền
+{entity_catalog}
 
 === QUY TẮC TRÍCH XUẤT ===
 - CHỈ extract thực thể có trong danh sách trên

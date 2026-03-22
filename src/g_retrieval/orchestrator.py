@@ -30,6 +30,7 @@ from dataclasses import dataclass
 from typing import Any
 
 from src.constants.constant import EntityType, FormatKey, RetrievalMethod
+from src.g_retrieval.entity_catalog import EntityCatalog
 from src.g_retrieval.entity_extractor import EntityExtractor
 from src.g_retrieval.graph_retriever import GraphData, GraphRetriever
 from src.g_retrieval.query_processor import ProcessedQuery, QueryProcessor
@@ -119,6 +120,8 @@ class RetrievalOrchestrator:
     """
 
     def __init__(self, client: Neo4jClient) -> None:
+        self._entity_catalog  = EntityCatalog()
+        self._entity_catalog.load(client)              # 4 lightweight Cypher reads at startup
         self._query_processor  = QueryProcessor()
         self._entity_extractor = EntityExtractor()
         self._graph_retriever  = GraphRetriever(client)
@@ -238,7 +241,9 @@ class RetrievalOrchestrator:
 
         with ThreadPoolExecutor(max_workers=2) as pool:
             future_combined: Future = pool.submit(
-                self._query_processor.expand_and_extract, query
+                self._query_processor.expand_and_extract,
+                query,
+                self._entity_catalog.as_text(),    # inject dynamic catalog
             )
             future_decompose: Future = pool.submit(
                 self._query_processor._decompose, query
