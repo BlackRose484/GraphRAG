@@ -58,21 +58,55 @@ def render_retrieval_detail(item: dict) -> None:
     with tab_query:
         pq = r.get("processed_query", {})
         if pq:
-            st.markdown("**Câu hỏi gốc**")
+            st.markdown("**📝 Câu hỏi gốc**")
             st.info(pq.get("original", "—"))
 
             expanded = pq.get("expanded", "")
             if expanded and expanded != pq.get("original"):
-                st.markdown("**Câu hỏi mở rộng (expanded)**")
+                st.markdown("**✨ Câu hỏi mở rộng (expanded)**")
                 st.success(expanded)
 
             decomposed = pq.get("decomposed", [])
             if decomposed and decomposed != [pq.get("original")]:
-                st.markdown(f"**Sub-queries ({len(decomposed)})**")
+                st.markdown(f"**🔀 Sub-queries ({len(decomposed)})**")
                 for i, sq in enumerate(decomposed, 1):
                     st.write(f"{i}. {sq}")
         else:
             st.info("Không có thông tin query processing.")
+
+        # ── Entities extracted ─────────────────────────────────────────────
+        entities = r.get("entities", {})
+        _ENTITY_CONFIG = {
+            "characters": ("🎭", "Nhân vật",  "#1f77b4"),
+            "actors":     ("🎤", "Diễn viên", "#2ca02c"),
+            "plays":      ("📖", "Vở kịch",   "#d62728"),
+            "scenes":     ("🎬", "Trích đoạn", "#9467bd"),
+        }
+        has_entities = any(entities.get(k) for k in _ENTITY_CONFIG)
+        if has_entities:
+            st.markdown("---")
+            st.markdown("**🔍 Entities đã trích xuất**")
+            cols = st.columns(4)
+            for col, (key, (icon, label, color)) in zip(cols, _ENTITY_CONFIG.items()):
+                names = entities.get(key, [])
+                with col:
+                    st.markdown(
+                        f"<div style='font-size:0.8em;color:gray'>{icon} {label}</div>",
+                        unsafe_allow_html=True,
+                    )
+                    if names:
+                        for name in names:
+                            st.markdown(
+                                f"<span style='background:{color}22;border:1px solid {color}66;"
+                                f"border-radius:4px;padding:2px 7px;margin:2px;display:inline-block;"
+                                f"font-size:0.85em'>{name}</span>",
+                                unsafe_allow_html=True,
+                            )
+                    else:
+                        st.markdown(
+                            "<span style='color:gray;font-size:0.8em'>—</span>",
+                            unsafe_allow_html=True,
+                        )
 
     # ── Nodes ─────────────────────────────────────────────────────────────────
     with tab_nodes:

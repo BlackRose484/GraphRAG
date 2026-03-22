@@ -150,6 +150,7 @@ def render() -> None:
                         "total_time":          result.total_time,
                         # Detailed data
                         "processed_query":     dict(result.retrieval.processed_query),
+                        "entities":            dict(result.retrieval.entities),
                         "nodes":               list(result.retrieval.graph_data.get("nodes", [])),
                         "triplets":            list(result.retrieval.graph_data.get("triplets", [])),
                         "paths":               list(result.retrieval.graph_data.get("paths", [])),

@@ -1,45 +1,91 @@
 """
-Query processing: expansion and decomposition using promt_engineer templates.
+Query processing: expansion, decomposition, and combined expand+extract.
+
+Public methods
+--------------
+process(query, enable_enhancement)
+    Legacy pipeline (sequential expand → decompose). Used when enhancement=False.
+
+expand_and_extract(query) -> dict
+    Combined single-LLM-call: returns {expanded, entities} simultaneously.
+    Designed to run in parallel with _decompose() via ThreadPoolExecutor.
+
+_decompose(query) -> list[str]
+    Kept public-ish so orchestrator can submit it to a thread pool directly.
 """
 from __future__ import annotations
 
-from typing import TypedDict
+import json
+import re
+from typing import Any, TypedDict
 
-from src.constants.promt_engineer import QUERY_DECOMPOSE, QUERY_EXPAND
+from src.constants.constant import EntityType
+from src.constants.promt_engineer import (
+    QUERY_DECOMPOSE,
+    QUERY_EXPAND,
+    QUERY_EXPAND_AND_EXTRACT,
+)
 from src.core.base import BaseModel
 from src.utils.logger import get_logger
 
 _logger = get_logger(__name__)
 
+_EMPTY_ENTITIES: dict[str, list[str]] = {
+    EntityType.CHARACTERS: [],
+    EntityType.ACTORS:     [],
+    EntityType.PLAYS:      [],
+    EntityType.SCENES:     [],
+}
+
 
 class ProcessedQuery(TypedDict):
-    original: str
-    expanded: str
+    original:   str
+    expanded:   str
     decomposed: list[str]
 
 
+class ExpandAndExtractResult(TypedDict):
+    expanded: str
+    entities: dict[str, list[str]]   # keys: characters, actors, plays, scenes
+
+
 class QueryProcessor(BaseModel):
-    """Expand and decompose queries for better graph retrieval."""
+    """Expand and decompose queries for better graph retrieval.
+
+    Two usage modes:
+
+    **Legacy (sequential)**::
+
+        processed = processor.process(query)          # 2 LLM calls
+
+    **Optimised (parallel-friendly)**::
+
+        # Call these two concurrently via ThreadPoolExecutor:
+        combined   = processor.expand_and_extract(query)  # LLM call A
+        decomposed = processor._decompose(query)           # LLM call B
+        # → total latency ≈ max(A, B) instead of A + B
+    """
 
     def __init__(self) -> None:
         super().__init__()
         _logger.info("QueryProcessor initialised")
 
-    # ── Public API ────────────────────────────────────────────────────────────
+    # ── Public API — Legacy ────────────────────────────────────────────────────
 
     def process(self, query: str, *, enable_enhancement: bool = True) -> ProcessedQuery:
-        """Run the full processing pipeline.
+        """Run the full sequential processing pipeline.
 
         Args:
             query: Raw user query.
-            enable_enhancement: When *False* returns the query unchanged.
+            enable_enhancement: When *False* returns the query unchanged
+                                (skips both LLM calls).
 
         Returns:
             :class:`ProcessedQuery` with original / expanded / decomposed keys.
         """
         result: ProcessedQuery = {
-            "original": query,
-            "expanded": query,
+            "original":   query,
+            "expanded":   query,
             "decomposed": [query],
         }
 
@@ -61,14 +107,85 @@ class QueryProcessor(BaseModel):
 
         return result
 
-    # ── Private helpers ───────────────────────────────────────────────────────
+    # ── Public API — Optimised (parallel-friendly) ─────────────────────────────
+
+    def expand_and_extract(self, query: str) -> ExpandAndExtractResult:
+        """Single LLM call: expand *query* and extract named entities at once.
+
+        Replaces the sequential ``_expand()`` (LLM call #1) +
+        ``EntityExtractor._extract_by_llm()`` (LLM call #3) with one combined
+        call. Designed to be submitted to a ``ThreadPoolExecutor`` alongside
+        ``_decompose()`` so both run in parallel.
+
+        Args:
+            query: Raw (or original) user query.
+
+        Returns:
+            Dict with:
+              - ``expanded``: enriched query string
+              - ``entities``: ``{characters, actors, plays, scenes}`` lists
+        """
+        prompt = QUERY_EXPAND_AND_EXTRACT.format(query=query)
+        raw = self.safe_generate(prompt).strip()
+
+        # ── Parse JSON from LLM response ──────────────────────────────────────
+        # Strip ```json ... ``` fences if present
+        if "```" in raw:
+            m = re.search(r"```(?:json)?\s*(\{.*?\})\s*```", raw, re.DOTALL)
+            if m:
+                raw = m.group(1)
+
+        # Extract bare JSON object
+        m2 = re.search(r"\{.*\}", raw, re.DOTALL)
+        if m2:
+            raw = m2.group(0)
+
+        try:
+            parsed: dict[str, Any] = json.loads(raw)
+
+            expanded = (parsed.get("expanded") or "").strip() or query
+
+            raw_ents = parsed.get("entities", {})
+            entities: dict[str, list[str]] = {
+                key: [str(v) for v in raw_ents.get(key, [])]
+                if isinstance(raw_ents.get(key), list)
+                else []
+                for key in EntityType.ALL
+            }
+
+            total = sum(len(v) for v in entities.values())
+            _logger.info(
+                "expand_and_extract: expanded OK, %d entities extracted", total
+            )
+            return ExpandAndExtractResult(expanded=expanded, entities=entities)
+
+        except (json.JSONDecodeError, Exception) as exc:  # noqa: BLE001
+            _logger.warning(
+                "expand_and_extract: JSON parse failed (%s) — falling back to raw expand",
+                exc,
+            )
+            # Graceful fallback: try to at least return a non-empty expanded string
+            expanded_fallback = raw.split("\n")[0].strip() or query
+            return ExpandAndExtractResult(
+                expanded=expanded_fallback,
+                entities=dict(_EMPTY_ENTITIES),
+            )
+
+    # ── Private / thread-pool helpers ──────────────────────────────────────────
 
     def _expand(self, query: str) -> str:
+        """Expand *query* with Cheo-domain context (1 LLM call)."""
         prompt = QUERY_EXPAND.format(query=query)
         expanded = self.safe_generate(prompt).strip()
         return expanded or query
 
     def _decompose(self, query: str) -> list[str]:
+        """Break *query* into focused sub-questions (1 LLM call).
+
+        Made accessible (not name-mangled) so :class:`RetrievalOrchestrator`
+        can submit it to a ``ThreadPoolExecutor`` alongside
+        ``expand_and_extract``.
+        """
         prompt = QUERY_DECOMPOSE.format(query=query)
         response = self.safe_generate(prompt).strip()
         subqueries = [q.strip() for q in response.splitlines() if q.strip()]

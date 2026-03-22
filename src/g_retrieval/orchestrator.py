@@ -2,25 +2,35 @@
 G-Retrieval orchestrator.
 
 Sequences:
-    QueryProcessor → EntityExtractor → GraphRetriever → GraphFormatConverter
-and returns a :class:`RetrievalResult` dataclass.
+    [enhancement=True]
+        ThreadPoolExecutor: expand_and_extract(query) ║ _decompose(query)
+            ↓ (both running in parallel)
+        LLM-grounded entities (no regex) → GraphRetriever → GraphFormatConverter
+
+    [enhancement=False]
+        QueryProcessor.process(pass-through) → EntityExtractor.extract()
+            ↓
+        GraphRetriever → GraphFormatConverter
 
 Enhancement pipeline (enable_enhancement=True):
-    - QueryProcessor expands the raw query into a richer description.
-    - QueryProcessor decomposes it into focused sub-questions.
-    - EntityExtractor runs on the *expanded* query (richer context → better recall).
-    - Regex scan also runs on every decomposed sub-query at zero extra LLM cost,
-      catching entity names that appear only in specific sub-questions.
-    - All entity lists are merged & deduplicated before graph retrieval.
+    - expand_and_extract: 1 LLM call → expanded query + grounded entities
+      (LLM uses the known entity list from the prompt — no regex fallback needed)
+    - _decompose: 1 LLM call → focused sub-questions (runs PARALLEL)
+    - Entity lists deduplicated before graph retrieval
+
+Optimisation vs legacy:
+    Legacy : expand(LLM#1) → decompose(LLM#2) → entity_extract(LLM#3) = 3 sequential calls
+    New    : expand+extract(LLM#A) ║ decompose(LLM#B) = 2 parallel calls → ~max(A,B) latency
 """
 from __future__ import annotations
 
 import time
+from concurrent.futures import ThreadPoolExecutor, Future
 from dataclasses import dataclass
 from typing import Any
 
 from src.constants.constant import EntityType, FormatKey, RetrievalMethod
-from src.g_retrieval.entity_extractor import EntityExtractor, _VN_PROPER_NOUN
+from src.g_retrieval.entity_extractor import EntityExtractor
 from src.g_retrieval.graph_retriever import GraphData, GraphRetriever
 from src.g_retrieval.query_processor import ProcessedQuery, QueryProcessor
 from src.graph_loader.neo4j_client import Neo4jClient
@@ -75,6 +85,9 @@ class RetrievalResult:
     formatted_contexts: dict[str, str]
     key_facts: str
 
+    # Extracted entities (for UI display)
+    entities: dict[str, list[str]]
+
     # Statistics
     num_nodes: int
     num_triplets: int
@@ -87,14 +100,14 @@ class RetrievalResult:
     def summary(self) -> dict[str, Any]:
         """Compact summary dict suitable for logging / display."""
         return {
-            "query": self.query,
+            "query":            self.query,
             "retrieval_methods": self.retrieval_methods,
-            "format_keys": self.format_keys,
-            "num_nodes": self.num_nodes,
-            "num_triplets": self.num_triplets,
-            "num_paths": self.num_paths,
+            "format_keys":      self.format_keys,
+            "num_nodes":        self.num_nodes,
+            "num_triplets":     self.num_triplets,
+            "num_paths":        self.num_paths,
             "retrieval_time_s": round(self.retrieval_time, 3),
-            "error": self.error,
+            "error":            self.error,
         }
 
 
@@ -106,9 +119,9 @@ class RetrievalOrchestrator:
     """
 
     def __init__(self, client: Neo4jClient) -> None:
-        self._query_processor = QueryProcessor()
+        self._query_processor  = QueryProcessor()
         self._entity_extractor = EntityExtractor()
-        self._graph_retriever = GraphRetriever(client)
+        self._graph_retriever  = GraphRetriever(client)
         _logger.info("RetrievalOrchestrator initialised")
 
     # ── Public API ────────────────────────────────────────────────────────────
@@ -123,77 +136,48 @@ class RetrievalOrchestrator:
     ) -> RetrievalResult:
         """Execute the full retrieval pipeline.
 
-        When *enable_enhancement* is ``True`` the entity extraction receives the
-        **expanded** query (richer context → higher entity recall), and a cheap
-        regex pass runs over every decomposed sub-query to catch entity names
-        that appear only in specific sub-questions — all at zero extra LLM cost.
-        All entity sets are merged before graph retrieval.
+        When *enable_enhancement* is ``True`` two LLM calls run **in parallel**:
+
+        * ``expand_and_extract(query)`` — enriched query + named entities
+        * ``_decompose(query)``         — focused sub-questions
+
+        A cheap regex pass over the sub-questions supplements the LLM entities
+        at zero extra LLM cost. All entity sets are merged before graph retrieval.
+
+        When *enable_enhancement* is ``False`` the query is used as-is with a
+        single EntityExtractor LLM call (no expansion/decomposition overhead).
 
         Args:
-            query: Raw user query.
+            query:             Raw user query.
             retrieval_methods: Which of nodes/triplets/paths/subgraph to use.
-            format_keys: Which :class:`~src.constants.constant.FormatKey` values to produce.
-            enable_enhancement: Forward to :class:`~.query_processor.QueryProcessor`.
+            format_keys:       Which :class:`~src.constants.constant.FormatKey` values to produce.
+            enable_enhancement: Toggle parallel expand+extract+decompose pipeline.
 
         Returns:
             A populated :class:`RetrievalResult`.  On error *error* field is set
             and graph containers are empty.
         """
         retrieval_methods = retrieval_methods or _DEFAULT_METHODS
-        format_keys = format_keys or _DEFAULT_FORMATS
+        format_keys       = format_keys       or _DEFAULT_FORMATS
         start = time.perf_counter()
 
         try:
-            # ── 1. Query processing ────────────────────────────────────────────
-            _logger.info("Retrieval: processing query")
-            processed = self._query_processor.process(query, enable_enhancement=enable_enhancement)
-
-            # ── 2. Entity extraction ───────────────────────────────────────────
-            # Feed the *expanded* query to the LLM extractor (richer context).
-            # If enhancement is off, processed.expanded == query (no change).
-            _logger.info("Retrieval: extracting entities from expanded query")
-            entities = self._entity_extractor.extract(processed["expanded"])
-
-            # When enhancement is ON, also regex-scan every sub-query so entities
-            # mentioned only in specific decomposed questions are not missed.
-            # This costs zero extra LLM calls.
             if enable_enhancement:
-                sub_queries = processed.get("decomposed", [])
-                # skip sub-queries identical to the expanded query (already covered)
-                novel_subs = [
-                    sq for sq in sub_queries
-                    if sq.strip() and sq.strip() != processed["expanded"].strip()
-                ]
-                if novel_subs:
-                    regex_names: list[str] = []
-                    for sq in novel_subs:
-                        regex_names.extend(_VN_PROPER_NOUN.findall(sq))
-                    if regex_names:
-                        entities = _merge_entities(
-                            entities,
-                            {
-                                EntityType.CHARACTERS: list(set(regex_names)),
-                                EntityType.ACTORS:     [],
-                                EntityType.PLAYS:      [],
-                                EntityType.SCENES:     [],
-                            },
-                        )
-                        _logger.info(
-                            "Retrieval: merged %d regex entities from %d sub-queries",
-                            len(regex_names), len(novel_subs),
-                        )
+                processed, entities = self._enhanced_pipeline(query)
+            else:
+                processed, entities = self._basic_pipeline(query)
 
             total_entities = sum(len(v) for v in entities.values())
             _logger.info("Retrieval: %d entities total after merge", total_entities)
 
-            # ── 3. Graph retrieval ─────────────────────────────────────────────
+            # ── Graph retrieval ────────────────────────────────────────────────
             _logger.info("Retrieval: querying Neo4j with methods=%s", retrieval_methods)
             graph_data = self._graph_retriever.retrieve(entities, methods=retrieval_methods)
 
-            # ── 4. Format contexts ─────────────────────────────────────────────
+            # ── Format contexts ────────────────────────────────────────────────
             _logger.info("Retrieval: formatting with keys=%s", format_keys)
             formatted_contexts = GraphFormatConverter.convert_selected(graph_data, format_keys)
-            key_facts = GraphFormatConverter.extract_key_facts(graph_data)
+            key_facts          = GraphFormatConverter.extract_key_facts(graph_data)
 
             elapsed = time.perf_counter() - start
             result = RetrievalResult(
@@ -204,6 +188,7 @@ class RetrievalOrchestrator:
                 format_keys=format_keys,
                 formatted_contexts=formatted_contexts,
                 key_facts=key_facts,
+                entities=entities,
                 num_nodes=len(graph_data.get("nodes", [])),
                 num_triplets=len(graph_data.get("triplets", [])),
                 num_paths=len(graph_data.get("paths", [])),
@@ -216,9 +201,9 @@ class RetrievalOrchestrator:
             elapsed = time.perf_counter() - start
             _logger.error("Retrieval pipeline failed: %s", exc, exc_info=True)
             empty_graph: GraphData = {
-                "nodes": [],
+                "nodes":    [],
                 "triplets": [],
-                "paths": [],
+                "paths":    [],
                 "subgraph": {"nodes": [], "relationships": []},
             }
             return RetrievalResult(
@@ -229,9 +214,64 @@ class RetrievalOrchestrator:
                 format_keys=format_keys,
                 formatted_contexts={},
                 key_facts="",
+                entities={},
                 num_nodes=0,
                 num_triplets=0,
                 num_paths=0,
                 retrieval_time=elapsed,
                 error=str(exc),
             )
+
+    # ── Private pipeline paths ─────────────────────────────────────────────────
+
+    def _enhanced_pipeline(
+        self, query: str
+    ) -> tuple[ProcessedQuery, dict[str, list[str]]]:
+        """Parallel: expand+extract ║ decompose  (2 LLM calls, ~max latency).
+
+        Entity extraction is fully LLM-grounded: the prompt provides the complete
+        list of known Cheo entities so no regex fallback is needed.
+
+        Returns (ProcessedQuery, entities_dict).
+        """
+        _logger.info("Retrieval: launching parallel expand+extract ║ decompose")
+
+        with ThreadPoolExecutor(max_workers=2) as pool:
+            future_combined: Future = pool.submit(
+                self._query_processor.expand_and_extract, query
+            )
+            future_decompose: Future = pool.submit(
+                self._query_processor._decompose, query
+            )
+            # Both futures run concurrently; .result() blocks until done
+            combined   = future_combined.result()
+            decomposed = future_decompose.result()
+
+        entities: dict[str, list[str]] = dict(combined["entities"])
+
+        _logger.info(
+            "Retrieval: expand+extract done — %d entities (characters=%d, actors=%d, plays=%d, scenes=%d)",
+            sum(len(v) for v in entities.values()),
+            len(entities.get("characters", [])),
+            len(entities.get("actors", [])),
+            len(entities.get("plays", [])),
+            len(entities.get("scenes", [])),
+        )
+        _logger.info("Retrieval: decomposed into %d sub-queries", len(decomposed))
+
+        processed: ProcessedQuery = {
+            "original":   query,
+            "expanded":   combined["expanded"],
+            "decomposed": decomposed,
+        }
+
+        return processed, entities
+
+    def _basic_pipeline(
+        self, query: str
+    ) -> tuple[ProcessedQuery, dict[str, list[str]]]:
+        """No enhancement: pass-through query + 1 entity-extract LLM call."""
+        _logger.info("Retrieval: enhancement disabled — processing query as-is")
+        processed = self._query_processor.process(query, enable_enhancement=False)
+        entities  = self._entity_extractor.extract(processed["expanded"])
+        return processed, entities
