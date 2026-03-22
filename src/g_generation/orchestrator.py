@@ -97,16 +97,16 @@ class GenerationOrchestrator:
         try:
             _logger.info("Generation start  strategy=%s  query=%r", self._strategy_name, query[:60])
 
-            # Build context length estimate for the result metadata
-            # (We re-use the same _build_context the strategy will call)
-            ctx_preview = self._strategy._build_context(graph_data, formats)
-            context_length = len(ctx_preview)
+            # Build context once — pass it down to avoid a second build inside the strategy
+            context = self._strategy._build_context(graph_data, formats, key_facts=key_facts)
+            context_length = len(context)
 
             response = self._strategy.generate(
                 query=query,
                 graph_data=graph_data,
                 selected_formats=formats,
                 key_facts=key_facts,
+                prebuilt_context=context,
             )
             elapsed = time.perf_counter() - start
             result = GenerationResult(

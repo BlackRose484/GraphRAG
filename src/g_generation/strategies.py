@@ -61,12 +61,19 @@ class BaseGenerationStrategy(ABC):
         self,
         graph_data: GraphData,
         selected_formats: list[str],
+        key_facts: str = "",
     ) -> str:
-        """Assemble a multi-section context string from graph_data."""
+        """Assemble a multi-section context string from graph_data.
+
+        Args:
+            graph_data: Retrieved graph data.
+            selected_formats: List of :class:`~src.constants.constant.FormatKey` values.
+            key_facts: Pre-computed key facts string.  Computed fresh if empty.
+        """
         parts: list[str] = [CONTEXT_HEADER]
 
-        # Key facts summary (always included)
-        kf = GraphFormatConverter.extract_key_facts(graph_data)
+        # Key facts summary (always included) — use pre-computed value if available
+        kf = key_facts or GraphFormatConverter.extract_key_facts(graph_data)
         parts.append(CONTEXT_KEY_FACTS_HEADER.format(key_facts=kf))
 
         # One section per requested format
@@ -107,9 +114,11 @@ class PreGenerationStrategy(BaseGenerationStrategy):
         graph_data: GraphData,
         selected_formats: list[str] | None = None,
         key_facts: str = "",
+        *,
+        prebuilt_context: str = "",
     ) -> str:
         formats = selected_formats or self.DEFAULT_FORMATS
-        context = self._build_context(graph_data, formats)
+        context = prebuilt_context or self._build_context(graph_data, formats, key_facts=key_facts)
         prompt = PRE_GENERATION.format(context=context, query=query)
         response = self._model.safe_generate(prompt)
         _logger.info("PreGenerationStrategy: generation complete")
@@ -130,11 +139,13 @@ class MidGenerationStrategy(BaseGenerationStrategy):
         graph_data: GraphData,
         selected_formats: list[str] | None = None,
         key_facts: str = "",
+        *,
+        prebuilt_context: str = "",
     ) -> str:
         formats = selected_formats or self.DEFAULT_FORMATS
-        context = self._build_context(graph_data, formats)
-        # Compute key_facts fresh if not provided
+        # Compute key_facts once — reused in both context header and prompt body
         kf = key_facts or GraphFormatConverter.extract_key_facts(graph_data)
+        context = prebuilt_context or self._build_context(graph_data, formats, key_facts=kf)
         prompt = MID_GENERATION.format(context=context, query=query, key_facts=kf)
         response = self._model.safe_generate(prompt)
         _logger.info("MidGenerationStrategy: generation complete")
@@ -155,6 +166,8 @@ class PostGenerationStrategy(BaseGenerationStrategy):
         graph_data: GraphData,
         selected_formats: list[str] | None = None,
         key_facts: str = "",
+        *,
+        prebuilt_context: str = "",
     ) -> str:
         formats = selected_formats or self.DEFAULT_FORMATS
 
@@ -165,7 +178,7 @@ class PostGenerationStrategy(BaseGenerationStrategy):
 
         # Step 2 — refine against graph data
         kf = key_facts or GraphFormatConverter.extract_key_facts(graph_data)
-        context = self._build_context(graph_data, formats)
+        context = prebuilt_context or self._build_context(graph_data, formats, key_facts=kf)
         verification_data = f"=== KEY FACTS ===\n{kf}\n\n{context}"
         refine_prompt = POST_REFINE.format(
             query=query,
