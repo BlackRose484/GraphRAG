@@ -1,0 +1,792 @@
+{
+  "Chu Mãi Thần": {
+    "play_title": "Chu Mãi Thần",
+    "characters": [
+      {
+        "gender": "Nữ",
+        "name": "Đào Huế"
+      },
+      {
+        "gender": "Nữ",
+        "name": "Thiệt Thê"
+      },
+      {
+        "gender": "Nam",
+        "name": "Tuần Ty"
+      }
+    ],
+    "actors": [
+      {
+        "name": "Thanh Ngoan"
+      },
+      {
+        "name": "Kim Liên"
+      },
+      {
+        "name": "Hương Dịu"
+      },
+      {
+        "name": "An Chinh"
+      },
+      {
+        "name": "Ngọc Minh"
+      },
+      {
+        "name": "Phú Kiên"
+      }
+    ],
+    "scenes": [
+      {
+        "name": "Tuần Ty - Đào Huế",
+        "summary": "Nội dung câu chuyện của trích đoạn “Tuần Ty Đào Huế” xoay quanh nhân vật Tuần Ty, một viên quan tuần quê miền Trung được cử ra Bắc làm nhiệm vụ. Tại đây, ông tằng tịu với người vợ cũ của Chu Mãi Thần là Thiệt Thê, định lấy làm “vợ hai” mà quên luôn vợ con ở Huế. Đào Huế, vợ của Tuần Ty ra Bắc tìm chồng, bất chợt bắt gặp “đức ông” đang cặp kè với cô nhân tình ngoài đường. Và một trận “cuồng phong” dữ dội của sự ghen tuông đã nổi lên trong lòng cô Đào xứ Huế. Trích đoạn là sự diễn tiến đầy kịch tính tâm lý giữa sự chì chiết đáo để, đay nghiến cay đắng của Đào Huế và sự chống đỡ, giấu giếm, bao che uyển chuyển và hài hước của Tuần Ty. Còn Đào Nấp chỉ là cái bóng luôn luôn lẩn trốn để tránh đòn. Đây là trích đoạn vừa hài hước vừa châm biếm sâu sắc về nghĩa vợ đạo chồng."
+      }
+    ],
+    "role_assignments": [
+      {
+        "actor": "Thanh Ngoan",
+        "character": "Đào Huế",
+        "version": null
+      },
+      {
+        "actor": "Kim Liên",
+        "character": "Đào Huế",
+        "version": null
+      },
+      {
+        "actor": "Hương Dịu",
+        "character": "Thiệt Thê",
+        "version": null
+      },
+      {
+        "actor": "An Chinh",
+        "character": "Thiệt Thê",
+        "version": null
+      },
+      {
+        "actor": "Ngọc Minh",
+        "character": "Tuần Ty",
+        "version": null
+      },
+      {
+        "actor": "Phú Kiên",
+        "character": "Tuần Ty",
+        "version": null
+      }
+    ]
+  },
+  "Kim Nham": {
+    "play_title": "Kim Nham",
+    "characters": [
+      {
+        "gender": "Nữ",
+        "name": "Hỷ đồng"
+      },
+      {
+        "gender": "Nam",
+        "name": "Khoèo"
+      },
+      {
+        "gender": "Nữ",
+        "name": "Mụ Quán"
+      },
+      {
+        "gender": "Nam",
+        "name": "Phù thủy"
+      },
+      {
+        "gender": "Nữ",
+        "name": "Súy Vân"
+      },
+      {
+        "gender": "Nam",
+        "name": "Trần Phương"
+      },
+      {
+        "gender": "Nam",
+        "name": "Hề (Mụ Quán Trần Phương)"
+      },
+      {
+        "gender": "Nam",
+        "name": "Hề (Trần Phương vào chùa)"
+      }
+    ],
+    "actors": [
+      {
+        "name": "Thanh Mai"
+      },
+      {
+        "name": "An Chinh"
+      },
+      {
+        "name": "Tuấn Kha"
+      },
+      {
+        "name": "Đăng Toàn"
+      },
+      {
+        "name": "Kiều Oanh"
+      },
+      {
+        "name": "Thanh Mạn"
+      },
+      {
+        "name": "Trần Hải"
+      },
+      {
+        "name": "Thúy Ngần"
+      },
+      {
+        "name": "Kim Liên"
+      },
+      {
+        "name": "Tạ Thị Kim Liên"
+      },
+      {
+        "name": "Huy Toàn"
+      },
+      {
+        "name": "Bá Dũng"
+      },
+      {
+        "name": "Ngọc Minh"
+      },
+      {
+        "name": "Trần Vinh"
+      }
+    ],
+    "scenes": [
+      {
+        "name": "Mụ quán - Trần Phương",
+        "summary": "Đoạn trích \"Mụ Quán Trần Phương\" được trích trong vở chèo Kim Nham, là đoạn kể về sự việc Trần Phương quyết định tung đòn tấn công cuối cùng để dụ dỗ nàng Súy Vân giả dại bỏ chồng. Hắn tìm đến mụ Quán để tính kế tiếp cận tán tỉnh Súy Vân."
+      },
+      {
+        "name": "Phù thủy sợ ma",
+        "summary": "Trích đoạn “Phù thủy sợ ma” trong vở chèo Kim Nham là một cảnh diễn mang đậm tính châm biếm. Nhân vật Phù thủy – kẻ tự nhận có tài trừ tà, trấn ma – được mời về để giải trừ yêu quái. Ông ta huênh hoang khoe mình được Phật bà ban cho ba mươi sáu tay ấn quyết, nhắm mắt cũng bước qua núi, chưa kịp đến ma quỷ phải tìm đường chạy hết. Tuy nhiên, khi Hỷ đồng giả làm ma xuất hiện dọa, Phù thủy liền khiếp vía, sợ hãi đến mức không dám nhận mình là thầy phù thủy nữa mà khai là người “bán cối”. Qua tình huống hài hước ấy, trích đoạn phê phán sâu sắc thói mê tín dị đoan và những kẻ lợi dụng lòng tin của nhân dân để trục lợi."
+      },
+      {
+        "name": "Súy Vân giả dại",
+        "summary": "Đoạn trích \"Súy Vân giả dại\" được trích trong vở chèo Kim Nham, là đoạn kể về sự việc giả điên của Súy Vân để mong được thoát khỏi Kim Nham. Súy Vân trong đoạn trích này không ngừng than thở, kể lể và thể hiện sự điên loạn, dở hơi của mình bằng những câu hát nửa điên dại, ngô nghê, nửa chân thực tỉnh táo về thân phận dang dở, bẽ bàng,... để mọi người tin là mình đã điên thật nhằm mong muốn được Kim Nham giải thoát để đi theo người tình là Trần Phương."
+      },
+      {
+        "name": "Trần Phương vào chùa",
+        "summary": "Trần Phương – một người nhà giàu ở Đông Ngàn, buôn bán giỏi và ham mê cờ bạc – tìm đến cửa Phật với danh nghĩa làm thơ lễ chùa, nhưng thực chất là để gặp gỡ cô thục nữ Suý Vân. Cùng theo hầu là Hề gậy – kẻ hầu cận tinh nghịch và lắm lời. Trong khi Trần Phương cố tỏ ra tao nhã, ngâm thơ nơi cửa thiền, thì Hề gậy lại liên tục châm chọc, giễu cợt những lời hoa mỹ và ý đồ không trong sáng của chủ. Bị Hề trêu chọc, Trần Phương tức giận dọa nạt, sợ y bép xép chuyện gặp gỡ Suý Vân nên dúi cho vài đồng bạc để đuổi đi chợ."
+      }
+    ],
+    "role_assignments": [
+      {
+        "actor": "Thanh Mai",
+        "character": "Hỷ đồng",
+        "version": null
+      },
+      {
+        "actor": "An Chinh",
+        "character": "Hỷ đồng",
+        "version": null
+      },
+      {
+        "actor": "Tuấn Kha",
+        "character": "Khoèo",
+        "version": null
+      },
+      {
+        "actor": "Đăng Toàn",
+        "character": "Khoèo",
+        "version": null
+      },
+      {
+        "actor": "Kiều Oanh",
+        "character": "Mụ Quán",
+        "version": null
+      },
+      {
+        "actor": "Thanh Mạn",
+        "character": "Mụ Quán",
+        "version": null
+      },
+      {
+        "actor": "Tuấn Kha",
+        "character": "Phù thủy",
+        "version": null
+      },
+      {
+        "actor": "Trần Hải",
+        "character": "Phù thủy",
+        "version": null
+      },
+      {
+        "actor": "Thúy Ngần",
+        "character": "Súy Vân",
+        "version": null
+      },
+      {
+        "actor": "Kim Liên",
+        "character": "Súy Vân",
+        "version": null
+      },
+      {
+        "actor": "Tạ Thị Kim Liên",
+        "character": "Súy Vân",
+        "version": null
+      },
+      {
+        "actor": "Huy Toàn",
+        "character": "Trần Phương",
+        "version": null
+      },
+      {
+        "actor": "Bá Dũng",
+        "character": "Trần Phương",
+        "version": null
+      },
+      {
+        "actor": "Ngọc Minh",
+        "character": "Hề (Mụ Quán Trần Phương)",
+        "version": null
+      },
+      {
+        "actor": "Trần Vinh",
+        "character": "Hề (Mụ Quán Trần Phương)",
+        "version": null
+      }
+    ]
+  },
+  "Lưu Bình - Dương Lễ": {
+    "play_title": "Lưu Bình - Dương Lễ",
+    "characters": [
+      {
+        "gender": "Nữ",
+        "name": "Châu Long"
+      },
+      {
+        "gender": "Nam",
+        "name": "Dương Lễ"
+      },
+      {
+        "gender": "Nam",
+        "name": "Lưu Bình"
+      },
+      {
+        "gender": "Nữ",
+        "name": "Hề (Đưa bạn đi thi)"
+      },
+      {
+        "gender": "Nam",
+        "name": "Hề áo đỏ (Dương Lễ tiễn Châu Long đi nuôi bạn)"
+      },
+      {
+        "gender": "Nam",
+        "name": "Hề áo xanh (Dương Lễ tiễn Châu Long đi nuôi bạn)"
+      }
+    ],
+    "actors": [
+      {
+        "name": "Phương Mây"
+      },
+      {
+        "name": "Ngọc Ánh"
+      },
+      {
+        "name": "Tử Dương"
+      },
+      {
+        "name": "Hồng Nam"
+      },
+      {
+        "name": "Nguyễn Duy"
+      },
+      {
+        "name": "Huyền Trang"
+      },
+      {
+        "name": "Lê Tuấn"
+      },
+      {
+        "name": "Đào Dũng"
+      }
+    ],
+    "scenes": [
+      {
+        "name": "Đưa bạn đi thi",
+        "summary": "Khi khoa thi đến gần, Châu Long hết lời động viên và dặn dò Lưu Bình giữ vững chí khí. Trước lúc lên đường, Lưu Bình mời nàng uống rượu dưới trăng: chén đầu mừng tuổi giai nhân, chén thứ hai cảm tạ công lao nuôi dưỡng, chén thứ ba muốn gửi gắm tình ý lứa đôi. Châu Long khéo léo từ chối chén thứ ba, khuyên Lưu Bình hãy tập trung lập nghiệp, giữ mình thanh khiết, cầu thánh hiền phù trợ cho con đường công danh. Nhận ra chỉ vì men rượu mà mình suýt thất lễ, Lưu Bình hối hận và thề rằng khi chưa thành đạt quyết không dám ngỏ lời ái ân. Thời gian thấm thoát, đến giờ lên đường, Châu Long tiễn biệt Lưu Bình trong niềm hy vọng và tin tưởng."
+      },
+      {
+        "name": "Dương Lễ tiễn Châu Long đi nuôi bạn",
+        "summary": "Sau khi đỗ đạt làm quan, Dương Lễ gặp lại người bạn cũ Lưu Bình nhưng giả vờ lạnh nhạt, sai gia nhân mang cơm nguội, cà thiu ra tiếp đãi. Lưu Bình tủi thân, đau khổ định tìm đến cái chết. Thực chất, Dương Lễ chỉ muốn thử chí và giúp bạn. Ông bàn với vợ ba là Châu Long, nhờ nàng thay mình nuôi bạn ăn học nên người. Hiểu thấu tấm lòng chồng, Châu Long đồng ý gánh vác trọng trách. Dương Lễ tiễn vợ lên đường, gửi gắm nàng thay chồng chăm sóc, khích lệ để Lưu Bình có cơ hội lập công danh."
+      }
+    ],
+    "role_assignments": [
+      {
+        "actor": "Phương Mây",
+        "character": "Châu Long",
+        "version": null
+      },
+      {
+        "actor": "Ngọc Ánh",
+        "character": "Châu Long",
+        "version": null
+      },
+      {
+        "actor": "Tử Dương",
+        "character": "Dương Lễ",
+        "version": null
+      },
+      {
+        "actor": "Hồng Nam",
+        "character": "Lưu Bình",
+        "version": null
+      },
+      {
+        "actor": "Nguyễn Duy",
+        "character": "Lưu Bình",
+        "version": null
+      },
+      {
+        "actor": "Huyền Trang",
+        "character": "Hề (Đưa bạn đi thi)",
+        "version": null
+      },
+      {
+        "actor": "Lê Tuấn",
+        "character": "Hề áo đỏ (Dương Lễ tiễn Châu Long đi nuôi bạn)",
+        "version": null
+      },
+      {
+        "actor": "Đào Dũng",
+        "character": "Hề áo xanh (Dương Lễ tiễn Châu Long đi nuôi bạn)",
+        "version": null
+      }
+    ]
+  },
+  "Quan Âm Thị Kính": {
+    "play_title": "Quan Âm Thị Kính",
+    "characters": [
+      {
+        "gender": "Nam",
+        "name": "Lý Trưởng"
+      },
+      {
+        "gender": "Nam",
+        "name": "Mãng Ông (bố Thị Kính)"
+      },
+      {
+        "gender": "Nữ",
+        "name": "Mẹ Mõ (Đốp)"
+      },
+      {
+        "gender": "Nam",
+        "name": "Nô"
+      },
+      {
+        "gender": "Nam",
+        "name": "Phú Ông"
+      },
+      {
+        "gender": "Nữ",
+        "name": "Sùng Bà"
+      },
+      {
+        "gender": "Nam",
+        "name": "Sùng Ông"
+      },
+      {
+        "gender": "Nữ",
+        "name": "Thị Kính"
+      },
+      {
+        "gender": "Nữ",
+        "name": "Thị Màu"
+      },
+      {
+        "gender": "Nam",
+        "name": "Thiện Sỹ"
+      }
+    ],
+    "actors": [
+      {
+        "name": "Tuấn Nghĩa"
+      },
+      {
+        "name": "Tuấn Cường"
+      },
+      {
+        "name": "Tuấn Kha"
+      },
+      {
+        "name": "Bích Vân"
+      },
+      {
+        "name": "Thanh Mạn"
+      },
+      {
+        "name": "Mạnh Phóng"
+      },
+      {
+        "name": "Văn Quân"
+      },
+      {
+        "name": "Thanh Tùng"
+      },
+      {
+        "name": "Trần Hải"
+      },
+      {
+        "name": "Phú Kiên"
+      },
+      {
+        "name": "Trần Thị Thân"
+      },
+      {
+        "name": "Thanh Ngoan"
+      },
+      {
+        "name": "Bá Dũng"
+      },
+      {
+        "name": "Ngọc Minh"
+      },
+      {
+        "name": "Thảo Hiền"
+      },
+      {
+        "name": "Thúy Ngần"
+      },
+      {
+        "name": "Hồng Thắm"
+      },
+      {
+        "name": "An Chinh"
+      },
+      {
+        "name": "Vân Quyền"
+      },
+      {
+        "name": "Hương Dịu"
+      },
+      {
+        "name": "Thu Huyền"
+      },
+      {
+        "name": "Trần Xuân Tài"
+      },
+      {
+        "name": "Huy Toàn"
+      }
+    ],
+    "scenes": [
+      {
+        "name": "Cắt râu",
+        "summary": "Trích đoạn \"Cắt râu\" trong vở chèo \"Quan Âm Thị Kính\" kể về nỗi oan của Thị Kính khi bị gán cho tội lăng loàn âm mưu giết chồng chỉ vì muốn cắt sợi râu mọc ngược trên cằm Thiện Sĩ. Bị Sùng ông, Sùng bà đánh mắng rồi đuổi về với cha. Sau đó nàng phẫn chí, giả trai để lên chùa tu hành với pháp danh là Kính Tâm."
+      },
+      {
+        "name": "Lý trưởng - Mẹ Mõ",
+        "summary": "Nội dung chính của đoạn trích xoay quanh việc Lý Trưởng sai mẹ Mõ đi loan tin trong làng về việc Thị Mầu có thai mà chưa có chồng. Đoạn trích thể hiện rõ sự khác biệt trong tính cách và vai trò của hai nhân vật Lý Trưởng - mẹ Mõ."
+      },
+      {
+        "name": "Mầu - Nô - Phú Ông",
+        "summary": "Trích đoạn \"Màu - Nô - Phú ông\" trong vở chèo \"Quan Âm Thị Kính\" kể về một lần Thị Màu gian díu với Nô, người làm trong nhà và bị Phú ông đang say xỉn bắt gặp. Phú ông, cha của Thị Màu, là một người giàu có, thế lực, nhưng lại nhu nhược, không dám làm gì khi biết chuyện của con gái. Sau này có thai, bị làng bắt vạ, Thị Màu đổ oan cho Thị Kính là cha của đứa bé."
+      },
+      {
+        "name": "Thị Mầu lên chùa",
+        "summary": "Trích đoạn \"Thị Màu lên chùa\" trong vở chèo \"Quan Âm Thị Kính\" là sự tiếp nối nỗi bi kịch của Thị Kính sau khi lên chùa tu tập. Tại đây, Thị Màu, con gái Phú ông lên chùa và đem lòng si mê Kính Tâm. Ả tìm mọi cách dụ dỗ nhưng bị cự tuyệt."
+      },
+      {
+        "name": "Vu quy",
+        "summary": "Mãng ông muốn cho con gái mình là Thị kính cưới Thiện Sĩ. Thị Kính lo cưới xa không được về với cha mẹ nhiều. Nhưng Mãng Ông động viên thì cũng bằng lòng, sau đó hai người dắt nhau về vu quy."
+      }
+    ],
+    "role_assignments": [
+      {
+        "actor": "Tuấn Nghĩa",
+        "character": "Lý Trưởng",
+        "version": null
+      },
+      {
+        "actor": "Tuấn Cường",
+        "character": "Lý Trưởng",
+        "version": null
+      },
+      {
+        "actor": "Tuấn Kha",
+        "character": "Mãng Ông (bố Thị Kính)",
+        "version": null
+      },
+      {
+        "actor": "Bích Vân",
+        "character": "Mẹ Mõ (Đốp)",
+        "version": null
+      },
+      {
+        "actor": "Thanh Mạn",
+        "character": "Mẹ Mõ (Đốp)",
+        "version": null
+      },
+      {
+        "actor": "Mạnh Phóng",
+        "character": "Nô",
+        "version": null
+      },
+      {
+        "actor": "Văn Quân",
+        "character": "Nô",
+        "version": null
+      },
+      {
+        "actor": "Thanh Tùng",
+        "character": "Nô",
+        "version": null
+      },
+      {
+        "actor": "Trần Hải",
+        "character": "Phú Ông",
+        "version": null
+      },
+      {
+        "actor": "Phú Kiên",
+        "character": "Phú Ông",
+        "version": null
+      },
+      {
+        "actor": "Trần Thị Thân",
+        "character": "Sùng Bà",
+        "version": null
+      },
+      {
+        "actor": "Thanh Ngoan",
+        "character": "Sùng Bà",
+        "version": null
+      },
+      {
+        "actor": "Bá Dũng",
+        "character": "Sùng Ông",
+        "version": null
+      },
+      {
+        "actor": "Ngọc Minh",
+        "character": "Sùng Ông",
+        "version": null
+      },
+      {
+        "actor": "Thảo Hiền",
+        "character": "Thị Kính",
+        "version": null
+      },
+      {
+        "actor": "Thúy Ngần",
+        "character": "Thị Kính",
+        "version": null
+      },
+      {
+        "actor": "Hồng Thắm",
+        "character": "Thị Kính",
+        "version": null
+      },
+      {
+        "actor": "An Chinh",
+        "character": "Thị Màu",
+        "version": null
+      },
+      {
+        "actor": "Vân Quyền",
+        "character": "Thị Màu",
+        "version": null
+      },
+      {
+        "actor": "Hương Dịu",
+        "character": "Thị Màu",
+        "version": null
+      },
+      {
+        "actor": "Thu Huyền",
+        "character": "Thị Màu",
+        "version": null
+      },
+      {
+        "actor": "Trần Xuân Tài",
+        "character": "Thiện Sỹ",
+        "version": null
+      },
+      {
+        "actor": "Huy Toàn",
+        "character": "Thiện Sỹ",
+        "version": null
+      }
+    ]
+  },
+  "Trinh Nguyên": {
+    "play_title": "Trinh Nguyên",
+    "characters": [
+      {
+        "gender": "Nam",
+        "name": "Thầy Đồ"
+      },
+      {
+        "gender": "Nam",
+        "name": "Tôn Mạnh"
+      },
+      {
+        "gender": "Nam",
+        "name": "Tôn Trọng"
+      },
+      {
+        "gender": "Nữ",
+        "name": "Trinh Nguyên"
+      }
+    ],
+    "actors": [
+      {
+        "name": "Phú Kiên"
+      },
+      {
+        "name": "Thanh Mai"
+      },
+      {
+        "name": "Thanh Hương"
+      },
+      {
+        "name": "An Chinh"
+      }
+    ],
+    "scenes": [
+      {
+        "name": "Thầy đồ dạy học",
+        "summary": "Trích đoạn \"Thầy đồ dạy học\" trong vở chèo Trinh Nguyên khắc họa hình ảnh ông thầy đồ dốt nát, giả nhân giả nghĩa và đê tiện, mượn danh dạy học để ve vãn Trinh Nguyên – người phụ nữ đoan trang đưa con đến xin học. Qua những lời nói ngô nghê, thầy để lộ sự kém hiểu biết, lại thêm thói háo sắc, tìm đủ cách giữ chân Trinh Nguyên. Trước sự khéo léo, cứng rắn của nàng, âm mưu của thầy tan biến, để lại lời than tục tĩu “phí của trời” phơi bày trọn vẹn tâm địa xấu xa. Bằng tiếng cười châm biếm sâu cay, trích đoạn phê phán những kẻ giả danh trí thức, đồng thời đề cao hình tượng người phụ nữ Trinh Nguyên thông minh, đoan chính, ứng xử khéo léo, biết giữ gìn phẩm hạnh giữa những cám dỗ tầm thường."
+      }
+    ],
+    "role_assignments": [
+      {
+        "actor": "Phú Kiên",
+        "character": "Thầy Đồ",
+        "version": null
+      },
+      {
+        "actor": "Thanh Mai",
+        "character": "Tôn Mạnh",
+        "version": null
+      },
+      {
+        "actor": "Thanh Hương",
+        "character": "Tôn Trọng",
+        "version": null
+      },
+      {
+        "actor": "An Chinh",
+        "character": "Trinh Nguyên",
+        "version": null
+      }
+    ]
+  },
+  "Trương Viên": {
+    "play_title": "Trương Viên",
+    "characters": [
+      {
+        "gender": "Nữ",
+        "name": "Thị Phương"
+      },
+      {
+        "gender": "Nữ",
+        "name": "Tiên Nữ"
+      },
+      {
+        "gender": "Nữ",
+        "name": "Trương Mẫu"
+      },
+      {
+        "gender": "Nam",
+        "name": "Trương Viên"
+      },
+      {
+        "gender": "Nam",
+        "name": "Hề (Lớp \"Tiên Nữ - Đoàn tụ)"
+      }
+    ],
+    "actors": [
+      {
+        "name": "Thu Huyền"
+      },
+      {
+        "name": "Thu Hòa"
+      },
+      {
+        "name": "Minh Nhan"
+      },
+      {
+        "name": "Hồng Nam"
+      },
+      {
+        "name": "Khắc Huy"
+      }
+    ],
+    "scenes": [
+      {
+        "name": "Lớp \"Tiên Nữ - Đoàn tụ\"",
+        "summary": "Trích đoạn kể về Thị Phương – người con dâu hiền thảo trong cảnh ngộ mù lòa sau khi hiến đôi mắt cho Sơn Thần để cứu mẹ chồng, Thị Phương cùng Trương Mẫu nương nhờ nhau nơi rừng sâu. Thấu hiểu tấm lòng hiếu nghĩa và đức hạnh của nàng, các Tiên nữ giáng trần, truyền dạy cho Thị Phương nghề đàn hát để vừa nuôi thân, vừa phụng dưỡng mẹ, lại có thể lần tìm chồng. Mười tám năm trôi qua, Trương Viên sau khi hoàn thành sứ mệnh dẹp giặc trở về, chỉ còn thấy mái nhà xưa phủ rêu phong, không hay tin tức mẹ và vợ. Đúng lúc ấy, ông được nghe tiếng hát xẩm bi thương của hai mẹ con, liền mời về hát cho nghe. Trong lời ca chứa chan tình nghĩa, chàng nhận ra chính là vợ và mẹ mình. Ngọc lưu ly ngày trước ghép lại thành đôi, tự nhảy vào mắt, giúp Thị Phương sáng trở lại. Gia đình sum họp, vợ chồng đoàn viên, mẹ con đoàn tụ trong niềm hạnh phúc vỡ òa."
+      }
+    ],
+    "role_assignments": [
+      {
+        "actor": "Thu Huyền",
+        "character": "Thị Phương",
+        "version": null
+      },
+      {
+        "actor": "Thu Hòa",
+        "character": "Tiên Nữ",
+        "version": null
+      },
+      {
+        "actor": "Minh Nhan",
+        "character": "Trương Mẫu",
+        "version": null
+      },
+      {
+        "actor": "Hồng Nam",
+        "character": "Trương Viên",
+        "version": null
+      },
+      {
+        "actor": "Khắc Huy",
+        "character": "Hề (Lớp \"Tiên Nữ - Đoàn tụ)",
+        "version": null
+      }
+    ]
+  },
+  "Từ Thức": {
+    "play_title": "Từ Thức",
+    "characters": [
+      {
+        "gender": "Nam",
+        "name": "Từ Thức"
+      },
+      {
+        "gender": "Nam",
+        "name": "Hề gậy (Hề Theo Thầy)"
+      }
+    ],
+    "actors": [
+      {
+        "name": "Phú Kiên"
+      },
+      {
+        "name": "Văn Quân"
+      }
+    ],
+    "scenes": [
+      {
+        "name": "Hề theo Thầy",
+        "summary": "Từ Thức nghe danh cửa Thần Phù huyện Tống Sơn có nhiều núi đẹp, liền đem theo một tiểu đồng và một túi đàn đến dựng một gian nhà nhỏ ở chân núi để ở. Một hôm, dậy sớm, trông ra cửa Thần Phù thấy có mây ngũ sắc kết thành hình hoa sen, Từ Thức cùng tiều đồng (Hề) chèo thuyền ra phía ấy. Trích đoạn \"Hề theo thầy\" kể về hành trình lênh đênh trên thuyền của hai người."
+      }
+    ],
+    "role_assignments": [
+      {
+        "actor": "Phú Kiên",
+        "character": "Từ Thức",
+        "version": null
+      },
+      {
+        "actor": "Văn Quân",
+        "character": "Hề gậy (Hề Theo Thầy)",
+        "version": null
+      }
+    ]
+  }
+}
