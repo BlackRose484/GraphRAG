@@ -154,6 +154,7 @@ def render() -> None:
                         "nodes":               list(result.retrieval.graph_data.get("nodes", [])),
                         "triplets":            list(result.retrieval.graph_data.get("triplets", [])),
                         "paths":               list(result.retrieval.graph_data.get("paths", [])),
+                        "subgraph":            dict(result.retrieval.graph_data.get("subgraph", {})),
                         "formatted_contexts":  dict(result.retrieval.formatted_contexts),
                     }
 

@@ -5,6 +5,12 @@ from __future__ import annotations
 
 import streamlit as st
 
+try:
+    from ui.graph_visualizer import build_graph_html as _build_graph_html, is_available as _gviz_available
+except ImportError:
+    _gviz_available = lambda: False
+    _build_graph_html = None
+
 
 def render_retrieval_detail(item: dict) -> None:
     """Render a 6-tab panel showing full retrieval details for one result.
@@ -28,13 +34,14 @@ def render_retrieval_detail(item: dict) -> None:
     num_triplets = r.get("num_triplets", len(r.get("triplets", [])))
     num_paths    = r.get("num_paths",    len(r.get("paths",    [])))
 
-    tab_stats, tab_query, tab_nodes, tab_triplets, tab_paths, tab_context = st.tabs([
+    tab_stats, tab_query, tab_nodes, tab_triplets, tab_paths, tab_context, tab_graph = st.tabs([
         "📈 Thống kê",
         "🔍 Query",
         f"🗂️ Nodes ({num_nodes})",
         f"🔗 Triplets ({num_triplets})",
         f"🛤️ Paths ({num_paths})",
         "📝 Context (LLM input)",
+        "🕸️ Đồ thị",
     ])
 
     # ── Stats ─────────────────────────────────────────────────────────────────
@@ -191,3 +198,63 @@ def render_retrieval_detail(item: dict) -> None:
                         )
         else:
             st.info("Không có formatted context.")
+
+    # ── Graph visualization ────────────────────────────────────────────────
+    with tab_graph:
+        nodes    = r.get("nodes", [])
+        triplets = r.get("triplets", [])
+        subgraph = r.get("subgraph", {})
+
+        if not nodes and not triplets:
+            st.info("Đồ thị trống — cháy pipeline trước để xem kết quả.")
+        elif not _gviz_available():
+            st.warning("⚠️ pyvis chưa cài. Chạy: `pip install pyvis`")
+        else:
+            # Controls
+            col1, col2, col3 = st.columns([2, 2, 1])
+            with col1:
+                height = st.slider(
+                    "Chiều cao đồ thị (px)",
+                    min_value=300, max_value=900, value=600, step=50,
+                    key="graph_height",
+                )
+            with col2:
+                max_nodes = st.slider(
+                    "Số node tối đa hiển thị",
+                    min_value=20, max_value=120, value=80, step=10,
+                    key="graph_max_nodes",
+                )
+            with col3:
+                physics = st.toggle("Physics", value=True, key="graph_physics")
+
+            st.caption(
+                f"💡 **{len(nodes)} nodes** + **{len(triplets)} triplets** từ retrieval. "
+                "Kéo để di chuyển, cuộn để phóng to/thu nhỏ, hover để xem chi tiết."
+            )
+
+            # Build and render
+            html = _build_graph_html(
+                nodes=nodes[:max_nodes],
+                triplets=triplets,
+                subgraph=subgraph,
+                height=height,
+                physics=physics,
+            )
+            st.components.v1.html(html, height=height + 30, scrolling=False)
+
+            # Legend
+            st.markdown(
+                """
+                <div style='display:flex;flex-wrap:wrap;gap:14px;font-size:0.82em;margin-top:6px'>
+                  <span><span style='color:#e8811a;font-size:1.2em'>■</span> Vở chèo</span>
+                  <span><span style='color:#2e7dd6;font-size:1.2em'>●</span> Nhân vật</span>
+                  <span><span style='color:#1a9c4e;font-size:1.2em'>◆</span> Diễn viên</span>
+                  <span><span style='color:#7b3fa0;font-size:1.2em'>●</span> Trích đoạn</span>
+                  <span><span style='color:#5bafd6;font-size:1.2em'>▼</span> Phiên bản</span>
+                  <span><span style='color:#c0c0c0;font-size:1.2em'>■</span> RoleAssignment</span>
+                  <span><span style='color:#f0c040;font-size:1.2em'>★</span> Appearance</span>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+
