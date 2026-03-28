@@ -201,6 +201,7 @@ class GraphFormatConverter:
             FormatKey.CODE_LIKE:        GraphFormatConverter.to_code_like(graph_data),
             FormatKey.NODE_SEQUENCE:    GraphFormatConverter.to_node_sequence(graph_data),
             FormatKey.EMBEDDING_TEXT:   GraphFormatConverter.to_graph_embedding_text(graph_data),
+            FormatKey.COMMUNITY_SUMMARY: GraphFormatConverter.to_community_summary(graph_data),
         }
 
     @staticmethod
@@ -216,11 +217,12 @@ class GraphFormatConverter:
             formats:    List of ``FormatKey`` strings.  ``None`` → all formats.
         """
         _dispatch = {
-            FormatKey.ADJACENCY_TABLE:  GraphFormatConverter.to_adjacency_table,
-            FormatKey.NATURAL_LANGUAGE: GraphFormatConverter.to_natural_language,
-            FormatKey.CODE_LIKE:        GraphFormatConverter.to_code_like,
-            FormatKey.NODE_SEQUENCE:    GraphFormatConverter.to_node_sequence,
-            FormatKey.EMBEDDING_TEXT:   GraphFormatConverter.to_graph_embedding_text,
+            FormatKey.ADJACENCY_TABLE:   GraphFormatConverter.to_adjacency_table,
+            FormatKey.NATURAL_LANGUAGE:  GraphFormatConverter.to_natural_language,
+            FormatKey.CODE_LIKE:         GraphFormatConverter.to_code_like,
+            FormatKey.NODE_SEQUENCE:     GraphFormatConverter.to_node_sequence,
+            FormatKey.EMBEDDING_TEXT:    GraphFormatConverter.to_graph_embedding_text,
+            FormatKey.COMMUNITY_SUMMARY: GraphFormatConverter.to_community_summary,
         }
         result: Dict[str, str] = {}
         for key in (formats or FormatKey.ALL):
@@ -230,6 +232,20 @@ class GraphFormatConverter:
             else:
                 logger.warning("convert_selected: unknown format key '%s'", key)
         return result
+
+    @staticmethod
+    def to_community_summary(graph_data: Dict) -> str:
+        """Return the pre-built community context injected by CommunityIndex.
+
+        Unlike other converters that transform ``graph_data`` on-the-fly,
+        this one simply retrieves the ``community_context`` key that was
+        already populated by :meth:`CommunityIndex.as_graph_data`.
+        If no community context is available, it returns an empty string.
+        """
+        ctx = graph_data.get("community_context", "")
+        if ctx:
+            logger.debug("Community summary: %d chars", len(ctx))
+        return ctx if isinstance(ctx, str) else ""
 
     @staticmethod
     def extract_key_facts(graph_data: Dict) -> str:

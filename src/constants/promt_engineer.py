@@ -41,8 +41,12 @@ Thực hiện đồng thời 2 nhiệm vụ:
 === QUY TẮC TRÍCH XUẤT ===
 - CHỈ extract thực thể có trong danh sách trên
 - Nếu câu hỏi dùng tên viết tắt/biến thể → map về tên chuẩn (VD: "Thị Mầu" → "Thị Màu", "Quan Âm" → "Quan Âm Thị Kính")
-- Nếu không có thực thể nào khớp → trả về mảng rỗng []
 - KHÔNG tự tạo thêm thực thể không có trong danh sách
+
+=== QUY TẮC ĐẶC BIỆT: CÂU HỎI TOÀN CỤC ===
+- Nếu câu hỏi yêu cầu tổng hợp, so sánh, liệt kê, hoặc thống kê trên TOÀN BỘ KG (ví dụ: "diễn viên nào xuất hiện nhiều nhất", "so sánh nhân vật nữ chính các vở", "có bao nhiêu vở", "tổng kết toàn bộ")
+- → Hãy liệt kê TẤT CẢ tên vở chèo vào mảng "plays" để hệ thống truy xuất đầy đủ dữ liệu
+- Nếu không có thực thể cụ thể nào khớp VÀ câu hỏi không phải dạng toàn cục → trả về mảng rỗng []
 
 CHỈ trả về JSON duy nhất (không giải thích, không markdown):
 {{"expanded": "câu hỏi mở rộng đặt ở đây", "entities": {{"characters": [], "actors": [], "plays": [], "scenes": []}}}}"""

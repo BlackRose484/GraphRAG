@@ -102,36 +102,40 @@ class EntityType:
 # ── G-Retrieval methods ───────────────────────────────────────────────────────
 
 class RetrievalMethod:
-    NODES    = "nodes"
-    TRIPLETS = "triplets"
-    PATHS    = "paths"
-    SUBGRAPH = "subgraph"
+    NODES     = "nodes"
+    TRIPLETS  = "triplets"
+    PATHS     = "paths"
+    SUBGRAPH  = "subgraph"
+    COMMUNITY = "community"
 
-    ALL: list[str] = [NODES, TRIPLETS, PATHS, SUBGRAPH]
-    DEFAULT: list[str] = [NODES, TRIPLETS, PATHS, SUBGRAPH]
+    ALL: list[str] = [NODES, TRIPLETS, PATHS, SUBGRAPH, COMMUNITY]
+    DEFAULT: list[str] = [NODES, TRIPLETS, PATHS, SUBGRAPH, COMMUNITY]
 
 
 # ── Graph format converter keys ───────────────────────────────────────────────
 
 class FormatKey:
-    NATURAL_LANGUAGE = "natural_language"
-    ADJACENCY_TABLE  = "adjacency_table"
-    CODE_LIKE        = "code_like"
-    NODE_SEQUENCE    = "node_sequence"
-    EMBEDDING_TEXT   = "embedding_text"
+    NATURAL_LANGUAGE  = "natural_language"
+    ADJACENCY_TABLE   = "adjacency_table"
+    CODE_LIKE         = "code_like"
+    NODE_SEQUENCE     = "node_sequence"
+    EMBEDDING_TEXT    = "embedding_text"
+    COMMUNITY_SUMMARY = "community_summary"
 
     ALL: list[str] = [
         NATURAL_LANGUAGE, ADJACENCY_TABLE,
         CODE_LIKE, NODE_SEQUENCE, EMBEDDING_TEXT,
+        COMMUNITY_SUMMARY,
     ]
 
     # Human-readable titles (Vietnamese) used in context building
     TITLES: dict[str, str] = {
-        NATURAL_LANGUAGE: "Mô tả tự nhiên",
-        ADJACENCY_TABLE:  "Bảng quan hệ",
-        CODE_LIKE:        "Chi tiết dữ liệu",
-        NODE_SEQUENCE:    "Đường đi",
-        EMBEDDING_TEXT:   "Text representation",
+        NATURAL_LANGUAGE:  "Mô tả tự nhiên",
+        ADJACENCY_TABLE:   "Bảng quan hệ",
+        CODE_LIKE:         "Chi tiết dữ liệu",
+        NODE_SEQUENCE:     "Đường đi",
+        EMBEDDING_TEXT:    "Text representation",
+        COMMUNITY_SUMMARY: "Community subgraph",
     }
 
     # Default formats per generation strategy

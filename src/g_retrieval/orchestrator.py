@@ -31,6 +31,7 @@ from typing import Any
 
 from src.constants.constant import EntityType, FormatKey, RetrievalMethod
 from src.g_retrieval.entity_catalog import EntityCatalog
+from src.g_retrieval.community_index import CommunityIndex
 from src.g_retrieval.entity_extractor import EntityExtractor
 from src.g_retrieval.graph_retriever import GraphData, GraphRetriever
 from src.g_retrieval.query_processor import ProcessedQuery, QueryProcessor
@@ -120,12 +121,15 @@ class RetrievalOrchestrator:
     """
 
     def __init__(self, client: Neo4jClient) -> None:
-        self._entity_catalog  = EntityCatalog()
+        self._entity_catalog   = EntityCatalog()
         self._entity_catalog.load(client)              # 4 lightweight Cypher reads at startup
+        self._community_index  = CommunityIndex()
+        self._community_index.load(client)             # play-centric subgraph cache
         self._query_processor  = QueryProcessor()
         self._entity_extractor = EntityExtractor()
         self._graph_retriever  = GraphRetriever(client)
-        _logger.info("RetrievalOrchestrator initialised")
+        _logger.info("RetrievalOrchestrator initialised (community: %s)",
+                     self._community_index.is_loaded())
 
     # ── Public API ────────────────────────────────────────────────────────────
 
@@ -173,9 +177,26 @@ class RetrievalOrchestrator:
             total_entities = sum(len(v) for v in entities.values())
             _logger.info("Retrieval: %d entities total after merge", total_entities)
 
+            # ── Global query fallback ─────────────────────────────────────────
+            # If no entities were extracted but the community index is loaded,
+            # inject ALL play titles so the community retriever can provide
+            # full-KG context for aggregate/global queries.
+            if total_entities == 0 and self._community_index.is_loaded():
+                all_plays = self._community_index.all_plays()
+                if all_plays:
+                    entities.setdefault("plays", []).extend(all_plays)
+                    _logger.info(
+                        "Global fallback: injected %d plays → %s",
+                        len(all_plays), all_plays,
+                    )
+
             # ── Graph retrieval ────────────────────────────────────────────────
             _logger.info("Retrieval: querying Neo4j with methods=%s", retrieval_methods)
-            graph_data = self._graph_retriever.retrieve(entities, methods=retrieval_methods)
+            graph_data = self._graph_retriever.retrieve(
+                entities,
+                methods=retrieval_methods,
+                community_index=self._community_index,
+            )
 
             # ── Format contexts ────────────────────────────────────────────────
             _logger.info("Retrieval: formatting with keys=%s", format_keys)

@@ -1,11 +1,12 @@
 """
 Graph retrieval from Neo4j.
 
-Provides four complementary retrieval strategies:
+Provides five complementary retrieval strategies:
   - nodes      → individual matching nodes
   - triplets   → (subject, relationship, object) triples
   - paths      → multi-hop connection chains
   - subgraph   → ego-subgraph centred on matched entities
+  - community  → pre-loaded play-centric community subgraphs
 
 All Cypher queries are built using typed constants (NodeType, RelType, NodeProp,
 Limit) so that changes to the ontology propagate automatically.
@@ -73,13 +74,16 @@ class GraphRetriever:
         self,
         entities: dict[str, list[str]],
         methods: list[str] | None = None,
+        *,
+        community_index: Any | None = None,
     ) -> GraphData:
         """Run one or more retrieval methods and return combined graph data.
 
         Args:
-            entities: Extracted entities from :class:`~entity_extractor.EntityExtractor`.
-            methods: Any subset of ``['nodes','triplets','paths','subgraph']``.
-                     Defaults to all four.
+            entities: Extracted entities.
+            methods: Any subset of ``RetrievalMethod.ALL``.
+            community_index: Optional :class:`~community_index.CommunityIndex`
+                             required when ``'community'`` is in *methods*.
 
         Returns:
             :class:`GraphData` dict with lists for every key.
@@ -102,6 +106,30 @@ class GraphRetriever:
         }
 
         for method in methods:
+            # Community is handled separately (needs community_index)
+            if method == RetrievalMethod.COMMUNITY:
+                if community_index is None or not community_index.is_loaded():
+                    _logger.debug("Community method skipped — no index loaded")
+                    continue
+                try:
+                    comm_data = self._get_community(entities, community_index)
+                    # Merge community nodes & triplets into graph_data
+                    graph_data["nodes"].extend(comm_data.get("nodes", []))
+                    graph_data["triplets"].extend(comm_data.get("triplets", []))
+                    # Store raw community context for format_converter
+                    graph_data["community_context"] = comm_data.get(  # type: ignore[typeddict-unknown-key]
+                        "community_context", ""
+                    )
+                    n_nodes = len(comm_data.get("nodes", []))
+                    n_trips = len(comm_data.get("triplets", []))
+                    _logger.info(
+                        "Method 'community' retrieved %d nodes, %d triplets",
+                        n_nodes, n_trips,
+                    )
+                except Exception as exc:  # noqa: BLE001
+                    _logger.error("Community retrieval failed: %s", exc)
+                continue
+
             if method not in dispatch:
                 _logger.warning("Unknown retrieval method: %s — skipped", method)
                 continue
@@ -331,3 +359,42 @@ class GraphRetriever:
                         })
 
         return subgraph
+
+    # ── Community (pre-loaded) ────────────────────────────────────────────────
+
+    @staticmethod
+    def _get_community(
+        entities: dict[str, list[str]],
+        community_index: Any,
+    ) -> dict[str, Any]:
+        """Resolve entities to play communities and return merged graph data.
+
+        Uses the pre-loaded :class:`~community_index.CommunityIndex` — no
+        Cypher queries are executed at query time.
+
+        Args:
+            entities: Extracted entity dict.
+            community_index: Loaded :class:`CommunityIndex` instance.
+
+        Returns:
+            Dict with ``nodes``, ``triplets``, ``community_context`` keys.
+        """
+        # Collect all entity names
+        all_names: list[str] = []
+        for key in _ALL_ENTITY_TYPES:
+            all_names.extend(entities.get(key, []))
+
+        if not all_names:
+            return {"nodes": [], "triplets": [], "community_context": ""}
+
+        # Resolve to communities
+        communities = community_index.resolve_many(all_names)
+
+        if not communities:
+            _logger.debug("Community: no plays matched for entities %s", all_names)
+            return {"nodes": [], "triplets": [], "community_context": ""}
+
+        play_titles = [c.play_title for c in communities]
+        _logger.info("Community: resolved %d plays: %s", len(play_titles), play_titles)
+
+        return community_index.as_graph_data(play_titles)
