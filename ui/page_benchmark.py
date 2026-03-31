@@ -221,6 +221,27 @@ def render() -> None:
     st.title("📊 Benchmark — Đánh giá hệ thống RAG")
     st.caption("So sánh GraphRAG và RAG trên bộ CheoBench. Chọn chỉ số và chạy.")
 
+    with st.expander("ℹ️ Hướng dẫn sử dụng trang Benchmark", expanded=False):
+        st.markdown(
+            """
+            Trang này **đánh giá định lượng** chất lượng câu trả lời của 2 hệ thống:
+
+            | Hệ thống | Mô tả |
+            |---|---|
+            | 🔍 **GraphRAG** | Truy xuất từ Knowledge Graph + LLM |
+            | 📚 **RAG** | Vector search + LLM |
+
+            **Cách dùng:**
+            1. Chọn hệ thống muốn đánh giá ở sidebar (GraphRAG / RAG hoặc cả hai)
+            2. Chọn số câu hỏi muốn chạy (mặc định 20 câu từ bộ CheoBench)
+            3. Chọn các chỉ số muốn tính (IR, NLG, Exact hoặc RAGAS)
+            4. Nhấn **▶️ Chạy Benchmark** và chờ kết quả
+            5. Xem biểu đồ so sánh và tải kết quả về
+
+            > ⚠️ **Lưu ý:** Cần đảm bảo Neo4j đang chạy và Vector Store đã được build (trang 📚 RAG) trước khi chạy.
+            """
+        )
+
     # ── Sidebar ───────────────────────────────────────────────────────────────
     st.sidebar.markdown("### ⚙️ Cấu hình")
 

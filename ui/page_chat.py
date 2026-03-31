@@ -7,6 +7,15 @@ from __future__ import annotations
 import streamlit as st
 
 
+# ── Constants ─────────────────────────────────────────────────────────────────
+
+_EXAMPLE_QUESTIONS = [
+    "Chèo là gì? Nghệ thuật Chèo Việt Nam có nguồn gốc từ đâu?",
+    "Nhân vật Thị Kính có ý nghĩa biểu tượng gì trong Chèo?",
+    "Chèo khác Tuồng và Cải Lương như thế nào?",
+]
+
+
 # ── Helper ────────────────────────────────────────────────────────────────────
 
 def _load_llm():
@@ -64,12 +73,27 @@ def render() -> None:
 
     if "messages" not in st.session_state:
         st.session_state.messages = []
+    if "chat_prefill" not in st.session_state:
+        st.session_state.chat_prefill = ""
+
+    # ── Onboarding (chỉ hiển thị khi chưa có lịch sử) ────────────────────────
+    if not st.session_state.messages:
+        st.info(
+            "💡 Trang này dùng **LLM thuần** (không có tri thức bổ sung) để trả lời câu hỏi về Chèo.\n\n"
+            "Thử đặt câu hỏi:"
+        )
+        cols = st.columns(len(_EXAMPLE_QUESTIONS))
+        for col, q in zip(cols, _EXAMPLE_QUESTIONS):
+            if col.button(q, use_container_width=True, key=f"chat_eg_{q[:20]}"):
+                st.session_state.chat_prefill = q
+                st.rerun()
 
     for msg in st.session_state.messages:
         with st.chat_message(msg["role"]):
             st.markdown(msg["content"])
 
-    if prompt := st.chat_input("Hỏi về Chèo...", disabled=not llm_ready):
+    prefill = st.session_state.pop("chat_prefill", "")
+    if prompt := (st.chat_input("Hỏi về Chèo...", disabled=not llm_ready) or prefill or "") or None:
         st.session_state.messages.append({"role": "user", "content": prompt})
         with st.chat_message("user"):
             st.markdown(prompt)

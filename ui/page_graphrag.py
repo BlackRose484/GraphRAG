@@ -37,6 +37,15 @@ def _get_pipeline(
 
 # ── Render ────────────────────────────────────────────────────────────────────
 
+_EXAMPLE_QUESTIONS = [
+    "Vở chèo Quan Âm Thị Kính có những nhân vật chính nào?",
+    "Diễn viên Thanh Ngoan đã thủ vai những nhân vật gì?",
+    "Nhân vật Thị Mầu xuất hiện trong những trích đoạn nào?",
+    "Liệt kê các vở chèo trong hệ thống và nhân vật nữ chính.",
+    "Trích đoạn Thị Mầu lên chùa có những phiên bản nào và ai diễn?",
+]
+
+
 def render() -> None:
     st.title("🔍 GraphRAG — Hỏi đáp về Chèo")
     st.caption("Graph-Retrieval Augmented Generation: kết hợp knowledge graph + LLM")
@@ -94,6 +103,21 @@ def render() -> None:
     # ── History ───────────────────────────────────────────────────────────────
     if "graphrag_history" not in st.session_state:
         st.session_state.graphrag_history = []
+    if "graphrag_prefill" not in st.session_state:
+        st.session_state.graphrag_prefill = ""
+
+    # ── Onboarding (chỉ hiển thị khi chưa có lịch sử) ────────────────────────
+    if not st.session_state.graphrag_history:
+        st.info(
+            "💡 **Hệ thống GraphRAG** truy xuất thông tin từ Knowledge Graph về "
+            "nghệ thuật Chèo Việt Nam, sau đó dùng LLM để tổng hợp câu trả lời.\n\n"
+            "Hãy thử đặt câu hỏi về **nhân vật**, **vở kịch**, **diễn viên** hoặc **trích đoạn** Chèo:"
+        )
+        cols = st.columns(len(_EXAMPLE_QUESTIONS))
+        for col, q in zip(cols, _EXAMPLE_QUESTIONS):
+            if col.button(q, use_container_width=True, key=f"eg_{q[:20]}"):
+                st.session_state.graphrag_prefill = q
+                st.rerun()
 
     for item in st.session_state.graphrag_history:
         with st.chat_message("user"):
@@ -113,7 +137,8 @@ def render() -> None:
         return
 
     # ── Input ─────────────────────────────────────────────────────────────────
-    if query := st.chat_input("Hỏi về Chèo (vd: Thúy Kiều là ai?)..."):
+    prefill = st.session_state.pop("graphrag_prefill", "")
+    if query := (st.chat_input("Hỏi về Chèo (vd: Thị Mầu là ai?)...") or prefill or "") or None:
         with st.chat_message("user"):
             st.markdown(query)
 

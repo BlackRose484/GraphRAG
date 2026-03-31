@@ -27,6 +27,14 @@ def _get_rag_pipeline(top_k: int):
 
 # ── Render ────────────────────────────────────────────────────────────────────
 
+_EXAMPLE_QUESTIONS = [
+    "Chèo là gì? Hãy giới thiệu về nghệ thuật Chèo Việt Nam.",
+    "Vở chèo Quan Âm Thị Kính kể về chủ đề gì?",
+    "Nhân vật Thị Mầu trong Chèo có đặc điểm gì?",
+    "Trích đoạn Súy Vân giả dại nói về điều gì?",
+]
+
+
 def render() -> None:
     st.title("📚 RAG — Truyền thống Vector Search")
     st.caption(
@@ -91,6 +99,21 @@ def render() -> None:
     # ── History ───────────────────────────────────────────────────────────────
     if "rag_history" not in st.session_state:
         st.session_state.rag_history = []
+    if "rag_prefill" not in st.session_state:
+        st.session_state.rag_prefill = ""
+
+    # ── Onboarding (chỉ hiển thị khi chưa có lịch sử) ────────────────────────
+    if not st.session_state.rag_history:
+        st.info(
+            "💡 **Hệ thống RAG** tìm kiếm các đoạn văn bản liên quan nhất bao tiết kho vector "
+            "rồi dùng LLM để trả lời. Phù hợp cho câu hỏi mô tả tổng quan về Chèo.\n\n"
+            "Thử đặt câu hỏi:"
+        )
+        cols = st.columns(len(_EXAMPLE_QUESTIONS))
+        for col, q in zip(cols, _EXAMPLE_QUESTIONS):
+            if col.button(q, use_container_width=True, key=f"rag_eg_{q[:20]}"):
+                st.session_state.rag_prefill = q
+                st.rerun()
 
     for item in st.session_state.rag_history:
         with st.chat_message("user"):
@@ -107,7 +130,8 @@ def render() -> None:
                 )
 
     # ── Input ─────────────────────────────────────────────────────────────────
-    if query := st.chat_input("Hỏi về Chèo (RAG)..."):
+    prefill = st.session_state.pop("rag_prefill", "")
+    if query := (st.chat_input("Hỏi về Chèo (RAG)...") or prefill or "") or None:
         with st.chat_message("user"):
             st.markdown(query)
 
