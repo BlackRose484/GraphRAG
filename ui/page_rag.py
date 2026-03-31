@@ -86,6 +86,8 @@ def render() -> None:
 
     if st.sidebar.button("🗑️ Xóa lịch sử"):
         st.session_state.rag_history = []
+        from src.utils.history_store import HistoryStore
+        HistoryStore.clear(page_filter="rag")
         st.rerun()
 
     # ── Guard: store missing ──────────────────────────────────────────────────
@@ -101,6 +103,22 @@ def render() -> None:
         st.session_state.rag_history = []
     if "rag_prefill" not in st.session_state:
         st.session_state.rag_prefill = ""
+
+    # ── Restore from persistent storage on first load ──────────────────────
+    if not st.session_state.rag_history:
+        try:
+            from src.utils.history_store import HistoryStore
+            for e in reversed(HistoryStore.load(page_filter="rag")):
+                st.session_state.rag_history.append({
+                    "query":          e["query"],
+                    "answer":         e["answer"],
+                    "num_chunks":     e["metadata"].get("num_chunks", 0),
+                    "context_length": 0,
+                    "retrieval_time": e["metadata"].get("retrieval_time", 0.0),
+                    "gen_time":       e["metadata"].get("gen_time", 0.0),
+                })
+        except Exception:
+            pass
 
     # ── Onboarding (chỉ hiển thị khi chưa có lịch sử) ────────────────────────
     if not st.session_state.rag_history:
@@ -171,6 +189,20 @@ def render() -> None:
                         "retrieval_time": result.retrieval.retrieval_time,
                         "gen_time":       result.generation.generation_time,
                     })
+
+                    # ── Persist to history file ────────────────────────────
+                    if not result.generation.error:
+                        from src.utils.history_store import HistoryStore
+                        HistoryStore.append(
+                            page="rag",
+                            query=query,
+                            answer=result.answer,
+                            metadata={
+                                "num_chunks":     result.retrieval.num_nodes,
+                                "retrieval_time": round(result.retrieval.retrieval_time, 2),
+                                "gen_time":       round(result.generation.generation_time, 2),
+                            },
+                        )
 
                 except FileNotFoundError:
                     st.error(
