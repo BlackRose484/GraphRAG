@@ -16,24 +16,40 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 import streamlit as st
 
-from ui import page_chat, page_neo4j, page_graphrag, page_rag, page_benchmark
+from ui import page_home, page_chat, page_neo4j, page_graphrag, page_rag, page_benchmark
 
 # ── Page config (must be first Streamlit call) ────────────────────────────────
 
 st.set_page_config(
-    page_title="GraphRAGv2",
+    page_title="GraphRAG Chèo",
     page_icon="🎭",
     layout="wide",
 )
 
-# ── Sidebar navigation ────────────────────────────────────────────────────────
+# ── Navigation pages ──────────────────────────────────────────────────────────
+
+_PAGES = ["🏠 Giới thiệu", "🔍 GraphRAG", "📚 RAG", "💬 Chat", "🔗 Neo4j", "📊 Benchmark"]
+
+# Initialise nav state (default: Home)
+if "_nav_page" not in st.session_state:
+    st.session_state["_nav_page"] = _PAGES[0]
+
+# Keep the radio in sync with programmatic navigation from page_home
+_current_idx = _PAGES.index(st.session_state["_nav_page"]) if st.session_state["_nav_page"] in _PAGES else 0
+
+# ── Sidebar ───────────────────────────────────────────────────────────────────
 
 st.sidebar.title("🎭 GraphRAGv2")
 page = st.sidebar.radio(
     "Điều hướng",
-    ["💬 Chat", "🔗 Neo4j", "🔍 GraphRAG", "📚 RAG", "📊 Benchmark"],
+    _PAGES,
+    index=_current_idx,
     label_visibility="collapsed",
 )
+
+# Sync back: if user clicked sidebar radio, update session nav state
+st.session_state["_nav_page"] = page
+
 st.sidebar.divider()
 
 try:
@@ -45,13 +61,15 @@ except Exception:
 
 # ── Router ────────────────────────────────────────────────────────────────────
 
-if page == "💬 Chat":
-    page_chat.render()
-elif page == "🔗 Neo4j":
-    page_neo4j.render()
+if page == "🏠 Giới thiệu":
+    page_home.render()
 elif page == "🔍 GraphRAG":
     page_graphrag.render()
 elif page == "📚 RAG":
     page_rag.render()
+elif page == "💬 Chat":
+    page_chat.render()
+elif page == "🔗 Neo4j":
+    page_neo4j.render()
 elif page == "📊 Benchmark":
     page_benchmark.render()
