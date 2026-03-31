@@ -69,12 +69,24 @@ def render() -> None:
     )
     if st.sidebar.button("🗑️ Xóa lịch sử chat"):
         st.session_state.messages = []
+        from src.utils.history_store import HistoryStore
+        HistoryStore.clear(page_filter="chat")
         st.rerun()
 
     if "messages" not in st.session_state:
         st.session_state.messages = []
     if "chat_prefill" not in st.session_state:
         st.session_state.chat_prefill = ""
+
+    # ── Restore from persistent storage on first load ──────────────────────
+    if not st.session_state.messages:
+        try:
+            from src.utils.history_store import HistoryStore
+            for e in reversed(HistoryStore.load(page_filter="chat")):
+                st.session_state.messages.append({"role": "user",      "content": e["query"]})
+                st.session_state.messages.append({"role": "assistant", "content": e["answer"]})
+        except Exception:
+            pass
 
     # ── Onboarding (chỉ hiển thị khi chưa có lịch sử) ────────────────────────
     if not st.session_state.messages:
@@ -117,6 +129,9 @@ def render() -> None:
                     st.session_state.messages.append(
                         {"role": "assistant", "content": answer}
                     )
+                    # ── Persist to history file ────────────────────────────
+                    from src.utils.history_store import HistoryStore
+                    HistoryStore.append(page="chat", query=prompt, answer=answer)
                 except Exception as exc:
                     err = f"❌ Lỗi khi gọi LLM: {exc}"
                     st.error(err)

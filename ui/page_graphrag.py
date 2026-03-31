@@ -98,6 +98,8 @@ def render() -> None:
 
     if st.sidebar.button("🗑️ Xóa lịch sử"):
         st.session_state.graphrag_history = []
+        from src.utils.history_store import HistoryStore
+        HistoryStore.clear(page_filter="graphrag")
         st.rerun()
 
     # ── History ───────────────────────────────────────────────────────────────
@@ -105,6 +107,32 @@ def render() -> None:
         st.session_state.graphrag_history = []
     if "graphrag_prefill" not in st.session_state:
         st.session_state.graphrag_prefill = ""
+
+    # ── Restore from persistent storage on first load ──────────────────────
+    if not st.session_state.graphrag_history:
+        try:
+            from src.utils.history_store import HistoryStore
+            for e in reversed(HistoryStore.load(page_filter="graphrag")):
+                st.session_state.graphrag_history.append({
+                    "query":              e["query"],
+                    "answer":             e["answer"],
+                    "num_nodes":          e["metadata"].get("num_nodes", 0),
+                    "num_triplets":       e["metadata"].get("num_triplets", 0),
+                    "num_paths":          0,
+                    "retrieval_time":     e["metadata"].get("retrieval_time", 0.0),
+                    "gen_time":           0.0,
+                    "total_time":         e["metadata"].get("total_time", 0.0),
+                    "processed_query":    {},
+                    "entities":           {},
+                    "nodes":              [],
+                    "triplets":           [],
+                    "paths":              [],
+                    "subgraph":           {},
+                    "formatted_contexts": {},
+                    "_persisted":         True,  # đánh dấu từ file, không có graph detail
+                })
+        except Exception:
+            pass
 
     # ── Onboarding (chỉ hiển thị khi chưa có lịch sử) ────────────────────────
     if not st.session_state.graphrag_history:
@@ -188,6 +216,22 @@ def render() -> None:
                             _render_retrieval_detail(history_item)
 
                     st.session_state.graphrag_history.append(history_item)
+
+                    # ── Persist to history file ────────────────────────────
+                    if result.success:
+                        from src.utils.history_store import HistoryStore
+                        HistoryStore.append(
+                            page="graphrag",
+                            query=query,
+                            answer=result.answer,
+                            metadata={
+                                "num_nodes":      result.retrieval.num_nodes,
+                                "num_triplets":   result.retrieval.num_triplets,
+                                "retrieval_time": round(result.retrieval.retrieval_time, 2),
+                                "total_time":     round(result.total_time, 2),
+                                "strategy":       strategy,
+                            },
+                        )
 
                 except Exception as exc:
                     st.error(f"❌ Lỗi: {exc}")
