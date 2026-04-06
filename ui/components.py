@@ -12,7 +12,7 @@ except ImportError:
     _build_graph_html = None
 
 
-def render_retrieval_detail(item: dict) -> None:
+def render_retrieval_detail(item: dict, key_prefix: str = "") -> None:
     """Render a 6-tab panel showing full retrieval details for one result.
 
     The *item* dict may come from either the GraphRAG chat history or a
@@ -34,18 +34,31 @@ def render_retrieval_detail(item: dict) -> None:
     num_triplets = r.get("num_triplets", len(r.get("triplets", [])))
     num_paths    = r.get("num_paths",    len(r.get("paths",    [])))
 
-    tab_stats, tab_query, tab_nodes, tab_triplets, tab_paths, tab_context, tab_graph = st.tabs([
-        "📈 Thống kê",
-        "🔍 Query",
-        f"🗂️ Nodes ({num_nodes})",
-        f"🔗 Triplets ({num_triplets})",
-        f"🛤️ Paths ({num_paths})",
-        "📝 Context (LLM input)",
-        "🕸️ Đồ thị",
-    ])
+    # Use compact labels when rendered inside narrow columns (e.g. Compare page)
+    if key_prefix:
+        tab_query, tab_nodes, tab_triplets, tab_paths, tab_context = st.tabs([
+            "🔍 Query",
+            f"Nodes ({num_nodes})",
+            f"Triplets ({num_triplets})",
+            f"Paths ({num_paths})",
+            "📝 Context",
+        ])
+        tab_stats = None
+        tab_graph = None
+    else:
+        tab_stats, tab_query, tab_nodes, tab_triplets, tab_paths, tab_context, tab_graph = st.tabs([
+            "📈 Thống kê",
+            "🔍 Query",
+            f"🗂️ Nodes ({num_nodes})",
+            f"🔗 Triplets ({num_triplets})",
+            f"🛤️ Paths ({num_paths})",
+            "📝 Context (LLM input)",
+            "🕸️ Đồ thị",
+        ])
 
     # ── Stats ─────────────────────────────────────────────────────────────────
-    with tab_stats:
+    if tab_stats is not None:
+      with tab_stats:
         c1, c2, c3 = st.columns(3)
         c1.metric("Nodes",    num_nodes)
         c2.metric("Triplets", num_triplets)
@@ -200,7 +213,8 @@ def render_retrieval_detail(item: dict) -> None:
             st.info("Không có formatted context.")
 
     # ── Graph visualization ────────────────────────────────────────────────
-    with tab_graph:
+    if tab_graph is not None:
+      with tab_graph:
         nodes    = r.get("nodes", [])
         triplets = r.get("triplets", [])
         subgraph = r.get("subgraph", {})
@@ -216,16 +230,16 @@ def render_retrieval_detail(item: dict) -> None:
                 height = st.slider(
                     "Chiều cao đồ thị (px)",
                     min_value=300, max_value=900, value=600, step=50,
-                    key="graph_height",
+                    key=f"{key_prefix}graph_height",
                 )
             with col2:
                 max_nodes = st.slider(
                     "Số node tối đa hiển thị",
                     min_value=20, max_value=120, value=80, step=10,
-                    key="graph_max_nodes",
+                    key=f"{key_prefix}graph_max_nodes",
                 )
             with col3:
-                physics = st.toggle("Physics", value=True, key="graph_physics")
+                physics = st.toggle("Physics", value=True, key=f"{key_prefix}graph_physics")
 
             st.caption(
                 f"💡 **{len(nodes)} nodes** + **{len(triplets)} triplets** từ retrieval. "

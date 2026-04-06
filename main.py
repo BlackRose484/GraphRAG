@@ -16,7 +16,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 import streamlit as st
 
-from ui import page_home, page_chat, page_neo4j, page_graphrag, page_rag, page_benchmark
+from ui import page_home, page_chat, page_neo4j, page_graphrag, page_rag, page_benchmark, page_compare
 
 # ── Page config (must be first Streamlit call) ────────────────────────────────
 
@@ -28,7 +28,7 @@ st.set_page_config(
 
 # ── Navigation pages ──────────────────────────────────────────────────────────
 
-_PAGES = ["🏠 Giới thiệu", "🔍 GraphRAG", "📚 RAG", "💬 Chat", "🔗 Neo4j", "📊 Benchmark"]
+_PAGES = ["🏠 Giới thiệu", "⚖️ So sánh", "🔍 GraphRAG", "📚 RAG", "💬 Chat", "🔗 Neo4j", "📊 Benchmark"]
 
 # Initialise nav state (default: Home)
 if "_nav_page" not in st.session_state:
@@ -63,6 +63,8 @@ except Exception:
 
 if page == "🏠 Giới thiệu":
     page_home.render()
+elif page == "⚖️ So sánh":
+    page_compare.render()
 elif page == "🔍 GraphRAG":
     page_graphrag.render()
 elif page == "📚 RAG":

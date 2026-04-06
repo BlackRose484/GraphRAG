@@ -147,14 +147,14 @@ def render() -> None:
                 st.session_state.graphrag_prefill = q
                 st.rerun()
 
-    for item in st.session_state.graphrag_history:
+    for h_idx, item in enumerate(st.session_state.graphrag_history):
         with st.chat_message("user"):
             st.markdown(item["query"])
         with st.chat_message("assistant"):
             st.markdown(item["answer"])
             if show_detail:
                 with st.expander("📊 Chi tiết retrieval", expanded=False):
-                    _render_retrieval_detail(item)
+                    _render_retrieval_detail(item, key_prefix=f"gr_h{h_idx}_")
 
     # ── Guards ────────────────────────────────────────────────────────────────
     if not retrieval_methods:
@@ -213,7 +213,7 @@ def render() -> None:
 
                     if show_detail:
                         with st.expander("📊 Chi tiết retrieval", expanded=True):
-                            _render_retrieval_detail(history_item)
+                            _render_retrieval_detail(history_item, key_prefix=f"gr_new_{len(st.session_state.graphrag_history)}_")
 
                     st.session_state.graphrag_history.append(history_item)
 
