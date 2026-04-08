@@ -142,9 +142,12 @@ def render() -> None:
         unsafe_allow_html=True,
     )
 
-    col1, col2, col3, _ = st.columns([2, 2, 2, 1])
+    col0, col1, col2, col3 = st.columns(4)
+    with col0:
+        if st.button("⚖️ So sánh 3 hệ thống", use_container_width=True, type="primary"):
+            _nav_to("⚖️ So sánh")
     with col1:
-        if st.button("🔍 Dùng GraphRAG", use_container_width=True, type="primary"):
+        if st.button("🔍 Dùng GraphRAG", use_container_width=True):
             _nav_to("🔍 GraphRAG")
     with col2:
         if st.button("📚 Dùng RAG truyền thống", use_container_width=True):
@@ -186,6 +189,21 @@ def render() -> None:
     st.markdown("### 🧩 Các trang chức năng")
 
     _CARDS = [
+        {
+            "icon": "⚖️",
+            "title": "So sánh",
+            "badge": "⭐ Thực nghiệm",
+            "badge_fg": "#b45309",
+            "badge_bg": "#fef3c7",
+            "border": "#f59e0b",
+            "bg": "#fffbeb",
+            "desc": (
+                "Hỏi <b>1 câu</b>, cả 3 hệ thống <b>trả lời song song</b>. "
+                "Kết quả hiện cạnh nhau để so sánh trực quan "
+                "GraphRAG vs RAG vs LLM."
+            ),
+            "page": "⚖️ So sánh",
+        },
         {
             "icon": "🔍",
             "title": "GraphRAG",
@@ -248,7 +266,8 @@ def render() -> None:
         },
     ]
 
-    cols = st.columns(4)
+    cols = st.columns(len(_CARDS))
+
     for col, card in zip(cols, _CARDS):
         with col:
             st.markdown(
