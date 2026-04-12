@@ -12,11 +12,19 @@ except ImportError:
     _build_graph_html = None
 
 
-def render_retrieval_detail(item: dict, key_prefix: str = "") -> None:
-    """Render a 6-tab panel showing full retrieval details for one result.
+def render_retrieval_detail(item: dict, key_prefix: str = "", compact: bool = False) -> None:
+    """Render a retrieval detail panel showing full retrieval details for one result.
 
     The *item* dict may come from either the GraphRAG chat history or a
     :class:`~benchmark.runner.CaseResult` ``retrieval_detail`` field.
+
+    Args:
+        item:       The result dict to render.
+        key_prefix: Prefix for all Streamlit widget keys — use when rendering
+                    the same component multiple times on a page to avoid key
+                    conflicts (e.g. chat history, benchmark rows).
+        compact:    When True, uses shorter tab labels and hides Stats/Graph tabs.
+                    Set to True when rendering inside narrow columns (e.g. Compare page).
 
     Expected keys (all optional, falls back gracefully):
         - num_nodes / num_triplets / num_paths  (int)
@@ -34,8 +42,8 @@ def render_retrieval_detail(item: dict, key_prefix: str = "") -> None:
     num_triplets = r.get("num_triplets", len(r.get("triplets", [])))
     num_paths    = r.get("num_paths",    len(r.get("paths",    [])))
 
-    # Use compact labels when rendered inside narrow columns (e.g. Compare page)
-    if key_prefix:
+    # compact=True: short labels, no Stats/Graph tabs (for narrow columns e.g. Compare page)
+    if compact:
         tab_query, tab_nodes, tab_triplets, tab_paths, tab_context = st.tabs([
             "🔍 Query",
             f"Nodes ({num_nodes})",

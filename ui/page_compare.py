@@ -217,7 +217,7 @@ def _render_column(col, name: str, result: _SystemResult, key_prefix: str = "") 
     # GraphRAG retrieval detail (expandable)
     if name == "graphrag" and result.retrieval_detail:
         with col.expander("📊 Chi tiết retrieval", expanded=False):
-            _render_retrieval_detail(result.retrieval_detail, key_prefix=key_prefix)
+            _render_retrieval_detail(result.retrieval_detail, key_prefix=key_prefix, compact=True)
 
 
 # ── Main Render ───────────────────────────────────────────────────────────────

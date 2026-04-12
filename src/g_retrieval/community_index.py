@@ -1,12 +1,14 @@
 """
-CommunityIndex — Tự động phát hiện cộng đồng từ Knowledge Graph.
+CommunityIndex — Nhóm tri thức theo vở chèo từ Knowledge Graph.
 
-Tải TOÀN BỘ đồ thị từ Neo4j (tất cả 7 loại node + 7 loại quan hệ),
-xây dựng networkx Graph trung thực, chạy community detection
-(Greedy Modularity), rồi đặt tên cộng đồng từ Play node bên trong.
+Thay vì dùng thuật toán community detection tổng quát (greedy modularity),
+index này nhóm trực tiếp theo Play node qua ba Cypher query:
+    Play ──[HAS_CHARACTER]──► Character
+    Play ──[HAS_SCENE]──────► Scene
+    Play ◄── Scene ◄── Version ◄── RoleAssignment ──► Actor
 
-NGUYÊN TẮC: Không bỏ qua, không gộp, không tạo cạnh tổng hợp.
-Mọi node và quan hệ đều phản ánh đúng cấu trúc trong Neo4j.
+Đảm bảo: toàn bộ nhân vật và diễn viên của mỗi vở luôn nằm trong
+cùng một community, tránh hiện tượng phân mảnh dữ liệu.
 
 Cấu trúc đồ thị thực tế:
     Play ──[HAS_CHARACTER]──► Character
@@ -24,9 +26,6 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
-import networkx as nx
-from networkx.algorithms.community import greedy_modularity_communities
-
 from src.constants.constant import NodeProp, NodeType, RelType
 from src.utils.logger import get_logger
 
@@ -36,7 +35,7 @@ _FALLBACK_FILE = (
     Path(__file__).resolve().parent.parent.parent / "data" / "community_cache.json"
 )
 
-# ── Cypher: tải toàn bộ đồ thị trung thực ────────────────────────────────────
+# ── Cypher queries ────────────────────────────────────────────────────────────
 
 _LOAD_ALL_NODES_CYPHER = """
 MATCH (n)
@@ -46,16 +45,19 @@ RETURN
     properties(n) AS props
 """
 
-_LOAD_ALL_EDGES_CYPHER = """
-MATCH (n)-[r]->(m)
-RETURN
-    elementId(n) AS from_id,
-    elementId(m) AS to_id,
-    type(r)      AS rel_type
+# Quan hệ trực tiếp Play → Character
+_LOAD_PLAY_CHARACTERS_CYPHER = """
+MATCH (p:Play)-[:HAS_CHARACTER]->(c:Character)
+RETURN p.title AS play_title, c.charName AS char_name, c.charGender AS char_gender
 """
 
-# Cypher phụ: lấy thông tin vai diễn để xây dựng role_assignments
-# (vì RoleAssignment không có tên trực tiếp — cần join với Character và Actor)
+# Quan hệ trực tiếp Play → Scene
+_LOAD_PLAY_SCENES_CYPHER = """
+MATCH (p:Play)-[:HAS_SCENE]->(s:Scene)
+RETURN p.title AS play_title, s.sceneName AS scene_name
+"""
+
+# Vai diễn đầy đủ: actor + character + play + scene qua RoleAssignment
 _LOAD_ROLE_ASSIGNMENTS_CYPHER = """
 MATCH (ra:RoleAssignment)
 OPTIONAL MATCH (ra)-[:FOR_CHARACTER]->(c:Character)
@@ -75,7 +77,7 @@ RETURN
 
 @dataclass
 class CommunitySubgraph:
-    """Một cộng đồng được phát hiện tự động từ đồ thị."""
+    """Toàn bộ tri thức của một vở chèo."""
 
     community_id: int
     play_title: str
@@ -110,7 +112,7 @@ class CommunitySubgraph:
         )
 
     def as_text(self) -> str:
-        lines: list[str] = [f"=== COMMUNITY [{self.community_id}]: {self.play_title} ==="]
+        lines: list[str] = [f"=== {self.play_title} ==="]
         if self.character_names:
             lines.append(f"Nhân vật ({len(self.character_names)}): {', '.join(sorted(self.character_names))}")
         if self.actor_names:
@@ -142,7 +144,7 @@ class CommunitySubgraph:
 # ── Main class ────────────────────────────────────────────────────────────────
 
 class CommunityIndex:
-    """Tự động phát hiện và lập chỉ mục cộng đồng từ Knowledge Graph."""
+    """Lập chỉ mục tri thức theo từng vở chèo từ Knowledge Graph."""
 
     def __init__(self) -> None:
         self._communities: dict[str, CommunitySubgraph] = {}
@@ -153,12 +155,12 @@ class CommunityIndex:
     # ── Public API ────────────────────────────────────────────────────────────
 
     def load(self, client: Any) -> None:
-        """Tải toàn bộ đồ thị từ Neo4j, phát hiện cộng đồng."""
+        """Tải toàn bộ đồ thị từ Neo4j, nhóm theo vở chèo."""
         try:
             self._load_and_detect(client)
-            self._source = "Neo4j+detection"
+            self._source = "Neo4j+play-centric"
         except Exception as exc:  # noqa: BLE001
-            _logger.warning("CommunityIndex: detection failed (%s) — trying cache", exc)
+            _logger.warning("CommunityIndex: load failed (%s) — trying cache", exc)
             self._load_from_cache()
             self._source = f"cache:{_FALLBACK_FILE.name}"
 
@@ -249,163 +251,102 @@ class CommunityIndex:
         _FALLBACK_FILE.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
         _logger.info("CommunityIndex: cache saved → %s", _FALLBACK_FILE)
 
-    # ── Private — Load + Detect ───────────────────────────────────────────────
+    # ── Private — Load ────────────────────────────────────────────────────────
 
     def _load_and_detect(self, client: Any) -> None:
-        """Tải toàn bộ graph → networkx → community detection."""
+        """Tải graph từ Neo4j và nhóm trực tiếp theo vở chèo.
 
-        # ── Bước 1: Tải tất cả node ───────────────────────────────────────────
+        Dùng 3 Cypher query để lấy đầy đủ dữ liệu từng vở:
+            1. Play → Character  (quan hệ trực tiếp)
+            2. Play → Scene      (quan hệ trực tiếp)
+            3. RoleAssignment    (actor + character + play + scene qua path 4 hop)
+
+        Không dùng community detection algorithm để tránh phân mảnh dữ liệu.
+        """
+        # Load node count for logging
         node_rows = client.read(_LOAD_ALL_NODES_CYPHER)
-        _logger.info("CommunityIndex: %d nodes loaded", len(node_rows))
+        _logger.info("CommunityIndex: %d nodes in graph", len(node_rows))
 
-        node_meta: dict[str, dict[str, Any]] = {}  # elementId → {label, props}
-        for row in node_rows:
-            nid   = row["node_id"]
-            lbls  = row.get("labels", [])
-            props = row.get("props", {}) or {}
-            label = lbls[0] if lbls else "Unknown"
-            node_meta[nid] = {"label": label, "props": props}
+        # Load direct Play→Character links
+        char_rows = client.read(_LOAD_PLAY_CHARACTERS_CYPHER)
+        _logger.info("CommunityIndex: %d play-character links", len(char_rows))
 
-        # ── Bước 2: Tải tất cả cạnh ────────────────────────────────────────────
-        edge_rows = client.read(_LOAD_ALL_EDGES_CYPHER)
-        _logger.info("CommunityIndex: %d edges loaded", len(edge_rows))
+        # Load direct Play→Scene links
+        scene_rows = client.read(_LOAD_PLAY_SCENES_CYPHER)
+        _logger.info("CommunityIndex: %d play-scene links", len(scene_rows))
 
-        # ── Bước 3: Tải role assignments để xây dựng CommunitySubgraph ────────
+        # Load role assignments (actor + character + play + scene)
         role_rows = client.read(_LOAD_ROLE_ASSIGNMENTS_CYPHER)
-        _logger.info("CommunityIndex: %d role assignments loaded", len(role_rows))
+        _logger.info("CommunityIndex: %d role assignments", len(role_rows))
 
-        # Lookup: ra_id → {char_name, actor_name, play_title, scene_name}
-        role_by_id: dict[str, dict[str, Any]] = {
-            row["ra_id"]: row for row in role_rows if row.get("ra_id")
-        }
+        # ── Group by play title ───────────────────────────────────────────────
+        play_characters: dict[str, list[dict[str, Any]]] = {}
+        play_actors:     dict[str, list[dict[str, Any]]] = {}
+        play_scenes:     dict[str, list[dict[str, Any]]] = {}
+        play_roles:      dict[str, list[dict[str, Any]]] = {}
 
-        # ── Bước 4: Xây dựng networkx graph trung thực ────────────────────────
-        G = nx.Graph()
-        for nid, meta in node_meta.items():
-            G.add_node(nid, label=meta["label"], props=meta["props"])
-        for row in edge_rows:
-            fid, tid = row["from_id"], row["to_id"]
-            if fid in node_meta and tid in node_meta:
-                G.add_edge(fid, tid, rel=row["rel_type"])
+        seen_chars:  dict[str, set[str]]              = {}
+        seen_actors: dict[str, set[str]]              = {}
+        seen_scenes: dict[str, set[str]]              = {}
+        seen_pairs:  dict[str, set[tuple[str, str]]]  = {}
 
-        _logger.info(
-            "CommunityIndex: networkx graph — %d nodes, %d edges",
-            G.number_of_nodes(), G.number_of_edges(),
+        for row in char_rows:
+            play, char = row.get("play_title", ""), row.get("char_name", "")
+            if play and char and char not in seen_chars.setdefault(play, set()):
+                seen_chars[play].add(char)
+                play_characters.setdefault(play, []).append(
+                    {"name": char, "gender": row.get("char_gender", "")}
+                )
+
+        for row in scene_rows:
+            play, scene = row.get("play_title", ""), row.get("scene_name", "")
+            if play and scene and scene not in seen_scenes.setdefault(play, set()):
+                seen_scenes[play].add(scene)
+                play_scenes.setdefault(play, []).append({"name": scene})
+
+        for row in role_rows:
+            play  = row.get("play_title", "")
+            actor = row.get("actor_name", "")
+            char  = row.get("char_name", "")
+            scene = row.get("scene_name", "") or ""
+            if not play:
+                continue
+            if actor and actor not in seen_actors.setdefault(play, set()):
+                seen_actors[play].add(actor)
+                play_actors.setdefault(play, []).append({"name": actor})
+            if char and actor:
+                pair = (char, actor)
+                if pair not in seen_pairs.setdefault(play, set()):
+                    seen_pairs[play].add(pair)
+                    play_roles.setdefault(play, []).append({
+                        "character": char,
+                        "actor":     actor,
+                        "scene":     scene,
+                        "play":      play,
+                        "version":   row.get("version_id", ""),
+                    })
+
+        # ── Build one CommunitySubgraph per play ──────────────────────────────
+        all_plays = sorted(
+            set(play_characters) | set(play_actors) | set(play_scenes) | set(play_roles)
         )
+        _logger.info("CommunityIndex: building %d play-centric communities", len(all_plays))
 
-        # ── Bước 5: Community detection ────────────────────────────────────────
-        components = list(nx.connected_components(G))
-        _logger.info("CommunityIndex: %d connected components", len(components))
-
-        detected: list[frozenset[str]] = []
-        for comp in components:
-            subG = G.subgraph(comp)
-            if subG.number_of_nodes() < 3:
-                detected.append(frozenset(comp))
-            else:
-                detected.extend(greedy_modularity_communities(subG))
-
-        _logger.info("CommunityIndex: %d communities detected", len(detected))
-
-        # ── Bước 6: Xây dựng CommunitySubgraph từ mỗi cụm ────────────────────
-        for comm_id, node_set in enumerate(detected):
-            comm = self._build_community(comm_id, node_set, node_meta, G, role_by_id)
-            if comm:
-                self._communities[comm.play_title] = comm
+        for comm_id, play_title in enumerate(all_plays):
+            self._communities[play_title] = CommunitySubgraph(
+                community_id=comm_id,
+                play_title=play_title,
+                characters=play_characters.get(play_title, []),
+                actors=play_actors.get(play_title, []),
+                scenes=play_scenes.get(play_title, []),
+                role_assignments=play_roles.get(play_title, []),
+            )
 
         if self._communities:
             try:
                 self.save_cache()
             except Exception as exc:  # noqa: BLE001
                 _logger.warning("CommunityIndex: cache write failed: %s", exc)
-
-    def _build_community(
-        self,
-        comm_id: int,
-        node_set: frozenset[str],
-        node_meta: dict[str, dict[str, Any]],
-        G: nx.Graph,
-        role_by_id: dict[str, dict[str, Any]],
-    ) -> CommunitySubgraph | None:
-        """Xây dựng CommunitySubgraph từ tập node đã phát hiện."""
-        characters:  list[dict[str, Any]] = []
-        actors:      list[dict[str, Any]] = []
-        scenes:      list[dict[str, Any]] = []
-        play_titles: list[str] = []
-
-        # Phân loại node theo label
-        for nid in node_set:
-            meta  = node_meta.get(nid, {})
-            label = meta.get("label", "")
-            props = meta.get("props", {}) or {}
-
-            if label == NodeType.PLAY:
-                title = props.get("title", "")
-                if title:
-                    play_titles.append(title)
-
-            elif label == NodeType.CHARACTER:
-                name = props.get("charName", "")
-                if name:
-                    characters.append({"name": name, "gender": props.get("charGender", "")})
-
-            elif label == NodeType.ACTOR:
-                name = props.get("actorName", "")
-                if name:
-                    actors.append({"name": name})
-
-            elif label == NodeType.SCENE:
-                name = props.get("sceneName", "")
-                if name:
-                    scenes.append({"name": name, "summary": props.get("sceneSummary", "")})
-
-        # Cộng đồng không có thực thể có nghĩa → bỏ qua
-        if not characters and not actors and not scenes:
-            return None
-
-        # Đặt tên cộng đồng từ Play node
-        if play_titles:
-            community_name = " & ".join(sorted(play_titles))
-        else:
-            # Không có Play node → dùng nút bậc cao nhất
-            subG = G.subgraph(node_set)
-            top_nid = max(node_set, key=lambda n: subG.degree(n), default=None)
-            meta = node_meta.get(top_nid, {}) if top_nid else {}
-            props = meta.get("props", {}) or {}
-            community_name = (
-                props.get("charName")
-                or props.get("actorName")
-                or props.get("sceneName")
-                or f"Community_{comm_id}"
-            )
-
-        # Xây dựng role_assignments: chỉ lấy RoleAssignment thuộc cụm này
-        role_assignments: list[dict[str, Any]] = []
-        seen_pairs: set[tuple[str, str]] = set()
-        for nid in node_set:
-            meta = node_meta.get(nid, {})
-            if meta.get("label") == NodeType.ROLE_ASSIGNMENT:
-                info = role_by_id.get(nid, {})
-                char  = info.get("char_name", "")
-                actor = info.get("actor_name", "")
-                if char and actor and (char, actor) not in seen_pairs:
-                    seen_pairs.add((char, actor))
-                    role_assignments.append({
-                        "character": char,
-                        "actor":     actor,
-                        "scene":     info.get("scene_name", ""),
-                        "play":      info.get("play_title", ""),
-                        "version":   info.get("version_id", ""),
-                    })
-
-        return CommunitySubgraph(
-            community_id=comm_id,
-            play_title=community_name,
-            characters=characters,
-            actors=actors,
-            scenes=scenes,
-            role_assignments=role_assignments,
-        )
 
     # ── Private — Cache fallback ──────────────────────────────────────────────
 

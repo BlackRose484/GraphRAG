@@ -135,7 +135,7 @@ def _render_columns(results: dict[str, _SystemResult], kp: str, expander_ok: boo
                 col.caption("  ·  ".join(pills))
         if expander_ok and name == "graphrag" and r.retrieval_detail:
             with col.expander("📊 Chi tiết retrieval", expanded=False):
-                _render_retrieval_detail(r.retrieval_detail, key_prefix=kp)
+                _render_retrieval_detail(r.retrieval_detail, key_prefix=kp, compact=True)
 
 
 def _render_rating(step_idx: int) -> None:

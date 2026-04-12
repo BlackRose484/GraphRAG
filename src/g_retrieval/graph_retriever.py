@@ -10,6 +10,13 @@ Provides five complementary retrieval strategies:
 
 All Cypher queries are built using typed constants (NodeType, RelType, NodeProp,
 Limit) so that changes to the ontology propagate automatically.
+
+All entity names are batched into list parameters ($names) so each retrieval
+method issues a fixed number of Cypher queries regardless of entity count:
+  nodes     → 4 queries (one per label)
+  triplets  → 3 queries (one per relationship pattern)
+  paths     → 1 query
+  subgraph  → 1 query
 """
 from __future__ import annotations
 
@@ -159,7 +166,7 @@ class GraphRetriever:
         if not names:
             return nodes
 
-        # Per-label targeted queries — all built with NodeType/NodeProp constants
+        # One query per label, all names batched — 4 queries instead of N×4
         label_queries: list[tuple[str, str, str]] = [
             (NodeType.CHARACTER, NodeProp.CHAR_NAME,  "c"),
             (NodeType.ACTOR,     NodeProp.ACTOR_NAME, "a"),
@@ -167,39 +174,39 @@ class GraphRetriever:
             (NodeType.SCENE,     NodeProp.SCENE_NAME,  "s"),
         ]
 
-        for name in names:
-            for label, prop, alias in label_queries:
-                cypher = (
-                    f"MATCH ({alias}:{label}) "
-                    f"WHERE toLower({alias}.{prop}) CONTAINS toLower($name) "
-                    f"RETURN {alias} LIMIT {Limit.NODE_QUERY}"
-                )
-                for record in self._client.read(cypher, {"name": name}):
-                    node = dict(record[alias])
-                    uid = str(node)
-                    if uid not in seen:
-                        seen.add(uid)
-                        nodes.append(node)
+        for label, prop, alias in label_queries:
+            cypher = (
+                f"MATCH ({alias}:{label}) "
+                f"WHERE any(n IN $names WHERE toLower({alias}.{prop}) CONTAINS toLower(n)) "
+                f"RETURN {alias} LIMIT {Limit.NODE_QUERY}"
+            )
+            for record in self._client.read(cypher, {"names": names}):
+                node = dict(record[alias])
+                uid = str(node)
+                if uid not in seen:
+                    seen.add(uid)
+                    nodes.append(node)
 
-        # Broad fuzzy fallback when nothing matched
+        # Broad fuzzy fallback when nothing matched — all terms in one query
         if not nodes and names:
             fallback_labels = " OR ".join(
                 f"n:{t}" for t in NodeType.SEARCHABLE
             )
-            for term in names[: Limit.FALLBACK_NAMES_COUNT]:
-                cypher = f"""
-                    MATCH (n)
-                    WHERE ({fallback_labels})
-                      AND any(p IN keys(n)
-                              WHERE toLower(toString(n[p])) CONTAINS toLower($term))
-                    RETURN n LIMIT $lim
-                """
-                for record in self._client.read(cypher, {"term": term, "lim": Limit.FALLBACK_NODES}):
-                    node = dict(record["n"])
-                    uid = str(node)
-                    if uid not in seen:
-                        seen.add(uid)
-                        nodes.append(node)
+            terms = names[: Limit.FALLBACK_NAMES_COUNT]
+            cypher = f"""
+                MATCH (n)
+                WHERE ({fallback_labels})
+                  AND any(term IN $terms WHERE
+                          any(p IN keys(n)
+                              WHERE toLower(toString(n[p])) CONTAINS toLower(term)))
+                RETURN n LIMIT $lim
+            """
+            for record in self._client.read(cypher, {"terms": terms, "lim": Limit.FALLBACK_NODES}):
+                node = dict(record["n"])
+                uid = str(node)
+                if uid not in seen:
+                    seen.add(uid)
+                    nodes.append(node)
 
         return nodes
 
@@ -211,48 +218,47 @@ class GraphRetriever:
         if not names:
             return triplets
 
-        for name in names:
-            # Character ↔ Actor (via RoleAssignment)
-            cypher = f"""
-                MATCH (c:{NodeType.CHARACTER})-[:{RelType.FOR_CHARACTER}]-(ra:{NodeType.ROLE_ASSIGNMENT})-[:{RelType.PERFORMED_BY}]->(a:{NodeType.ACTOR})
-                WHERE toLower(c.{NodeProp.CHAR_NAME}) CONTAINS toLower($name)
-                   OR toLower(a.{NodeProp.ACTOR_NAME}) CONTAINS toLower($name)
-                RETURN c.{NodeProp.CHAR_NAME} AS subj, '{RelType.PERFORMED_BY}' AS rel, a.{NodeProp.ACTOR_NAME} AS obj
-                LIMIT $lim
-            """
-            for r in self._client.read(cypher, {"name": name, "lim": Limit.TRIPLET_QUERY}):
-                t: Triplet = (r["subj"] or "", r["rel"], r["obj"] or "")
-                if t not in seen:
-                    seen.add(t)
-                    triplets.append(t)
+        # Character ↔ Actor (via RoleAssignment) — all names at once
+        cypher = f"""
+            MATCH (c:{NodeType.CHARACTER})-[:{RelType.FOR_CHARACTER}]-(ra:{NodeType.ROLE_ASSIGNMENT})-[:{RelType.PERFORMED_BY}]->(a:{NodeType.ACTOR})
+            WHERE any(n IN $names WHERE toLower(c.{NodeProp.CHAR_NAME}) CONTAINS toLower(n)
+                                     OR toLower(a.{NodeProp.ACTOR_NAME}) CONTAINS toLower(n))
+            RETURN c.{NodeProp.CHAR_NAME} AS subj, '{RelType.PERFORMED_BY}' AS rel, a.{NodeProp.ACTOR_NAME} AS obj
+            LIMIT $lim
+        """
+        for r in self._client.read(cypher, {"names": names, "lim": Limit.TRIPLET_QUERY}):
+            t: Triplet = (r["subj"] or "", r["rel"], r["obj"] or "")
+            if t not in seen:
+                seen.add(t)
+                triplets.append(t)
 
-            # Play → Character
-            cypher = f"""
-                MATCH (p:{NodeType.PLAY})-[:{RelType.HAS_CHARACTER}]->(c:{NodeType.CHARACTER})
-                WHERE toLower(c.{NodeProp.CHAR_NAME}) CONTAINS toLower($name)
-                   OR toLower(p.{NodeProp.TITLE}) CONTAINS toLower($name)
-                RETURN p.{NodeProp.TITLE} AS subj, '{RelType.HAS_CHARACTER}' AS rel, c.{NodeProp.CHAR_NAME} AS obj
-                LIMIT $lim
-            """
-            for r in self._client.read(cypher, {"name": name, "lim": Limit.TRIPLET_QUERY}):
-                t = (r["subj"] or "", r["rel"], r["obj"] or "")
-                if t not in seen:
-                    seen.add(t)
-                    triplets.append(t)
+        # Play → Character — all names at once
+        cypher = f"""
+            MATCH (p:{NodeType.PLAY})-[:{RelType.HAS_CHARACTER}]->(c:{NodeType.CHARACTER})
+            WHERE any(n IN $names WHERE toLower(c.{NodeProp.CHAR_NAME}) CONTAINS toLower(n)
+                                     OR toLower(p.{NodeProp.TITLE}) CONTAINS toLower(n))
+            RETURN p.{NodeProp.TITLE} AS subj, '{RelType.HAS_CHARACTER}' AS rel, c.{NodeProp.CHAR_NAME} AS obj
+            LIMIT $lim
+        """
+        for r in self._client.read(cypher, {"names": names, "lim": Limit.TRIPLET_QUERY}):
+            t = (r["subj"] or "", r["rel"], r["obj"] or "")
+            if t not in seen:
+                seen.add(t)
+                triplets.append(t)
 
-            # Play → Scene
-            cypher = f"""
-                MATCH (p:{NodeType.PLAY})-[:{RelType.HAS_SCENE}]->(s:{NodeType.SCENE})
-                WHERE toLower(p.{NodeProp.TITLE}) CONTAINS toLower($name)
-                   OR toLower(s.{NodeProp.SCENE_NAME}) CONTAINS toLower($name)
-                RETURN p.{NodeProp.TITLE} AS subj, '{RelType.HAS_SCENE}' AS rel, s.{NodeProp.SCENE_NAME} AS obj
-                LIMIT $lim
-            """
-            for r in self._client.read(cypher, {"name": name, "lim": Limit.TRIPLET_QUERY}):
-                t = (r["subj"] or "", r["rel"], r["obj"] or "")
-                if t not in seen:
-                    seen.add(t)
-                    triplets.append(t)
+        # Play → Scene — all names at once
+        cypher = f"""
+            MATCH (p:{NodeType.PLAY})-[:{RelType.HAS_SCENE}]->(s:{NodeType.SCENE})
+            WHERE any(n IN $names WHERE toLower(p.{NodeProp.TITLE}) CONTAINS toLower(n)
+                                     OR toLower(s.{NodeProp.SCENE_NAME}) CONTAINS toLower(n))
+            RETURN p.{NodeProp.TITLE} AS subj, '{RelType.HAS_SCENE}' AS rel, s.{NodeProp.SCENE_NAME} AS obj
+            LIMIT $lim
+        """
+        for r in self._client.read(cypher, {"names": names, "lim": Limit.TRIPLET_QUERY}):
+            t = (r["subj"] or "", r["rel"], r["obj"] or "")
+            if t not in seen:
+                seen.add(t)
+                triplets.append(t)
 
         # Fallback: return a sample of character–actor relationships
         if not triplets and names:
@@ -277,24 +283,24 @@ class GraphRetriever:
         if not names:
             return paths
 
+        # All names batched into a single path query
         cypher = f"""
             MATCH path = (start)-[*1..{Limit.PATH_HOPS_MAX}]-(end)
             WHERE (
-                (start:{NodeType.CHARACTER} AND toLower(start.{NodeProp.CHAR_NAME})  CONTAINS toLower($name)) OR
-                (start:{NodeType.ACTOR}     AND toLower(start.{NodeProp.ACTOR_NAME}) CONTAINS toLower($name)) OR
-                (start:{NodeType.PLAY}      AND toLower(start.{NodeProp.TITLE})      CONTAINS toLower($name))
+                (start:{NodeType.CHARACTER} AND any(n IN $names WHERE toLower(start.{NodeProp.CHAR_NAME})  CONTAINS toLower(n))) OR
+                (start:{NodeType.ACTOR}     AND any(n IN $names WHERE toLower(start.{NodeProp.ACTOR_NAME}) CONTAINS toLower(n))) OR
+                (start:{NodeType.PLAY}      AND any(n IN $names WHERE toLower(start.{NodeProp.TITLE})      CONTAINS toLower(n)))
             ) AND (end:{NodeType.CHARACTER} OR end:{NodeType.ACTOR} OR end:{NodeType.PLAY} OR end:{NodeType.SCENE})
             RETURN [n IN nodes(path) |
                 coalesce(n.{NodeProp.CHAR_NAME}, n.{NodeProp.ACTOR_NAME}, n.{NodeProp.TITLE}, n.{NodeProp.SCENE_NAME}, toString(id(n)))
             ] AS path_nodes
             LIMIT $lim
         """
-        for name in names:
-            for r in self._client.read(cypher, {"name": name, "lim": Limit.PATH_QUERY}):
-                key = tuple(r["path_nodes"])
-                if key not in seen:
-                    seen.add(key)
-                    paths.append(list(r["path_nodes"]))
+        for r in self._client.read(cypher, {"names": names, "lim": Limit.PATH_QUERY}):
+            key = tuple(r["path_nodes"])
+            if key not in seen:
+                seen.add(key)
+                paths.append(list(r["path_nodes"]))
 
         return paths
 
@@ -307,12 +313,13 @@ class GraphRetriever:
         if not names:
             return subgraph
 
+        # All names batched into a single subgraph expansion query
         cypher = f"""
             MATCH path = (center)-[r*1..{Limit.SUBGRAPH_HOPS_MAX}]-(neighbor)
             WHERE (
-                (center:{NodeType.CHARACTER} AND toLower(center.{NodeProp.CHAR_NAME})  CONTAINS toLower($name)) OR
-                (center:{NodeType.ACTOR}     AND toLower(center.{NodeProp.ACTOR_NAME}) CONTAINS toLower($name)) OR
-                (center:{NodeType.PLAY}      AND toLower(center.{NodeProp.TITLE})      CONTAINS toLower($name))
+                (center:{NodeType.CHARACTER} AND any(n IN $names WHERE toLower(center.{NodeProp.CHAR_NAME})  CONTAINS toLower(n))) OR
+                (center:{NodeType.ACTOR}     AND any(n IN $names WHERE toLower(center.{NodeProp.ACTOR_NAME}) CONTAINS toLower(n))) OR
+                (center:{NodeType.PLAY}      AND any(n IN $names WHERE toLower(center.{NodeProp.TITLE})      CONTAINS toLower(n)))
             )
             WITH center, relationships(path) AS rels, nodes(path) AS path_nodes
             RETURN center,
@@ -324,39 +331,38 @@ class GraphRetriever:
                    }}] AS all_rels
             LIMIT $lim
         """
-        for name in names:
-            for record in self._client.read(cypher, {"name": name, "lim": Limit.SUBGRAPH_QUERY}):
-                # Center node
-                center = dict(record["center"])
-                c_id = str(center)
-                if c_id not in seen_nodes:
-                    seen_nodes.add(c_id)
-                    subgraph["nodes"].append(center)
+        for record in self._client.read(cypher, {"names": names, "lim": Limit.SUBGRAPH_QUERY}):
+            # Center node
+            center = dict(record["center"])
+            c_id = str(center)
+            if c_id not in seen_nodes:
+                seen_nodes.add(c_id)
+                subgraph["nodes"].append(center)
 
-                # All nodes in paths
-                for node_list in record["all_nodes"]:
-                    for node in node_list:
-                        if node is not None:
-                            n = dict(node)
-                            n_id = str(n)
-                            if n_id not in seen_nodes:
-                                seen_nodes.add(n_id)
-                                subgraph["nodes"].append(n)
+            # All nodes in paths
+            for node_list in record["all_nodes"]:
+                for node in node_list:
+                    if node is not None:
+                        n = dict(node)
+                        n_id = str(n)
+                        if n_id not in seen_nodes:
+                            seen_nodes.add(n_id)
+                            subgraph["nodes"].append(n)
 
-                # Relationships
-                for rel_info in record["all_rels"]:
-                    if not rel_info:
-                        continue
-                    start = dict(rel_info.get("start") or {})
-                    end = dict(rel_info.get("end") or {})
-                    rel_id = f"{start}-{rel_info.get('type')}-{end}"
-                    if rel_id not in seen_rels:
-                        seen_rels.add(rel_id)
-                        subgraph["relationships"].append({
-                            "type": rel_info.get("type", "UNKNOWN"),
-                            "start": start,
-                            "end": end,
-                        })
+            # Relationships
+            for rel_info in record["all_rels"]:
+                if not rel_info:
+                    continue
+                start = dict(rel_info.get("start") or {})
+                end = dict(rel_info.get("end") or {})
+                rel_id = f"{start}-{rel_info.get('type')}-{end}"
+                if rel_id not in seen_rels:
+                    seen_rels.add(rel_id)
+                    subgraph["relationships"].append({
+                        "type": rel_info.get("type", "UNKNOWN"),
+                        "start": start,
+                        "end": end,
+                    })
 
         return subgraph
 
