@@ -149,6 +149,26 @@ class ChromaSettings:
 
 
 @dataclass
+class GmailSettings:
+    """Gmail SMTP configuration for sending experiment results."""
+
+    sender: str = field(
+        default_factory=lambda: os.getenv("EMAIL_USER", "")
+    )
+    app_password: str = field(
+        default_factory=lambda: os.getenv("EMAIL_PASS", "")
+    )
+    receiver: str = field(
+        default_factory=lambda: os.getenv("ADMIN_EMAIL", "")
+    )
+
+    @property
+    def is_configured(self) -> bool:
+        """True nếu đủ 3 biến môi trường EMAIL_USER / EMAIL_PASS / ADMIN_EMAIL."""
+        return bool(self.sender and self.app_password and self.receiver)
+
+
+@dataclass
 class OntologySettings:
     """Chèo domain ontology file configuration."""
 
@@ -192,6 +212,7 @@ class Settings:
         self.llm = LLMSettings()
         self.neo4j = Neo4jSettings()
         self.chroma = ChromaSettings()
+        self.gmail = GmailSettings()
         self.ontology = OntologySettings()
         self._initialised = True
 
