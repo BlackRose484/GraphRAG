@@ -15,6 +15,7 @@ chromadb==0.4.18
 
 # UI
 streamlit==1.29.0
+pyvis==0.3.2
 
 # Utils
 python-dotenv==1.0.0

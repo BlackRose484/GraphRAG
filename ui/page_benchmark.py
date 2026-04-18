@@ -12,7 +12,7 @@ from typing import Dict, List, Optional
 import streamlit as st
 
 _DATASET_DIR  = Path(__file__).resolve().parents[1] / "benchmark" / "datasets"
-_DEFAULT_DS   = _DATASET_DIR / "CheoBench_100_Fixed.json"
+_DEFAULT_DS   = _DATASET_DIR / "CheoBench_v2.json"
 _RAG_STORE    = Path(__file__).resolve().parents[1] / "data" / "vector_store.pkl"
 
 

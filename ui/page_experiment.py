@@ -36,16 +36,16 @@ _QUESTIONS: dict[str, list[dict[str, str]]] = {
         {"id": "CASE_052", "q": "Mối quan hệ giữa Thị Kính và Thiện Sỹ là gì?"},
         {"id": "CASE_057", "q": "Trần Phương tác động đến Súy Vân như thế nào?"},
         {"id": "CASE_060", "q": "Thị Kính bị Sùng Bà vu oan như thế nào?"},
-        {"id": "CASE_063", "q": "Diễn viên An Chinh đã đóng bao nhiêu vai khác nhau trong KG?"},
+        {"id": "CASE_063", "q": "Diễn viên An Chinh đã đóng những vai nào?"},
     ],
     "Dạng 3 — Phân tích & So sánh (Khó)": [
-        {"id": "CASE_078", "q": "Những vở chèo nào có trong KG? Liệt kê đầy đủ?"},
+        {"id": "CASE_078", "q": "Hãy liệt kê những vở chèo cổ tiêu biểu?"},
         {"id": "CASE_082", "q": "So sánh chủ đề của vở Quan Âm Thị Kính và Kim Nham?"},
-        {"id": "CASE_083", "q": "So sánh nhân vật nữ chính của các vở trong KG?"},
-        {"id": "CASE_090", "q": "Nhân vật loại Đào trong chèo là gì? Ai là đại diện trong KG?"},
-        {"id": "CASE_093", "q": "Phân tích hình tượng người phụ nữ hy sinh trong KG?"},
+        {"id": "CASE_083", "q": "So sánh nhân vật nữ chính của các vở chèo cổ?"},
+        {"id": "CASE_090", "q": "Nhân vật loại Đào trong chèo là gì? Có những ai là đại diện tiêu biểu?"},
+        {"id": "CASE_093", "q": "Phân tích hình tượng người phụ nữ hy sinh trong các vở chèo cổ?"},
         {"id": "CASE_094", "q": "So sánh số phận bi kịch của Súy Vân và Thị Kính?"},
-        {"id": "CASE_097", "q": "Liệt kê tất cả mối quan hệ vợ-chồng trong KG và kết cục của họ?"},
+        {"id": "CASE_097", "q": "Liệt kê các mối quan hệ vợ-chồng trong các vở chèo cổ và kết cục của họ?"},
     ],
 }
 

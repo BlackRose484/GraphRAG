@@ -12,7 +12,7 @@ Usage
 
     runner  = BenchmarkRunner(registry=registry)
     results = runner.run(
-        dataset_path="benchmark/datasets/CheoBench_100_Fixed.json",
+        dataset_path="benchmark/datasets/CheoBench_v2.json",
         graphrag_pipeline=graphrag_pipe,   # or None
         rag_pipeline=rag_pipe,             # or None
         n_cases=20,
