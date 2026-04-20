@@ -275,6 +275,32 @@ class GmailSettings:
 
 
 @dataclass
+class AppSettings:
+    """Application-level toggles.
+
+    - ``guest_mode``: when true, ``main.py`` hides admin-only pages from the
+      sidebar navigation. Typically set in production (Cloud Run) so the
+      public only sees user-facing study pages (Experiment, Preference).
+    - ``admin_password``: enables a password prompt in the sidebar that
+      toggles admin mode back on when ``guest_mode`` is true. Leave empty to
+      disable the unlock path entirely.
+    """
+
+    guest_mode: bool = field(
+        default_factory=lambda: os.getenv("GUEST_MODE", "").strip().lower()
+        in ("1", "true", "yes", "on"),
+    )
+    admin_password: str = field(
+        default_factory=lambda: os.getenv("ADMIN_PASSWORD", "").strip(),
+    )
+
+    @property
+    def admin_unlock_available(self) -> bool:
+        """True if an ADMIN_PASSWORD is configured, so unlock UI can render."""
+        return bool(self.admin_password)
+
+
+@dataclass
 class OntologySettings:
     """Chèo domain ontology file configuration."""
 
@@ -320,6 +346,7 @@ class Settings:
         self.chroma = ChromaSettings()
         self.gmail = GmailSettings()
         self.ontology = OntologySettings()
+        self.app = AppSettings()
         self._initialised = True
 
     @classmethod

@@ -98,38 +98,82 @@ _components.html("""
 
 # ── Navigation pages ──────────────────────────────────────────────────────────
 
-_PAGES = ["🏠 Giới thiệu", "⚖️ So sánh", "🔍 GraphRAG", "📚 RAG", "💬 Chat", "🔗 Neo4j", "📊 Benchmark", "🧪 Thử nghiệm", "📋 Đánh giá ưu tiên"]
+_ALL_PAGES   = ["🏠 Giới thiệu", "⚖️ So sánh", "🔍 GraphRAG", "📚 RAG", "💬 Chat", "🔗 Neo4j", "📊 Benchmark", "🧪 Thử nghiệm", "📋 Đánh giá ưu tiên"]
+_GUEST_PAGES = ["🧪 Thử nghiệm", "📋 Đánh giá ưu tiên"]
 
-# Initialise nav state (default: Home)
-if "_nav_radio" not in st.session_state:
-    st.session_state["_nav_radio"] = _PAGES[0]
+# ── Guest mode + admin unlock ────────────────────────────────────────────────
+# Behaviour:
+#   GUEST_MODE unset     → full app always
+#   GUEST_MODE=1         → only _GUEST_PAGES until admin password entered
+#   ADMIN_PASSWORD unset → no unlock path (public-only deployment)
+
+from src.core.settings import settings as _app_settings  # noqa: E402
+
+
+def _is_admin() -> bool:
+    """Is the current Streamlit session allowed to see admin-only pages?"""
+    if not _app_settings.app.guest_mode:
+        return True
+    return bool(st.session_state.get("_admin_unlocked"))
+
+
+def _render_admin_unlock() -> None:
+    """Password prompt to unlock admin pages, shown only in guest mode."""
+    if not _app_settings.app.guest_mode:
+        return
+    if st.session_state.get("_admin_unlocked"):
+        if st.sidebar.button("🔒 Khóa lại", use_container_width=True):
+            st.session_state["_admin_unlocked"] = False
+            st.session_state.pop("_nav_radio", None)  # reset nav
+            st.rerun()
+        return
+    if not _app_settings.app.admin_unlock_available:
+        return  # No password configured — silent
+    with st.sidebar.expander("🔑 Admin", expanded=False):
+        pw = st.text_input("Mật khẩu", type="password", key="_admin_pw_input")
+        if st.button("Mở khóa", key="_admin_unlock_btn"):
+            if pw and pw == _app_settings.app.admin_password:
+                st.session_state["_admin_unlocked"] = True
+                st.session_state.pop("_nav_radio", None)  # reset nav
+                st.rerun()
+            else:
+                st.error("Sai mật khẩu")
+
+
+available_pages = _ALL_PAGES if _is_admin() else _GUEST_PAGES
+
+# If session state points to a page that's no longer visible, snap to first.
+if st.session_state.get("_nav_radio") not in available_pages:
+    st.session_state["_nav_radio"] = available_pages[0]
 
 # ── Sidebar ───────────────────────────────────────────────────────────────────
 
 st.sidebar.title("🎭 GraphRAGv2")
 page = st.sidebar.radio(
     "Điều hướng",
-    _PAGES,
+    available_pages,
     key="_nav_radio",
     label_visibility="collapsed",
 )
-
-# Sync back
 st.session_state["_nav_page"] = page
 
 st.sidebar.divider()
 
-# Global LLM model selector — applies to every page in this rerun.
-render_global_model_selector()
+# Admin controls appear in guest mode (unlock) or admin mode (lock).
+_render_admin_unlock()
 
-st.sidebar.divider()
+# Everything below is admin-only UI — keep the guest sidebar minimal.
+if _is_admin():
+    st.sidebar.divider()
+    render_global_model_selector()
 
-try:
-    from src.utils.logger import current_log_path
-    _lp = current_log_path()
-    st.sidebar.caption(f"📋 Log: `{_lp.parent.name}/{_lp.name}`")
-except Exception:
-    pass
+    st.sidebar.divider()
+    try:
+        from src.utils.logger import current_log_path
+        _lp = current_log_path()
+        st.sidebar.caption(f"📋 Log: `{_lp.parent.name}/{_lp.name}`")
+    except Exception:
+        pass
 
 # ── Router ────────────────────────────────────────────────────────────────────
 
