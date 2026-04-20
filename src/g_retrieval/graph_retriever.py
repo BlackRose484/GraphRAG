@@ -260,6 +260,66 @@ class GraphRetriever:
                 seen.add(t)
                 triplets.append(t)
 
+        # Actor → Play — derived 5-hop chain. `isPerformedIn` is declared in
+        # the ontology but its instance edges are not yet materialized in the
+        # graph, so we walk Actor ← PERFORMED_BY ← RA → IN_VERSION → Version
+        #                 ← HAS_VERSION ← Scene ← HAS_SCENE ← Play to surface
+        # the Actor↔Play link the LLM would otherwise have to infer.
+        cypher = f"""
+            MATCH (a:{NodeType.ACTOR})<-[:{RelType.PERFORMED_BY}]-(ra:{NodeType.ROLE_ASSIGNMENT})
+                  -[:{RelType.IN_VERSION}]->(:{NodeType.VERSION})
+                  <-[:{RelType.HAS_VERSION}]-(:{NodeType.SCENE})
+                  <-[:{RelType.HAS_SCENE}]-(p:{NodeType.PLAY})
+            WHERE any(n IN $names WHERE toLower(a.{NodeProp.ACTOR_NAME}) CONTAINS toLower(n)
+                                     OR toLower(p.{NodeProp.TITLE})      CONTAINS toLower(n))
+            RETURN DISTINCT a.{NodeProp.ACTOR_NAME} AS subj, 'PERFORMS_IN' AS rel, p.{NodeProp.TITLE} AS obj
+            LIMIT $lim
+        """
+        for r in self._client.read(cypher, {"names": names, "lim": Limit.TRIPLET_QUERY}):
+            t = (r["subj"] or "", r["rel"], r["obj"] or "")
+            if t not in seen:
+                seen.add(t)
+                triplets.append(t)
+
+        # RoleAssignment → Version — surface which version a performance
+        # belongs to, with a human-readable version label (coalesce keeps the
+        # triple informative whether data uses `versionNumber` or `vidVersion`).
+        cypher = f"""
+            MATCH (ra:{NodeType.ROLE_ASSIGNMENT})-[:{RelType.FOR_CHARACTER}]->(c:{NodeType.CHARACTER})
+            MATCH (ra)-[:{RelType.PERFORMED_BY}]->(a:{NodeType.ACTOR})
+            MATCH (ra)-[:{RelType.IN_VERSION}]->(v:{NodeType.VERSION})
+            WHERE any(n IN $names WHERE toLower(c.{NodeProp.CHAR_NAME})  CONTAINS toLower(n)
+                                     OR toLower(a.{NodeProp.ACTOR_NAME}) CONTAINS toLower(n))
+            RETURN (c.{NodeProp.CHAR_NAME} + ' (' + a.{NodeProp.ACTOR_NAME} + ')') AS subj,
+                   '{RelType.IN_VERSION}' AS rel,
+                   coalesce(v.{NodeProp.VERSION_NUMBER}, v.{NodeProp.VID_VERSION}, v.{NodeProp.ID}) AS obj
+            LIMIT $lim
+        """
+        for r in self._client.read(cypher, {"names": names, "lim": Limit.TRIPLET_QUERY}):
+            t = (r["subj"] or "", r["rel"], r["obj"] or "")
+            if t not in seen and t[0] and t[2]:
+                seen.add(t)
+                triplets.append(t)
+
+        # RoleAssignment → Appearance — surface emotion / subtitle that the
+        # character expresses (196 emotion values, 48 subtitle values in the
+        # dataset that were previously unreachable via retrieval).
+        cypher = f"""
+            MATCH (ra:{NodeType.ROLE_ASSIGNMENT})-[:{RelType.FOR_CHARACTER}]->(c:{NodeType.CHARACTER})
+            MATCH (ra)-[:{RelType.HAS_APPEARANCE}]->(app:{NodeType.APPEARANCE})
+            WHERE any(n IN $names WHERE toLower(c.{NodeProp.CHAR_NAME}) CONTAINS toLower(n))
+              AND (app.{NodeProp.EMOTION} IS NOT NULL OR app.{NodeProp.SUBTITLE} IS NOT NULL)
+            RETURN c.{NodeProp.CHAR_NAME} AS subj,
+                   coalesce(app.{NodeProp.EMOTION}, 'lời thoại') AS rel,
+                   coalesce(app.{NodeProp.SUBTITLE}, app.{NodeProp.EMOTION}, '') AS obj
+            LIMIT $lim
+        """
+        for r in self._client.read(cypher, {"names": names, "lim": Limit.TRIPLET_QUERY}):
+            t = (r["subj"] or "", r["rel"] or "", r["obj"] or "")
+            if t not in seen and t[0] and t[2]:
+                seen.add(t)
+                triplets.append(t)
+
         # Fallback: return a sample of character–actor relationships
         if not triplets and names:
             cypher = f"""

@@ -219,9 +219,11 @@ class BenchmarkRunner:
         case_ids:     List[str],
         metric_names: List[str],
     ) -> None:
+        from src.core.settings import settings
         meta = {
             "started_at":   time.strftime("%Y-%m-%d %H:%M:%S"),
             "dataset":      str(dataset_path),
+            "llm_model":    settings.llm.model,
             "pipelines":    pipelines,
             "n_cases":      len(case_ids),
             "case_ids":     case_ids,

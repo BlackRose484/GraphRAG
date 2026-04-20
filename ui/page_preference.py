@@ -17,7 +17,7 @@ from src.core.settings import settings
 
 # ── Paths ─────────────────────────────────────────────────────────────────────
 
-_RESULTS_DIR = Path(__file__).resolve().parents[1] / "benchmark" / "results"
+_RESULTS_DIR = Path(__file__).resolve().parents[1] / "benchmark" / "results" / "user_studies"
 _DATASETS_DIR = Path(__file__).resolve().parents[1] / "benchmark" / "datasets"
 _ANSWERS_PATH = _DATASETS_DIR / "pregenerated_answers.json"
 

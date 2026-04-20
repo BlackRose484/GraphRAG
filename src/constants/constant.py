@@ -75,6 +75,14 @@ class NodeProp:
     # Scene
     SCENE_NAME    = "sceneName"
     SCENE_SUMMARY = "sceneSummary"
+    # Version
+    VERSION_NUMBER = "versionNumber"
+    VID_VERSION    = "vidVersion"
+    # Appearance
+    EMOTION     = "emotion"
+    SUBTITLE    = "subtitle"
+    START_TIME  = "startTime"
+    END_TIME    = "endTime"
     # Common
     ID    = "id"
     LABEL = "label"

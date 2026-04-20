@@ -60,6 +60,14 @@ def _select_case_ids(dataset_path: Path) -> Tuple[Optional[List[str]], int]:
             value=min(20, total_available),
             step=1,
         )
+        stratify = st.sidebar.toggle(
+            "Phân tầng theo nhóm",
+            value=True,
+            help=(
+                "Chia N câu gần đều giữa các nhóm (Local / Community / Global) "
+                "để đảm bảo mỗi nhóm đều có đại diện trong tập mẫu."
+            ),
+        )
         seed_str = st.sidebar.text_input(
             "Random seed (để trống = ngẫu nhiên thật)",
             value="42",
@@ -72,16 +80,43 @@ def _select_case_ids(dataset_path: Path) -> Tuple[Optional[List[str]], int]:
             seed = None
             st.sidebar.warning("Seed không hợp lệ, dùng ngẫu nhiên thật.")
 
-        # Sample case IDs
         rng = random.Random(seed)
-        all_ids = [c["id"] for c in index]
-        chosen = sorted(rng.sample(all_ids, n))   # sort for stable display
-        with st.sidebar.expander(f"  Đã chọn {n} câu", expanded=False):
-            id_to_q = {c["id"]: c["question"] for c in index}
+
+        # Sample case IDs
+        if stratify:
+            by_cat: Dict[str, List[str]] = {}
+            for c in index:
+                by_cat.setdefault(c["category"], []).append(c["id"])
+            cats = sorted(by_cat.keys())
+            n_cats = len(cats) or 1
+            base  = n // n_cats
+            extra = n % n_cats
+            chosen: List[str] = []
+            for i, cat in enumerate(cats):
+                per_cat = base + (1 if i < extra else 0)
+                per_cat = min(per_cat, len(by_cat[cat]))
+                chosen.extend(rng.sample(by_cat[cat], per_cat))
+            chosen.sort()
+        else:
+            all_ids = [c["id"] for c in index]
+            chosen = sorted(rng.sample(all_ids, n))
+
+        # Show distribution summary + question list
+        id_to_cat = {c["id"]: c["category"] for c in index}
+        id_to_q   = {c["id"]: c["question"] for c in index}
+        cat_counts: Dict[str, int] = {}
+        for cid in chosen:
+            cat = id_to_cat.get(cid, "?")
+            cat_counts[cat] = cat_counts.get(cat, 0) + 1
+
+        with st.sidebar.expander(f"  Đã chọn {len(chosen)} câu", expanded=False):
+            for cat in sorted(cat_counts):
+                st.caption(f"• **{cat}**: {cat_counts[cat]} câu")
+            st.caption("---")
             for cid in chosen:
                 q = id_to_q.get(cid, "")
                 st.caption(f"`{cid}` — {q[:60]}{'…' if len(q) > 60 else ''}")
-        return chosen, n
+        return chosen, len(chosen)
 
     # ── Manual selection mode ─────────────────────────────────────────────────
     # Filter by category first to make multiselect manageable
@@ -228,15 +263,213 @@ def _load_registry(enabled_names: List[str]):
     return registry
 
 
-def _get_graphrag_pipeline():
-    key = "bm_graphrag_pipeline"
-    if key not in st.session_state:
-        from src.graph_loader.neo4j_client import Neo4jClient
-        from src.pipeline.pipeline import GraphRAGPipeline
+def _get_graphrag_pipeline(config: Optional[Dict] = None):
+    """Create a fresh GraphRAGPipeline with the given config.
+
+    Only the Neo4jClient is cached across runs (connection is expensive); the
+    pipeline itself is light to re-build, so each run creates a fresh instance
+    that honours the latest retrieval / format / strategy choices from sidebar.
+    """
+    from src.graph_loader.neo4j_client import Neo4jClient
+    from src.pipeline.pipeline import GraphRAGPipeline
+
+    client_key = "bm_neo4j_client"
+    if client_key not in st.session_state:
         client = Neo4jClient()
         client.ping()
-        st.session_state[key] = GraphRAGPipeline(client)
-    return st.session_state[key]
+        st.session_state[client_key] = client
+    client = st.session_state[client_key]
+
+    if config:
+        return GraphRAGPipeline(
+            client,
+            retrieval_methods=config.get("retrieval_methods") or None,
+            format_keys=config.get("format_keys") or None,
+            generation_strategy=config.get("generation_strategy")
+                or "mid",
+        )
+    return GraphRAGPipeline(client)
+
+
+# ── Sidebar: GraphRAG ablation config ─────────────────────────────────────────
+
+def _ablation_scenarios() -> Dict[str, Dict]:
+    """Define the three ablation scenarios.
+
+    Lazy-loaded because it depends on constants that must be imported.
+    """
+    from src.constants.constant import (
+        FormatKey,
+        GenerationStrategy,
+        RetrievalMethod,
+    )
+    return {
+        "granularity": {
+            "label": "🧪 Mức độ truy xuất (5 runs)",
+            "varies": "retrieval_methods",
+            "variants": [
+                ("node",     [RetrievalMethod.NODES]),
+                ("triplet",  [RetrievalMethod.TRIPLETS]),
+                ("path",     [RetrievalMethod.PATHS]),
+                ("subgraph", [RetrievalMethod.SUBGRAPH]),
+                ("combined", list(RetrievalMethod.ALL)),
+            ],
+        },
+        "format": {
+            "label": "🧪 Định dạng ngữ cảnh (5 runs)",
+            "varies": "format_keys",
+            "variants": [
+                ("natural",  [FormatKey.NATURAL_LANGUAGE]),
+                ("json",     [FormatKey.CODE_LIKE]),
+                ("adj",      [FormatKey.ADJACENCY_TABLE]),
+                ("node_seq", [FormatKey.NODE_SEQUENCE]),
+                ("combined", list(FormatKey.DEFAULT_MID)),
+            ],
+        },
+        "strategy": {
+            "label": "🧪 Chiến lược tạo sinh (3 runs)",
+            "varies": "generation_strategy",
+            "variants": [
+                ("pre",  GenerationStrategy.PRE),
+                ("mid",  GenerationStrategy.MID),
+                ("post", GenerationStrategy.POST),
+            ],
+        },
+    }
+
+
+def _render_graphrag_config() -> Dict:
+    """Render GraphRAG config selectors. Returns dict with 'mode' and 'configs' list."""
+    from src.constants.constant import (
+        FormatKey,
+        GenerationStrategy,
+        RetrievalMethod,
+    )
+
+    st.sidebar.markdown("### 🧩 Cấu hình GraphRAG")
+
+    # ── Chế độ chạy ───────────────────────────────────────────────────────────
+    mode_labels = {
+        "single":      "🎯 Single (1 cấu hình)",
+        "granularity": "🧪 Ablation: Mức độ truy xuất",
+        "format":      "🧪 Ablation: Định dạng ngữ cảnh",
+        "strategy":    "🧪 Ablation: Chiến lược tạo sinh",
+    }
+    mode = st.sidebar.radio(
+        "Chế độ chạy",
+        options=list(mode_labels.keys()),
+        format_func=lambda m: mode_labels[m],
+        key="bm_cfg_mode",
+        help=(
+            "Single: chạy 1 cấu hình duy nhất. "
+            "Ablation: tự động chạy nhiều cấu hình, mỗi cấu hình lưu vào folder riêng."
+        ),
+    )
+
+    scenarios = _ablation_scenarios()
+    varying = scenarios[mode]["varies"] if mode != "single" else None
+
+    # ── Mức độ truy xuất ──────────────────────────────────────────────────────
+    retrieval_labels = {
+        RetrievalMethod.NODES:     "Node (thuộc tính đơn lẻ)",
+        RetrievalMethod.TRIPLETS:  "Triplet (bộ ba quan hệ)",
+        RetrievalMethod.PATHS:     "Path (đường dẫn)",
+        RetrievalMethod.SUBGRAPH:  "Subgraph (tiểu đồ thị)",
+        RetrievalMethod.COMMUNITY: "Community (cụm cộng đồng)",
+    }
+    if varying == "retrieval_methods":
+        st.sidebar.info(
+            "Mức độ truy xuất sẽ được thay đổi tự động qua 5 cấu hình: "
+            "node → triplet → path → subgraph → combined."
+        )
+        retrieval_methods = list(RetrievalMethod.ALL)  # unused, placeholder
+    else:
+        retrieval_methods = st.sidebar.multiselect(
+            "Mức độ truy xuất",
+            options=list(retrieval_labels.keys()),
+            default=list(RetrievalMethod.DEFAULT),
+            format_func=lambda k: retrieval_labels[k],
+            key="bm_cfg_retrieval",
+            help="Chọn 1 mức để ablation; chọn nhiều mức sẽ kết hợp.",
+        )
+
+    # ── Định dạng ngữ cảnh ────────────────────────────────────────────────────
+    format_labels = {
+        FormatKey.NATURAL_LANGUAGE:  "Văn bản tự nhiên",
+        FormatKey.CODE_LIKE:         "JSON có cấu trúc",
+        FormatKey.ADJACENCY_TABLE:   "Bảng kề",
+        FormatKey.NODE_SEQUENCE:     "Chuỗi nút",
+        FormatKey.COMMUNITY_SUMMARY: "Community summary",
+    }
+    if varying == "format_keys":
+        st.sidebar.info(
+            "Định dạng ngữ cảnh sẽ được thay đổi tự động qua 5 cấu hình: "
+            "natural → json → adjacency → node_seq → combined."
+        )
+        format_keys = list(FormatKey.DEFAULT_MID)  # unused, placeholder
+    else:
+        format_keys = st.sidebar.multiselect(
+            "Định dạng ngữ cảnh",
+            options=list(format_labels.keys()),
+            default=list(FormatKey.DEFAULT_MID),
+            format_func=lambda k: format_labels[k],
+            key="bm_cfg_format",
+            help="Định dạng biểu diễn ngữ cảnh đưa vào prompt.",
+        )
+
+    # ── Chiến lược tạo sinh ───────────────────────────────────────────────────
+    strategy_labels = {
+        GenerationStrategy.PRE:  "Pre-Generation (1 lượt gọi LLM)",
+        GenerationStrategy.MID:  "Mid-Generation (có cấu trúc suy luận)",
+        GenerationStrategy.POST: "Post-Generation (2 lượt, đối chiếu)",
+    }
+    if varying == "generation_strategy":
+        st.sidebar.info(
+            "Chiến lược tạo sinh sẽ được thay đổi tự động qua 3 cấu hình: "
+            "pre → mid → post."
+        )
+        gen_strategy = GenerationStrategy.DEFAULT  # unused, placeholder
+    else:
+        strategy_options = list(strategy_labels.keys())
+        gen_strategy = st.sidebar.radio(
+            "Chiến lược tạo sinh",
+            options=strategy_options,
+            index=strategy_options.index(GenerationStrategy.DEFAULT),
+            format_func=lambda s: strategy_labels[s],
+            key="bm_cfg_strategy",
+        )
+
+    # ── Build configs list ────────────────────────────────────────────────────
+    base = {
+        "retrieval_methods":    retrieval_methods,
+        "format_keys":          format_keys,
+        "generation_strategy":  gen_strategy,
+    }
+
+    if mode == "single":
+        configs = [{**base, "_name": "single"}]
+    else:
+        spec = scenarios[mode]
+        configs = []
+        for variant_name, value in spec["variants"]:
+            cfg = dict(base)
+            cfg[spec["varies"]] = value
+            cfg["_name"] = variant_name
+            configs.append(cfg)
+
+    return {"mode": mode, "configs": configs}
+
+
+def _config_tag(config: Dict, mode: str = "single") -> str:
+    """Short tag derived from a GraphRAG config for folder naming."""
+    if mode != "single":
+        return f"{mode[:4]}-{config.get('_name', 'x')}"
+    ret = config.get("retrieval_methods") or []
+    fmt = config.get("format_keys") or []
+    strat = (config.get("generation_strategy") or "mid")[:3]
+    ret_short = "".join(r[0] for r in ret) if ret else "def"
+    fmt_short = "".join(f[0] for f in fmt) if fmt else "def"
+    return f"{strat}_r-{ret_short}_f-{fmt_short}"
 
 
 def _get_rag_pipeline():
@@ -537,6 +770,11 @@ def render() -> None:
     st.sidebar.markdown("### 📋 Chọn câu hỏi")
     case_ids, n_selected = _select_case_ids(dataset_path)
 
+    graphrag_config: Optional[Dict] = None
+    if run_graphrag:
+        st.sidebar.divider()
+        graphrag_config = _render_graphrag_config()
+
     st.sidebar.divider()
     st.sidebar.markdown("### 📐 Chọn chỉ số")
     enabled_metrics = _render_metric_selector()
@@ -549,6 +787,7 @@ def render() -> None:
     if st.sidebar.button("🗑️ Xóa kết quả hiển thị"):
         st.session_state.pop("bm_results", None)
         st.session_state.pop("bm_output_dir", None)
+        st.session_state.pop("bm_ablation_summary", None)
         st.rerun()
 
     # ── Guards ────────────────────────────────────────────────────────────────
@@ -567,74 +806,161 @@ def render() -> None:
             "Vào trang **📚 RAG** → Build / Rebuild Vector Store trước."
         )
         return
+    if run_graphrag and graphrag_config is not None:
+        # Each resolved config must have non-empty retrieval_methods and format_keys
+        for cfg in graphrag_config["configs"]:
+            if not cfg.get("retrieval_methods"):
+                st.warning("Chọn ít nhất một mức độ truy xuất trong cấu hình GraphRAG.")
+                return
+            if not cfg.get("format_keys"):
+                st.warning("Chọn ít nhất một định dạng ngữ cảnh trong cấu hình GraphRAG.")
+                return
 
     # ── Run button ────────────────────────────────────────────────────────────
-    if st.button(
-        f"▶️ Chạy Benchmark trên {n_selected} câu",
-        type="primary",
-        use_container_width=True,
-    ):
+    mode = graphrag_config["mode"] if (run_graphrag and graphrag_config) else "single"
+    configs = graphrag_config["configs"] if (run_graphrag and graphrag_config) else [None]
+    n_configs = len(configs)
+    btn_label = (
+        f"▶️ Chạy Benchmark trên {n_selected} câu"
+        if n_configs == 1 or not run_graphrag
+        else f"▶️ Chạy Ablation: {n_configs} cấu hình × {n_selected} câu"
+    )
+
+    if st.button(btn_label, type="primary", use_container_width=True):
         from benchmark.runner import BenchmarkRunner
 
-        registry = _load_registry(enabled_metrics)
-        graphrag_pipe = None
-        rag_pipe      = None
+        # Clear stale ablation summary from previous batch
+        st.session_state.pop("bm_ablation_summary", None)
 
-        with st.status("Đang khởi tạo pipeline…", expanded=True) as status:
+        registry = _load_registry(enabled_metrics)
+        rag_pipe = None
+
+        batch_id = time.strftime("%Y-%m-%d_%H-%M-%S")
+        all_runs: List[Dict] = []  # summary for ablation: one per config
+
+        from src.core.settings import settings as _settings_for_run
+
+        with st.status(
+            f"Đang chạy {n_configs} cấu hình…" if n_configs > 1 else "Đang chạy…",
+            expanded=True,
+        ) as status:
             try:
-                if run_graphrag:
-                    st.write("Kết nối Neo4j + khởi tạo GraphRAGPipeline…")
-                    graphrag_pipe = _get_graphrag_pipeline()
+                st.write(f"🧠 LLM model cho run này: `{_settings_for_run.llm.model}`")
                 if run_rag:
                     st.write("Tải VectorRAGPipeline…")
                     rag_pipe = _get_rag_pipeline()
 
                 runner = BenchmarkRunner(registry=registry)
+                t0_batch = time.time()
 
-                progress = st.progress(0, text="Bắt đầu …")
+                for i, cfg in enumerate(configs, 1):
+                    # RAG chỉ chạy 1 lần ở cấu hình đầu tiên (kết quả không đổi
+                    # giữa các cấu hình GraphRAG), các lần sau bỏ qua để tiết
+                    # kiệm token.
+                    rag_this = rag_pipe if (run_rag and i == 1) else None
 
-                def _progress_cb(current: int, total: int, msg: str) -> None:
-                    pct = current / total if total else 0
-                    progress.progress(pct, text=f"[{current}/{total}] {msg}")
+                    # ── Khởi tạo GraphRAG pipeline với cfg ────────────────────
+                    graphrag_pipe = None
+                    if run_graphrag and cfg is not None:
+                        cfg_display = {
+                            k: v for k, v in cfg.items() if not k.startswith("_")
+                        }
+                        if n_configs > 1:
+                            st.markdown(
+                                f"### [{i}/{n_configs}] Cấu hình: `{cfg.get('_name','?')}`"
+                            )
+                        st.write(
+                            f"• Truy xuất: `{', '.join(cfg_display['retrieval_methods'])}`  \n"
+                            f"• Định dạng: `{', '.join(cfg_display['format_keys'])}`  \n"
+                            f"• Tạo sinh: `{cfg_display['generation_strategy']}`"
+                        )
+                        graphrag_pipe = _get_graphrag_pipeline(cfg)
 
-                # Auto-save dir: timestamped folder under auto_benchmark/
-                run_id     = time.strftime("%Y-%m-%d_%H-%M-%S")
-                output_dir = _AUTO_RUNS_DIR / run_id
-                st.write(f"📁 Lưu tiến trình vào: `{output_dir.relative_to(Path.cwd()) if output_dir.is_relative_to(Path.cwd()) else output_dir}`")
+                    # ── Folder cho cấu hình này ───────────────────────────────
+                    tag = _config_tag(cfg, mode) if cfg else "rag-only"
+                    run_id = f"{batch_id}_{tag}" if n_configs > 1 or run_graphrag else batch_id
+                    output_dir = _AUTO_RUNS_DIR / run_id
+                    st.write(f"📁 `{run_id}`")
 
-                st.write(
-                    f"Chạy {n_selected} câu trên {dataset_path.name}…"
-                )
-                t0      = time.time()
-                results = runner.run(
-                    dataset_path=dataset_path,
-                    graphrag_pipeline=graphrag_pipe,
-                    rag_pipeline=rag_pipe,
-                    case_ids=case_ids,
-                    progress_cb=_progress_cb,
-                    output_dir=output_dir,
-                )
-                elapsed = time.time() - t0
-                progress.progress(1.0, text="✅ Hoàn thành!")
+                    progress = st.progress(0, text=f"[{i}/{n_configs}] Bắt đầu…")
+
+                    def _progress_cb(current: int, total: int, msg: str, _i=i) -> None:
+                        pct = current / total if total else 0
+                        progress.progress(pct, text=f"[cfg {_i}/{n_configs}] [{current}/{total}] {msg}")
+
+                    t0 = time.time()
+                    results = runner.run(
+                        dataset_path=dataset_path,
+                        graphrag_pipeline=graphrag_pipe,
+                        rag_pipeline=rag_this,
+                        case_ids=case_ids,
+                        progress_cb=_progress_cb,
+                        output_dir=output_dir,
+                    )
+                    elapsed = time.time() - t0
+                    progress.progress(1.0, text=f"✅ Cấu hình {i}/{n_configs} xong ({elapsed:.1f}s)")
+
+                    # Save config json
+                    if graphrag_pipe is not None and cfg is not None:
+                        try:
+                            (output_dir / "graphrag_config.json").write_text(
+                                json.dumps(
+                                    {k: v for k, v in cfg.items() if not k.startswith("_")},
+                                    ensure_ascii=False, indent=2,
+                                ),
+                                encoding="utf-8",
+                            )
+                        except Exception:
+                            pass
+
+                    # Collect summary
+                    for br in results:
+                        if br.pipeline == "GraphRAG":
+                            all_runs.append({
+                                "cfg_name": cfg.get("_name", "?") if cfg else "—",
+                                "run_id":   run_id,
+                                "averages": br.averages,
+                            })
+
+                    # Last run's results stored for display
+                    st.session_state["bm_results"]    = results
+                    st.session_state["bm_output_dir"] = str(output_dir)
+
+                elapsed_batch = time.time() - t0_batch
                 status.update(
-                    label=f"✅ Hoàn thành {n_selected} câu trong {elapsed:.1f}s — đã lưu vào `{run_id}`",
+                    label=(
+                        f"✅ Hoàn thành {n_configs} cấu hình trong {elapsed_batch:.1f}s"
+                        if n_configs > 1
+                        else f"✅ Hoàn thành {n_selected} câu trong {elapsed_batch:.1f}s"
+                    ),
                     state="complete",
                     expanded=False,
                 )
-                st.session_state["bm_results"]    = results
-                st.session_state["bm_output_dir"] = str(output_dir)
+
+                if n_configs > 1 and all_runs:
+                    st.session_state["bm_ablation_summary"] = {
+                        "mode":    mode,
+                        "batch":   batch_id,
+                        "runs":    all_runs,
+                    }
 
             except Exception as exc:
                 status.update(label=f"❌ {exc}", state="error")
                 st.exception(exc)
 
-    # ── Display results ───────────────────────────────────────────────────────
+    # ── Ablation summary (nếu vừa chạy multi-config) ──────────────────────────
+    ablation = st.session_state.get("bm_ablation_summary")
+    if ablation:
+        st.divider()
+        _render_ablation_summary(ablation)
+
+    # ── Display results (last run) ────────────────────────────────────────────
     results = st.session_state.get("bm_results")
     if results:
         st.divider()
         out_dir = st.session_state.get("bm_output_dir")
         if out_dir:
-            st.info(f"💾 Run đã lưu tại: `{out_dir}`")
+            st.info(f"💾 Run cuối cùng đã lưu tại: `{out_dir}`")
         _render_composite_scores(results)
         st.divider()
         _render_by_category(results)
@@ -644,3 +970,57 @@ def render() -> None:
         _render_case_table(results)
         st.divider()
         _export_buttons(results)
+
+
+# ── Ablation summary table ───────────────────────────────────────────────────
+
+def _render_ablation_summary(ablation: Dict) -> None:
+    """Display a comparison table across ablation configs."""
+    import pandas as pd
+
+    mode_titles = {
+        "granularity": "So sánh các mức độ truy xuất",
+        "format":      "So sánh các định dạng ngữ cảnh",
+        "strategy":    "So sánh các chiến lược tạo sinh",
+    }
+    title = mode_titles.get(ablation["mode"], "So sánh cấu hình ablation")
+    st.subheader(f"🧪 {title}")
+    st.caption(
+        f"Batch `{ablation['batch']}` — mỗi cấu hình được lưu vào folder riêng, "
+        "chọn ở 'Lịch sử benchmark' để xem chi tiết."
+    )
+
+    rows = []
+    for run in ablation["runs"]:
+        avg = run["averages"] or {}
+        rows.append({
+            "Cấu hình":       run["cfg_name"],
+            "S_retrieval":    round(avg["S_retrieval"], 4) if avg.get("S_retrieval") is not None else None,
+            "S_generation":   round(avg["S_generation"], 4) if avg.get("S_generation") is not None else None,
+            "S_overall":      round(avg["S_overall"], 4)    if avg.get("S_overall")    is not None else None,
+            "Folder":         run["run_id"],
+        })
+
+    if not rows:
+        return
+    df = pd.DataFrame(rows)
+    st.dataframe(df, use_container_width=True, hide_index=True)
+
+    # Bar chart of S_overall per config
+    try:
+        chart_df = df[["Cấu hình", "S_overall"]].set_index("Cấu hình")
+        st.bar_chart(chart_df, height=280)
+    except Exception:
+        pass
+
+    # Export ablation summary
+    try:
+        csv_data = df.to_csv(index=False)
+        st.download_button(
+            "⬇️ Export CSV (ablation summary)",
+            data=csv_data,
+            file_name=f"ablation_{ablation['mode']}_{ablation['batch']}.csv",
+            mime="text/csv",
+        )
+    except Exception:
+        pass

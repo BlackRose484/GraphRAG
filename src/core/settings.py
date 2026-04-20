@@ -16,11 +16,36 @@ key) in .env — no code changes needed.
 from __future__ import annotations
 
 import os
+from contextlib import contextmanager
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Optional
+from typing import Iterator, List, Optional
 
 from dotenv import load_dotenv
+
+# Curated default models per provider — used by LLMSettings.available_models
+# when the user has not supplied an explicit LLM_MODELS_AVAILABLE allowlist.
+# Kept conservative (well-known stable names) so the dropdown doesn't offer
+# models LiteLLM will 404 on.
+_DEFAULT_MODEL_CATALOG: dict[str, list[str]] = {
+    "openai": [
+        "openai/gpt-4o-mini",
+        "openai/gpt-4o",
+        "openai/gpt-5-mini",
+    ],
+    "anthropic": [
+        "anthropic/claude-3-5-haiku-20241022",
+        "anthropic/claude-3-5-sonnet-20241022",
+    ],
+    "gemini": [
+        "gemini/gemini-2.0-flash",
+        "gemini/gemini-2.5-flash",
+        "gemini/gemini-2.5-pro",
+    ],
+    "ollama": [
+        "ollama/llama3.2",
+    ],
+}
 
 _PROJECT_ROOT = Path(__file__).parent.parent.parent
 load_dotenv(_PROJECT_ROOT / ".env")
@@ -109,6 +134,87 @@ class LLMSettings:
             )
             return False, msg
         return True, ""
+
+    def _provider_of(self, model_name: str) -> str:
+        return model_name.split("/")[0] if "/" in model_name else model_name
+
+    def has_key_for(self, model_name: str) -> bool:
+        """True if the provider of ``model_name`` has its API key configured."""
+        required = self._PROVIDER_KEY_MAP.get(self._provider_of(model_name))
+        if required is None:
+            return True  # e.g. ollama — no key needed
+        return bool(os.getenv(required))
+
+    @property
+    def available_models(self) -> List[str]:
+        """Models the user can pick at runtime.
+
+        Two sources, in priority order:
+
+        1. **User allowlist** — ``LLM_MODELS_AVAILABLE`` in .env (comma-
+           separated). When set, only these are offered (plus the current
+           model so it's always selectable).
+
+        2. **Auto-detect** — when the allowlist is empty, every model in
+           :data:`_DEFAULT_MODEL_CATALOG` whose provider has a valid API
+           key is offered. This means configuring ``GEMINI_API_KEY`` and
+           ``OPENAI_API_KEY`` in .env is enough to see both providers'
+           models in the dropdown without any extra config.
+
+        Final list is always filtered to providers with a valid API key.
+        """
+        raw = os.getenv("LLM_MODELS_AVAILABLE", "").strip()
+        if raw:
+            listed = [m.strip() for m in raw.split(",") if m.strip()]
+        else:
+            listed = [
+                m for provider, models in _DEFAULT_MODEL_CATALOG.items()
+                for m in models
+                if self.has_key_for(f"{provider}/_probe")
+            ]
+        # Preserve order, ensure current model is first and deduped
+        seen: set = set()
+        ordered: List[str] = []
+        for m in [self.model, *listed]:
+            if m and m not in seen:
+                seen.add(m)
+                ordered.append(m)
+        return [m for m in ordered if self.has_key_for(m)]
+
+    @property
+    def available_models_source(self) -> str:
+        """Which branch of ``available_models`` produced the current list.
+
+        Returns ``"allowlist"`` when ``LLM_MODELS_AVAILABLE`` is set,
+        ``"auto"`` otherwise. Useful for UI hints.
+        """
+        return "allowlist" if os.getenv("LLM_MODELS_AVAILABLE", "").strip() else "auto"
+
+    @contextmanager
+    def override_model(self, model_name: Optional[str]) -> Iterator[str]:
+        """Temporarily swap ``settings.llm.model`` for the duration of a block.
+
+        Usage::
+
+            with settings.llm.override_model("anthropic/claude-3-5-haiku-20241022"):
+                runner.run(...)   # all pipelines + metrics now use Claude
+
+        Pass ``None`` or the current model to no-op. Restores on exit even if
+        the block raises. BaseModel instances created inside (or already cached
+        outside) will see the override because ``BaseModel.model_name`` reads
+        ``settings.llm.model`` dynamically when not pinned at init.
+        """
+        if not model_name or model_name == self.model:
+            yield self.model
+            return
+        original = self.model
+        self.model = model_name
+        _logger.info("LLM model override: %s → %s", original, model_name)
+        try:
+            yield model_name
+        finally:
+            self.model = original
+            _logger.info("LLM model restored: %s", original)
 
 
 @dataclass

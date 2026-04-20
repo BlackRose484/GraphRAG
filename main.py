@@ -18,6 +18,7 @@ import streamlit as st
 import streamlit.components.v1 as _components
 
 from ui import page_home, page_chat, page_neo4j, page_graphrag, page_rag, page_benchmark, page_compare, page_experiment, page_preference
+from ui.model_selector import render_global_model_selector
 
 # ── Page config (must be first Streamlit call) ────────────────────────────────
 
@@ -115,6 +116,11 @@ page = st.sidebar.radio(
 
 # Sync back
 st.session_state["_nav_page"] = page
+
+st.sidebar.divider()
+
+# Global LLM model selector — applies to every page in this rerun.
+render_global_model_selector()
 
 st.sidebar.divider()
 

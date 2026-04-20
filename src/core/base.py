@@ -66,7 +66,15 @@ class BaseModel(ABC):
     _RETRYABLE = (RateLimitError, ServiceUnavailableError, Timeout, APIConnectionError)
 
     def __init__(self, model_name: Optional[str] = None) -> None:
-        self.model_name: str = model_name or settings.llm.model
+        # When None, ``self.model_name`` resolves dynamically from
+        # ``settings.llm.model`` on every access — this lets cached pipeline
+        # instances pick up runtime model switches (e.g. the benchmark UI's
+        # ``override_model`` context manager).
+        self._model_name: Optional[str] = model_name
+
+    @property
+    def model_name(self) -> str:
+        return self._model_name or settings.llm.model
 
     # ── Text generation ───────────────────────────────────────────────────────
 
