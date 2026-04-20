@@ -87,34 +87,42 @@ class MetricRegistry:
         Build the default registry with all standard metrics enabled and
         RAGAS disabled (LLM-intensive).
         """
-        from .ir_metrics import PrecisionAtK, RecallAtK, F1AtK, MAPMetric, MRRMetric, NDCGAtK
-        from .nlg_metrics import BLEUMetric, ROUGE1Metric, ROUGE2Metric, ROUGELMetric, METEORMetric
+        from .ir_metrics import PrecisionMetric, RecallMetric, MAPMetric, MRRMetric, NDCGAtK
         from .exact_metrics import ExactMatchMetric, KeywordCoverageMetric, EntityCoverageMetric
         from .ragas_metrics import (
             FaithfulnessMetric, AnswerRelevanceMetric,
             ContextPrecisionMetric, ContextRecallMetric, ContextRelevanceMetric,
+            ContextEntitiesRecallMetric,
         )
 
         registry = cls()
 
-        # ── IR (enabled by default) ───────────────────────────────────────────
-        for m in [PrecisionAtK(), RecallAtK(), F1AtK(),
-                  MAPMetric(), MRRMetric(), NDCGAtK()]:
+        # ── IR ────────────────────────────────────────────────────────────────
+        # Thesis spec uses Precision, Recall, MAP, NDCG@10. MRR is registered
+        # but disabled — it's redundant with MAP for binary relevance and not
+        # in the composite score; users can re-enable for diagnostics.
+        for m in [PrecisionMetric(), RecallMetric(), MAPMetric(), NDCGAtK()]:
             registry.register(m, enabled=True)
+        registry.register(MRRMetric(), enabled=False)
 
-        # ── NLG (enabled by default) ──────────────────────────────────────────
-        for m in [BLEUMetric(), ROUGE1Metric(), ROUGE2Metric(),
-                  ROUGELMetric(), METEORMetric()]:
-            registry.register(m, enabled=True)
+        # ── Exact (all disabled by default — replaced by RAGAs) ──────────────
+        # KeywordCoverage / EntityCoverage rely on literal substring match,
+        # which under-scores semantically correct paraphrases. Faithfulness
+        # and AnswerRelevance (RAGAs) cover the same intent with better
+        # semantic understanding. ExactMatch is always ≈0 for generative QA.
+        registry.register(ExactMatchMetric(),       enabled=False)
+        registry.register(KeywordCoverageMetric(),  enabled=False)
+        registry.register(EntityCoverageMetric(),   enabled=False)
 
-        # ── Exact (enabled by default) ────────────────────────────────────────
-        for m in [ExactMatchMetric(), KeywordCoverageMetric(), EntityCoverageMetric()]:
-            registry.register(m, enabled=True)
-
-        # ── RAGAS (disabled by default — requires LLM per question) ──────────
+        # ── RAGAS (LLM-judged) ───────────────────────────────────────────────
+        # Thesis spec uses ContextPrecision, ContextRecall, ContextEntitiesRecall
+        # (retrieval-side) and Faithfulness, AnswerRelevance (generation-side).
+        # ContextRelevance is registered but disabled — overlaps with
+        # ContextPrecision and isn't in the weight table.
         for m in [FaithfulnessMetric(), AnswerRelevanceMetric(),
                   ContextPrecisionMetric(), ContextRecallMetric(),
-                  ContextRelevanceMetric()]:
-            registry.register(m, enabled=False)
+                  ContextEntitiesRecallMetric()]:
+            registry.register(m, enabled=True)
+        registry.register(ContextRelevanceMetric(), enabled=False)
 
         return registry

@@ -35,6 +35,11 @@ logger = get_logger(__name__)
 # Suppress litellm's verbose internal logging
 litellm.suppress_debug_info = True
 
+# Auto-drop params the target model doesn't support (e.g. GPT-5 rejects
+# temperature=0.0 — only temperature=1 is allowed). Without this flag, RAGAs
+# metrics that pass temperature=0 for reproducibility would crash on gpt-5.
+litellm.drop_params = True
+
 
 # ── LLM Base ─────────────────────────────────────────────────────────────────
 
@@ -65,7 +70,7 @@ class BaseModel(ABC):
 
     # ── Text generation ───────────────────────────────────────────────────────
 
-    def safe_generate(self, prompt: str) -> str:
+    def safe_generate(self, prompt: str, temperature: Optional[float] = None) -> str:
         """
         Call the LLM with automatic retry on transient failures.
 
@@ -74,6 +79,9 @@ class BaseModel(ABC):
 
         Args:
             prompt: The full prompt string.
+            temperature: Per-call temperature override. When ``None`` (default),
+                ``settings.llm.temperature`` is used. Pass ``0.0`` for
+                deterministic output (e.g. LLM-judge metrics).
 
         Returns:
             The model's response text.
@@ -83,13 +91,14 @@ class BaseModel(ABC):
         """
         messages = [{"role": "user", "content": prompt}]
         last_error: Optional[Exception] = None
+        temp = temperature if temperature is not None else settings.llm.temperature
 
         for attempt in range(settings.llm.max_retries):
             try:
                 response = litellm.completion(
                     model=self.model_name,
                     messages=messages,
-                    temperature=settings.llm.temperature,
+                    temperature=temp,
                     timeout=settings.llm.timeout,
                 )
                 return response.choices[0].message.content or ""

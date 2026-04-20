@@ -51,7 +51,7 @@ _QUESTIONS: dict[str, list[dict[str, str]]] = {
 
 _CATEGORY_KEYS = list(_QUESTIONS.keys())
 _STEP_LABELS   = _CATEGORY_KEYS + ["Câu hỏi tự do"]
-_RESULTS_DIR   = Path(__file__).resolve().parents[1] / "benchmark" / "results"
+_RESULTS_DIR   = Path(__file__).resolve().parents[1] / "benchmark" / "results" / "user_studies"
 
 # ── Visual constants ─────────────────────────────────────────────────────────
 

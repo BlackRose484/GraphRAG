@@ -17,7 +17,7 @@ each question triggers 1–3 LLM calls.
 from __future__ import annotations
 
 import re
-from typing import List
+from typing import List, Set
 
 from .base import MetricBase, MetricGroup
 
@@ -25,7 +25,12 @@ from .base import MetricBase, MetricGroup
 # ── Shared LLM helper ─────────────────────────────────────────────────────────
 
 class _RAGASBase(MetricBase):
-    """Shared scaffolding for RAGAS metrics."""
+    """Shared scaffolding for RAGAS metrics.
+
+    All RAGAs LLM calls use ``temperature=0`` so judge scores are reproducible
+    across benchmark runs (variance from LLM stochasticity would invalidate
+    cross-pipeline comparisons).
+    """
 
     def __init__(self) -> None:
         from src.core.base import BaseModel
@@ -43,7 +48,7 @@ class _RAGASBase(MetricBase):
     def requires_ground_truth(self) -> bool: return False  # overridden where needed
 
     def _ask(self, prompt: str) -> str:
-        return self._llm.safe_generate(prompt)
+        return self._llm.safe_generate(prompt, temperature=0.0)
 
     @staticmethod
     def _parse_float(text: str, fallback: float = 0.0) -> float:
@@ -208,3 +213,45 @@ class ContextRelevanceMetric(_RAGASBase):
             f"Chỉ trả về một số từ 0.0 đến 1.0."
         )
         return self._parse_float(raw)
+
+
+# ── Context Entities Recall ───────────────────────────────────────────────────
+
+class ContextEntitiesRecallMetric(_RAGASBase):
+    """
+    Context Entities Recall — fraction of ground-truth entities (from the
+    reference answer) that appear in the retrieved context.
+
+    Distinct from ``EntityCoverage`` (which checks the *generated answer*) —
+    this measures whether the retriever surfaced the entities the gold answer
+    relies on, regardless of whether the LLM later used them.
+    """
+
+    @property
+    def name(self) -> str: return "ContextEntitiesRecall"
+    @property
+    def requires_ground_truth(self) -> bool: return True
+
+    def evaluate(self, reference: str, context: str, entities: List[str] = None, **_) -> float:
+        if not reference or not context:
+            return 0.0
+
+        # Prefer the explicit entity list from ground truth if provided
+        if entities:
+            ent_list = list(entities)
+        else:
+            # Fall back to LLM extraction from the reference answer
+            extracted = self._ask(
+                f"Liệt kê các thực thể (tên người, vở chèo, vai diễn, sự kiện) "
+                f"có trong câu trả lời sau. Mỗi thực thể trên một dòng, "
+                f"chỉ ghi tên thực thể, không thêm chú thích.\n\n"
+                f"Câu trả lời: {reference}"
+            )
+            ent_list = self._extract_list(extracted)
+            if not ent_list:
+                return 0.0
+
+        # Count how many of those entities appear in the retrieved context
+        ctx_lower = context.lower()
+        found = sum(1 for e in ent_list if e and e.strip().lower() in ctx_lower)
+        return found / len(ent_list)

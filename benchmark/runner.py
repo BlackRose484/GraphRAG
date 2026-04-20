@@ -31,6 +31,7 @@ from typing import Any, Callable, Dict, List, Optional
 
 from .metrics.base import MetricGroup, MetricResult
 from .metrics.registry import MetricRegistry
+from .score_aggregator import aggregate as aggregate_scores
 
 logger = logging.getLogger(__name__)
 
@@ -45,6 +46,7 @@ class CaseResult:
     pipeline:   str          # "graphrag" | "rag"
     answer:     str
     reference:  str
+    category:   str = ""     # e.g. "local_queries" | "community_queries" | "global_queries"
     scores:          Dict[str, Optional[float]] = field(default_factory=dict)
     latency_s:       float = 0.0
     error:           Optional[str] = None
@@ -56,19 +58,22 @@ class BenchmarkResult:
     """Aggregated results for one pipeline over N questions."""
     pipeline:   str
     n_cases:    int
-    cases:      List[CaseResult]                    = field(default_factory=list)
-    averages:   Dict[str, Optional[float]]          = field(default_factory=dict)
-    metadata:   Dict[str, Any]                      = field(default_factory=dict)
+    cases:      List[CaseResult]                              = field(default_factory=list)
+    averages:   Dict[str, Optional[float]]                    = field(default_factory=dict)
+    by_category: Dict[str, Dict[str, Optional[float]]]        = field(default_factory=dict)
+    metadata:   Dict[str, Any]                                = field(default_factory=dict)
 
     def to_dict(self) -> Dict:
         return {
-            "pipeline":  self.pipeline,
-            "n_cases":   self.n_cases,
-            "averages":  self.averages,
-            "cases":     [
+            "pipeline":    self.pipeline,
+            "n_cases":     self.n_cases,
+            "averages":    self.averages,
+            "by_category": self.by_category,
+            "cases":       [
                 {
                     "case_id":   c.case_id,
                     "question":  c.question,
+                    "category":  c.category,
                     "answer":    c.answer,
                     "reference": c.reference,
                     "scores":    c.scores,
@@ -77,7 +82,7 @@ class BenchmarkResult:
                 }
                 for c in self.cases
             ],
-            "metadata":  self.metadata,
+            "metadata":    self.metadata,
         }
 
 
@@ -106,51 +111,141 @@ class BenchmarkRunner:
         graphrag_pipeline  = None,
         rag_pipeline       = None,
         n_cases:           int = 20,
+        case_ids:          Optional[List[str]] = None,
         progress_cb:       Optional[ProgressCB] = None,
+        output_dir:        Optional[str | Path] = None,
     ) -> List[BenchmarkResult]:
         """
-        Evaluate one or both pipelines against the first *n_cases* questions.
+        Evaluate one or both pipelines against a subset of the dataset.
 
         Args:
             dataset_path:     Path to CheoBench JSON file.
             graphrag_pipeline: ``GraphRAGPipeline`` instance (or ``None`` to skip).
             rag_pipeline:      ``VectorRAGPipeline`` instance (or ``None`` to skip).
-            n_cases:           Max questions to evaluate.
+            n_cases:           Max questions to evaluate (used only when
+                ``case_ids`` is None).
+            case_ids:          Explicit list of case IDs to evaluate. When
+                provided, ``n_cases`` is ignored and only matching cases run.
             progress_cb:       ``(current, total, message)`` callback for UI.
+            output_dir:        When set, results are persisted under this
+                directory: ``meta.json`` (config), ``partial.jsonl`` (one
+                line per case appended live, so a crash mid-run preserves
+                everything completed so far), and ``final.json`` written
+                only after all cases finish.
 
         Returns:
             List of :class:`BenchmarkResult` (one per active pipeline).
         """
-        cases = self._load_dataset(dataset_path, n_cases)
+        cases = self._load_dataset(dataset_path, n_cases, case_ids=case_ids)
         total = len(cases) * sum(
             [graphrag_pipeline is not None, rag_pipeline is not None]
         )
+
+        out_path: Optional[Path] = None
+        partial_fp = None
+        if output_dir is not None:
+            out_path = Path(output_dir)
+            out_path.mkdir(parents=True, exist_ok=True)
+            self._write_meta(
+                out_path,
+                dataset_path=dataset_path,
+                pipelines=[n for n, p in
+                           [("GraphRAG", graphrag_pipeline), ("RAG", rag_pipeline)]
+                           if p is not None],
+                case_ids=[c["id"] for c in cases],
+                metric_names=[m.name for m in self.registry.active_metrics()],
+            )
+            partial_fp = open(out_path / "partial.jsonl", "w", encoding="utf-8")
+
         step  = 0
         results: List[BenchmarkResult] = []
 
-        for pipe_name, pipeline in [("GraphRAG", graphrag_pipeline),
-                                     ("RAG",      rag_pipeline)]:
-            if pipeline is None:
-                continue
+        try:
+            for pipe_name, pipeline in [("GraphRAG", graphrag_pipeline),
+                                         ("RAG",      rag_pipeline)]:
+                if pipeline is None:
+                    continue
 
-            pipe_cases: List[CaseResult] = []
-            for case in cases:
-                step += 1
-                if progress_cb:
-                    progress_cb(step, total, f"[{pipe_name}] {case['id']}")
+                pipe_cases: List[CaseResult] = []
+                for case in cases:
+                    step += 1
+                    if progress_cb:
+                        progress_cb(step, total, f"[{pipe_name}] {case['id']}")
 
-                result = self._run_case(pipe_name, case, pipeline)
-                pipe_cases.append(result)
-                logger.info("%s | %s → latency=%.2fs", pipe_name, case["id"], result.latency_s)
+                    result = self._run_case(pipe_name, case, pipeline)
+                    pipe_cases.append(result)
+                    logger.info("%s | %s → latency=%.2fs",
+                                pipe_name, case["id"], result.latency_s)
 
-            results.append(BenchmarkResult(
-                pipeline=pipe_name,
-                n_cases=len(pipe_cases),
-                cases=pipe_cases,
-                averages=self._aggregate(pipe_cases),
-            ))
+                    # Stream per-case result to disk immediately
+                    if partial_fp is not None:
+                        partial_fp.write(json.dumps(
+                            self._case_to_dict(result),
+                            ensure_ascii=False,
+                        ) + "\n")
+                        partial_fp.flush()
+
+                results.append(BenchmarkResult(
+                    pipeline=pipe_name,
+                    n_cases=len(pipe_cases),
+                    cases=pipe_cases,
+                    averages=self._aggregate(pipe_cases),
+                    by_category=self._aggregate_by_category(pipe_cases),
+                ))
+        finally:
+            if partial_fp is not None:
+                partial_fp.close()
+
+        # Write final aggregated file once all pipelines finish
+        if out_path is not None:
+            (out_path / "final.json").write_text(
+                json.dumps(
+                    {
+                        "results":   [r.to_dict() for r in results],
+                        "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
+                    },
+                    ensure_ascii=False, indent=2,
+                ),
+                encoding="utf-8",
+            )
 
         return results
+
+    @staticmethod
+    def _write_meta(
+        out_path:     Path,
+        dataset_path: str | Path,
+        pipelines:    List[str],
+        case_ids:     List[str],
+        metric_names: List[str],
+    ) -> None:
+        meta = {
+            "started_at":   time.strftime("%Y-%m-%d %H:%M:%S"),
+            "dataset":      str(dataset_path),
+            "pipelines":    pipelines,
+            "n_cases":      len(case_ids),
+            "case_ids":     case_ids,
+            "metrics":      metric_names,
+        }
+        (out_path / "meta.json").write_text(
+            json.dumps(meta, ensure_ascii=False, indent=2),
+            encoding="utf-8",
+        )
+
+    @staticmethod
+    def _case_to_dict(c: "CaseResult") -> Dict[str, Any]:
+        """Serialise a single CaseResult for the streaming partial.jsonl file."""
+        return {
+            "case_id":   c.case_id,
+            "pipeline":  c.pipeline,
+            "category":  c.category,
+            "question":  c.question,
+            "answer":    c.answer,
+            "reference": c.reference,
+            "scores":    c.scores,
+            "latency_s": c.latency_s,
+            "error":     c.error,
+        }
 
     # ── Case runner ───────────────────────────────────────────────────────────
 
@@ -200,6 +295,15 @@ class BenchmarkRunner:
                 context=context,
             )
             scores[metric.name] = mr.value
+            if mr.error:
+                logger.warning(
+                    "Metric %s failed for %s/%s: %s",
+                    metric.name, pipe_name, case["id"], mr.error,
+                )
+
+        # Composite weighted scores from score_aggregator
+        composites = aggregate_scores(scores).as_dict()
+        scores.update(composites)
 
         return CaseResult(
             case_id=case["id"],
@@ -207,6 +311,7 @@ class BenchmarkRunner:
             pipeline=pipe_name,
             answer=answer,
             reference=reference,
+            category=case.get("category", ""),
             scores=scores,
             latency_s=latency,
             error=error,
@@ -227,23 +332,51 @@ class BenchmarkRunner:
             averages[name] = sum(vals) / len(vals) if vals else None
         return averages
 
+    @classmethod
+    def _aggregate_by_category(
+        cls, cases: List[CaseResult]
+    ) -> Dict[str, Dict[str, Optional[float]]]:
+        """Group cases by ``category`` and aggregate each group separately.
+
+        Lets the benchmark distinguish "RAG wins on simple lookup" from
+        "GraphRAG wins on multi-hop" — which a single global average hides.
+        """
+        if not cases:
+            return {}
+        buckets: Dict[str, List[CaseResult]] = {}
+        for c in cases:
+            buckets.setdefault(c.category or "uncategorized", []).append(c)
+        return {cat: cls._aggregate(group) for cat, group in buckets.items()}
+
     # ── Dataset loader ────────────────────────────────────────────────────────
 
     @staticmethod
-    def _load_dataset(path: str | Path, n: int) -> List[Dict]:
+    def _load_dataset(
+        path: str | Path,
+        n: int,
+        case_ids: Optional[List[str]] = None,
+    ) -> List[Dict]:
         with open(path, encoding="utf-8") as f:
             data = json.load(f)
-        cases = data.get("test_cases", data) if isinstance(data, dict) else data
-        return [
+        raw_cases = data.get("test_cases", data) if isinstance(data, dict) else data
+
+        normalized = [
             {
                 "id":           c.get("id", f"CASE_{i+1:03d}"),
                 "category":     c.get("category", ""),
                 "question":     c.get("question", ""),
                 "ground_truth": c.get("ground_truth", {}),
             }
-            for i, c in enumerate(cases[:n])
+            for i, c in enumerate(raw_cases)
             if c.get("question")
         ]
+
+        if case_ids:
+            # Preserve user-specified order; silently skip unknown IDs.
+            by_id = {c["id"]: c for c in normalized}
+            return [by_id[cid] for cid in case_ids if cid in by_id]
+
+        return normalized[:n]
 
     # ── Context/entity extraction from pipeline results ───────────────────────
 
