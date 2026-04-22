@@ -138,27 +138,42 @@ class BaseModel(ABC):
 
     # ── Embeddings ────────────────────────────────────────────────────────────
 
+    # Gemini's batchEmbedContents caps at 100 per request; other providers allow
+    # more but 100 is a universally safe chunk size.
+    _EMBED_BATCH_SIZE = 100
+
     def safe_embed(self, texts: List[str]) -> List[List[float]]:
         """
         Embed a list of texts using the configured embedding model.
+
+        Automatically splits the input into batches of ``_EMBED_BATCH_SIZE`` to
+        respect provider limits (e.g. Gemini caps at 100 per request).
 
         Args:
             texts: List of strings to embed.
 
         Returns:
-            List of embedding vectors (one per input text).
+            List of embedding vectors (one per input text, in the same order).
 
         Raises:
             RuntimeError: On API error.
         """
-        try:
-            response = litellm.embedding(
-                model=settings.llm.embedding_model,
-                input=texts,
-            )
-            return [item["embedding"] for item in response["data"]]
-        except Exception as exc:
-            raise RuntimeError(f"Embedding failed: {exc}") from exc
+        if not texts:
+            return []
+
+        vectors: List[List[float]] = []
+        for i in range(0, len(texts), self._EMBED_BATCH_SIZE):
+            batch = texts[i : i + self._EMBED_BATCH_SIZE]
+            try:
+                response = litellm.embedding(
+                    model=settings.llm.embedding_model,
+                    input=batch,
+                )
+            except Exception as exc:
+                raise RuntimeError(f"Embedding failed: {exc}") from exc
+            vectors.extend(item["embedding"] for item in response["data"])
+
+        return vectors
 
 
 # ── Abstract Interfaces ───────────────────────────────────────────────────────

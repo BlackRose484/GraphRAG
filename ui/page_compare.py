@@ -49,8 +49,15 @@ class _SystemResult:
 
 # ── Runner functions (thread-safe) ────────────────────────────────────────────
 
-def _run_graphrag(query: str) -> _SystemResult:
-    """Run GraphRAG pipeline."""
+def _run_graphrag(query: str, disable_query_enhancement: bool = False) -> _SystemResult:
+    """Run GraphRAG pipeline.
+
+    Args:
+        query: User question.
+        disable_query_enhancement: If True, skip the LLM-based query expand/
+            decompose step before retrieval (used for user-study pages where
+            we want to evaluate the raw pipeline without extra pre-processing).
+    """
     t0 = time.time()
     try:
         from src.graph_loader.neo4j_client import Neo4jClient
@@ -58,7 +65,10 @@ def _run_graphrag(query: str) -> _SystemResult:
 
         client = Neo4jClient()
         client.ping()
-        pipeline = GraphRAGPipeline(client)
+        pipeline = GraphRAGPipeline(
+            client,
+            enable_query_enhancement=not disable_query_enhancement,
+        )
         result = pipeline.run(query)
 
         detail = {
@@ -102,7 +112,7 @@ def _run_rag(query: str) -> _SystemResult:
     try:
         from src.rag.pipeline import VectorRAGPipeline
 
-        pipeline = VectorRAGPipeline(store_path=_RAG_STORE_PATH, top_k=5)
+        pipeline = VectorRAGPipeline(store_path=_RAG_STORE_PATH, top_k=10)
         result = pipeline.run(query)
 
         if result.generation.error:
@@ -149,10 +159,19 @@ def _run_chat(query: str) -> _SystemResult:
 
 # ── Parallel executor ─────────────────────────────────────────────────────────
 
-def _run_all(query: str) -> dict[str, _SystemResult]:
-    """Run all 3 systems in parallel, return results keyed by system name."""
+def _run_all(
+    query: str,
+    disable_query_enhancement: bool = False,
+) -> dict[str, _SystemResult]:
+    """Run all 3 systems in parallel, return results keyed by system name.
+
+    Args:
+        query: User question.
+        disable_query_enhancement: Forwarded to GraphRAG; skips query expand/
+            decompose. RAG and Chat are unaffected (they don't enhance).
+    """
     runners = {
-        "graphrag": _run_graphrag,
+        "graphrag": lambda q: _run_graphrag(q, disable_query_enhancement),
         "rag":      _run_rag,
         "chat":     _run_chat,
     }

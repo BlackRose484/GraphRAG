@@ -530,12 +530,12 @@
       "id": "CASE_032",
       "category": "local_queries",
       "subcategory": "scene_info",
-      "question": "Trích đoạn 'Lớp Tiên Nữ - Đoàn tụ' thuộc vở nào?",
+      "question": "Trích đoạn 'Lớp \"Tiên Nữ - Đoàn tụ\"' thuộc vở nào?",
       "ground_truth": {
         "answer": "Thuộc vở Trương Viên",
         "related_entities": [
           "Trương Viên",
-          "Lớp Tiên Nữ - Đoàn tụ"
+          "Lớp \"Tiên Nữ - Đoàn tụ\""
         ],
         "must_include_keywords": [
           "Trương Viên"
@@ -548,7 +548,7 @@
       "subcategory": "scene_info",
       "question": "Khắc Huy đóng vai gì trong vở Trương Viên?",
       "ground_truth": {
-        "answer": "Khắc Huy đóng vai Hề trong trích đoạn Lớp Tiên Nữ - Đoàn tụ",
+        "answer": "Khắc Huy đóng vai Hề trong trích đoạn Lớp \"Tiên Nữ - Đoàn tụ\"",
         "related_entities": [
           "Khắc Huy",
           "Trương Viên"
@@ -1474,7 +1474,7 @@
       "subcategory": "cross_play",
       "question": "Nhân vật Hề xuất hiện trong những vở chèo nào?",
       "ground_truth": {
-        "answer": "Nhân vật Hề xuất hiện trong Kim Nham (trích đoạn Mụ quán - Trần Phương), Trương Viên (Lớp Tiên Nữ - Đoàn tụ) và Từ Thức (Hề theo Thầy)",
+        "answer": "Nhân vật Hề xuất hiện trong Kim Nham (trích đoạn Mụ quán - Trần Phương), Trương Viên (Lớp \"Tiên Nữ - Đoàn tụ\") và Từ Thức (Hề theo Thầy)",
         "related_entities": [
           "Hề",
           "Kim Nham",

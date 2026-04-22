@@ -96,8 +96,7 @@ def _get_neo4j_stats() -> dict | None:
 
 def _nav_to(page: str, prefill_key: str = "", prefill_val: str = "") -> None:
     """Navigate to another page, optionally setting a prefill value."""
-    st.session_state["_nav_page"] = page
-    st.session_state["_nav_radio"] = page
+    st.session_state["_nav_pending"] = page
     if prefill_key and prefill_val:
         st.session_state[prefill_key] = prefill_val
     st.rerun()

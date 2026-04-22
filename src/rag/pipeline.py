@@ -32,8 +32,8 @@ from src.rag.vector_store import SimpleVectorStore
 logger = logging.getLogger(__name__)
 
 # Default store path lives in project-root/data/
-_DEFAULT_STORE = Path(__file__).resolve().parents[3] / "data" / "vector_store.pkl"
-_TOP_K_DEFAULT = 5
+_DEFAULT_STORE = Path(__file__).resolve().parents[2] / "data" / "vector_store.pkl"
+_TOP_K_DEFAULT = 10
 
 
 # ── Result dataclasses ────────────────────────────────────────────────────────

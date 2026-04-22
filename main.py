@@ -17,7 +17,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import streamlit as st
 import streamlit.components.v1 as _components
 
-from ui import page_home, page_chat, page_neo4j, page_graphrag, page_rag, page_benchmark, page_compare, page_experiment, page_preference
+from ui import page_home, page_chat, page_neo4j, page_graphrag, page_rag, page_benchmark, page_compare, page_experiment, page_preference, page_intro
 from ui.model_selector import render_global_model_selector
 
 # ── Page config (must be first Streamlit call) ────────────────────────────────
@@ -98,8 +98,8 @@ _components.html("""
 
 # ── Navigation pages ──────────────────────────────────────────────────────────
 
-_ALL_PAGES   = ["🏠 Giới thiệu", "⚖️ So sánh", "🔍 GraphRAG", "📚 RAG", "💬 Chat", "🔗 Neo4j", "📊 Benchmark", "🧪 Thử nghiệm", "📋 Đánh giá ưu tiên"]
-_GUEST_PAGES = ["🧪 Thử nghiệm", "📋 Đánh giá ưu tiên"]
+_ALL_PAGES   = ["🏠 Giới thiệu", "👋 Chào mừng", "⚖️ So sánh", "🔍 GraphRAG", "📚 RAG", "💬 Chat", "🔗 Neo4j", "📊 Benchmark", "🧪 Thử nghiệm", "📋 Đánh giá ưu tiên"]
+_GUEST_PAGES = ["👋 Chào mừng", "🧪 Thử nghiệm", "📋 Đánh giá ưu tiên"]
 
 # ── Guest mode + admin unlock ────────────────────────────────────────────────
 # Behaviour:
@@ -142,6 +142,12 @@ def _render_admin_unlock() -> None:
 
 available_pages = _ALL_PAGES if _is_admin() else _GUEST_PAGES
 
+# Apply pending navigation from page buttons (must run BEFORE the radio widget
+# is instantiated — Streamlit blocks writes to a widget-backed key after that).
+_pending = st.session_state.pop("_nav_pending", None)
+if _pending and _pending in available_pages:
+    st.session_state["_nav_radio"] = _pending
+
 # If session state points to a page that's no longer visible, snap to first.
 if st.session_state.get("_nav_radio") not in available_pages:
     st.session_state["_nav_radio"] = available_pages[0]
@@ -179,6 +185,8 @@ if _is_admin():
 
 if page == "🏠 Giới thiệu":
     page_home.render()
+elif page == "👋 Chào mừng":
+    page_intro.render()
 elif page == "⚖️ So sánh":
     page_compare.render()
 elif page == "🔍 GraphRAG":

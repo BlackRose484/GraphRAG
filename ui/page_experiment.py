@@ -680,7 +680,7 @@ def render() -> None:
             step["question"] = chosen["q"]
             step["case_id"]  = chosen["id"]
             with st.spinner("⏳ Đang chạy song song 3 hệ thống — GraphRAG · RAG · LLM..."):
-                step["results"] = _run_all(chosen["q"])
+                step["results"] = _run_all(chosen["q"], disable_query_enhancement=True)
             st.session_state.exp_awaiting_rating = True
             st.rerun()
     else:
@@ -702,7 +702,7 @@ def render() -> None:
                 step["question"] = free_q.strip()
                 step["case_id"]  = "FREE"
                 with st.spinner("⏳ Đang chạy song song 3 hệ thống — GraphRAG · RAG · LLM..."):
-                    step["results"] = _run_all(free_q.strip())
+                    step["results"] = _run_all(free_q.strip(), disable_query_enhancement=True)
                 st.session_state.exp_awaiting_rating = True
                 st.rerun()
             else:
