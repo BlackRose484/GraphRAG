@@ -330,6 +330,72 @@ def _save_file() -> Path:
 
 # ── Render helpers ────────────────────────────────────────────────────────────
 
+@st.cache_data(show_spinner=False)
+def _load_ground_truth_map() -> dict[str, dict[str, Any]]:
+    """Read CheoBench v2 once and return {case_id: ground_truth_dict}.
+
+    Used by ``_render_reference_answer`` to show the expected answer below the
+    3-system output, so participants can compare system answers against the
+    curated reference while rating. Free-form questions (case_id=``"FREE"``)
+    have no entry and silently skip the panel.
+    """
+    path = (
+        Path(__file__).resolve().parents[1]
+        / "benchmark" / "datasets" / "CheoBench_v2.json"
+    )
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except Exception:
+        return {}
+    cases = data.get("test_cases", []) if isinstance(data, dict) else []
+    return {
+        c["id"]: c.get("ground_truth", {})
+        for c in cases
+        if isinstance(c, dict) and c.get("id")
+    }
+
+
+def _render_reference_answer(case_id: str) -> None:
+    """Render the curated reference answer card below the 3-system output.
+
+    Shown only for preset questions with a case_id matching CheoBench v2.
+    Silently no-op for free-form or unknown IDs so the UI stays clean.
+    """
+    if not case_id or case_id == "FREE":
+        return
+    gt = _load_ground_truth_map().get(case_id) or {}
+    answer = (gt.get("answer") or "").strip()
+    if not answer:
+        return
+
+    keywords = gt.get("must_include_keywords") or []
+    entities = gt.get("related_entities") or []
+
+    st.markdown(
+        """
+        <div style="
+            background: linear-gradient(135deg, #fff8dc 0%, #fef6e4 100%);
+            border: 1px solid #e8d99c; border-left: 4px solid #d4a017;
+            border-radius: 0 10px 10px 0; padding: 1rem 1.3rem;
+            margin: 1.2rem 0 0.5rem;
+        ">
+          <div style="
+              font-weight: 700; font-size: 0.95rem; color: #6b4e10;
+              margin-bottom: 0.5rem; display: flex; align-items: center; gap: 6px;
+          ">
+            ✅ Câu trả lời mong muốn (tham khảo)
+          </div>
+        """,
+        unsafe_allow_html=True,
+    )
+    st.markdown(answer)
+    if keywords:
+        st.caption(f"🔑 Từ khóa bắt buộc: {', '.join(keywords)}")
+    if entities:
+        st.caption(f"🏷️ Thực thể liên quan: {', '.join(entities)}")
+    st.markdown("</div>", unsafe_allow_html=True)
+
+
 def _render_columns(results: dict[str, _SystemResult], kp: str, expander_ok: bool = True) -> None:
     col_g, col_r, col_c = st.columns(3)
     for col, name in [(col_g, "graphrag"), (col_r, "rag"), (col_c, "chat")]:
@@ -539,6 +605,7 @@ def render() -> None:
             with st.chat_message("user"):
                 st.markdown(step["question"])
             _render_columns(step["results"], kp=f"exp_done_{i}_", expander_ok=False)
+            _render_reference_answer(step.get("case_id", ""))
 
     # ── Tất cả xong ──────────────────────────────────────────────────────────
     if current >= 4:
@@ -652,6 +719,7 @@ def render() -> None:
         with st.chat_message("user"):
             st.markdown(step["question"])
         _render_columns(step["results"], kp=f"exp_cur_{current}_")
+        _render_reference_answer(step.get("case_id", ""))
         _render_rating(current)
         return
 
