@@ -24,7 +24,10 @@ enableCORS = false\n\
 enableXsrfProtection = false\n\
 \n\
 [browser]\n\
-gatherUsageStats = false\n' > ~/.streamlit/config.toml
+gatherUsageStats = false\n\
+\n\
+[theme]\n\
+base="light"\n' > ~/.streamlit/config.toml
 
 EXPOSE 8080
 
