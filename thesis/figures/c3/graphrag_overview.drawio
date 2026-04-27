@@ -1,0 +1,270 @@
+<mxfile host="app.diagrams.net" agent="Claude" version="22.0.0" type="device">
+  <diagram name="GraphRAG-Overview" id="graphrag-overview">
+    <mxGraphModel dx="1600" dy="1100" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1500" pageHeight="1100" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+
+        <!-- ============== TẦNG GIAO DIỆN ============== -->
+        <mxCell id="ui_layer" value="Tầng Giao diện"
+                style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;strokeWidth=2;fontSize=18;fontStyle=1;verticalAlign=top;align=center;"
+                vertex="1" parent="1">
+          <mxGeometry x="40" y="30" width="1420" height="140" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="q_box" value="&lt;b&gt;q&lt;/b&gt;&lt;br&gt;Câu hỏi người dùng"
+                style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#6c8ebf;strokeWidth=1.5;fontSize=18;align=center;"
+                vertex="1" parent="1">
+          <mxGeometry x="120" y="70" width="260" height="80" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="a_box" value="&lt;b&gt;a&lt;/b&gt;&lt;br&gt;Câu trả lời"
+                style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#6c8ebf;strokeWidth=1.5;fontSize=18;align=center;"
+                vertex="1" parent="1">
+          <mxGeometry x="1080" y="70" width="260" height="80" as="geometry"/>
+        </mxCell>
+
+        <!-- ============== TẦNG XỬ LÝ ============== -->
+        <mxCell id="proc_layer" value="Tầng Xử lý GraphRAG"
+                style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;strokeWidth=2;fontSize=18;fontStyle=1;verticalAlign=top;align=center;"
+                vertex="1" parent="1">
+          <mxGeometry x="40" y="200" width="1420" height="480" as="geometry"/>
+        </mxCell>
+
+        <!-- G-Retrieval sub-panel -->
+        <mxCell id="gret_panel" value="G-Retrieval"
+                style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;strokeWidth=2;fontSize=18;fontStyle=1;verticalAlign=top;align=center;"
+                vertex="1" parent="1">
+          <mxGeometry x="80" y="260" width="720" height="380" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="gret_s1" value="&lt;b&gt;① Tiền xử lý &amp;amp;&lt;br&gt;trích xuất thực thể&lt;/b&gt;&lt;br&gt;&lt;br&gt;• LLM mở rộng ∥ phân rã&lt;br&gt;• Đối chiếu Danh mục thực thể"
+                style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#d79b00;strokeWidth=1.5;fontSize=14;align=center;"
+                vertex="1" parent="1">
+          <mxGeometry x="110" y="330" width="210" height="290" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="gret_s2" value="&lt;b&gt;② Truy vấn đa mức độ&lt;/b&gt;&lt;br&gt;&lt;br&gt;① Node&lt;br&gt;② Triplet&lt;br&gt;③ Path&lt;br&gt;④ Subgraph"
+                style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#d79b00;strokeWidth=1.5;fontSize=14;align=center;"
+                vertex="1" parent="1">
+          <mxGeometry x="350" y="330" width="210" height="290" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="gret_s3" value="&lt;b&gt;③ Tổ chức ngữ cảnh&lt;/b&gt;&lt;br&gt;&lt;br&gt;4 định dạng:&lt;br&gt;Mô tả tự nhiên&lt;br&gt;Bảng kề&lt;br&gt;JSON&lt;br&gt;Chuỗi nút"
+                style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#d79b00;strokeWidth=1.5;fontSize=14;align=center;"
+                vertex="1" parent="1">
+          <mxGeometry x="590" y="330" width="190" height="290" as="geometry"/>
+        </mxCell>
+
+        <!-- G-Retrieval internal arrows -->
+        <mxCell id="e_gr_s1_s2" value="Q, E"
+                style="endArrow=classic;html=1;rounded=0;strokeColor=#d79b00;strokeWidth=2.5;fontSize=14;fontStyle=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;"
+                edge="1" source="gret_s1" target="gret_s2" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="e_gr_s2_s3" value="G"
+                style="endArrow=classic;html=1;rounded=0;strokeColor=#d79b00;strokeWidth=2.5;fontSize=14;fontStyle=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;"
+                edge="1" source="gret_s2" target="gret_s3" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- G-Generation sub-panel -->
+        <mxCell id="ggen_panel" value="G-Generation"
+                style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;strokeWidth=2;fontSize=18;fontStyle=1;verticalAlign=top;align=center;"
+                vertex="1" parent="1">
+          <mxGeometry x="830" y="260" width="630" height="380" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="ggen_s1" value="&lt;b&gt;① Xây dựng Prompt P&lt;/b&gt;&lt;br&gt;&lt;br&gt;① Tiêu đề&lt;br&gt;② Dữ kiện chính&lt;br&gt;③ Khối ngữ cảnh&lt;br&gt;④ Câu hỏi + Chỉ dẫn"
+                style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#9673a6;strokeWidth=1.5;fontSize=14;align=center;"
+                vertex="1" parent="1">
+          <mxGeometry x="860" y="330" width="210" height="290" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="ggen_s2" value="&lt;b&gt;② Chiến lược tạo sinh&lt;/b&gt;&lt;br&gt;&lt;br&gt;Pre (1 lượt)&lt;br&gt;Mid (1 lượt)&lt;br&gt;Post (2 lượt)&lt;br&gt;&lt;br&gt;+ Kiểm soát ảo giác (2 lớp)"
+                style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#9673a6;strokeWidth=1.5;fontSize=14;align=center;"
+                vertex="1" parent="1">
+          <mxGeometry x="1090" y="330" width="350" height="290" as="geometry"/>
+        </mxCell>
+
+        <!-- G-Generation internal arrow -->
+        <mxCell id="e_gg_s1_s2" value="P"
+                style="endArrow=classic;html=1;rounded=0;strokeColor=#9673a6;strokeWidth=2.5;fontSize=14;fontStyle=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;"
+                edge="1" source="ggen_s1" target="ggen_s2" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- ============== TẦNG TRI THỨC ============== -->
+        <mxCell id="kg_layer" value="Tầng Tri thức"
+                style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;strokeWidth=2;fontSize=18;fontStyle=1;verticalAlign=top;align=center;"
+                vertex="1" parent="1">
+          <mxGeometry x="40" y="710" width="560" height="320" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="kg_neo4j" value="&lt;b&gt;Đồ thị tri thức&lt;/b&gt;&lt;br&gt;(Neo4j)&lt;br&gt;&lt;br&gt;Nút / Cạnh&lt;br&gt;Chỉ mục 3 tầng"
+                style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;fillColor=#ffffff;strokeColor=#82b366;strokeWidth=1.5;fontSize=14;align=center;"
+                vertex="1" parent="1">
+          <mxGeometry x="80" y="780" width="180" height="220" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="kg_catalog" value="&lt;b&gt;Danh mục thực thể&lt;/b&gt;&lt;br&gt;&lt;br&gt;Nạp từ Đồ thị tri thức&lt;br&gt;tại khởi tạo&lt;br&gt;&lt;br&gt;Grounding cho&lt;br&gt;trích xuất thực thể"
+                style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#82b366;strokeWidth=1.5;fontSize=14;align=center;"
+                vertex="1" parent="1">
+          <mxGeometry x="290" y="780" width="290" height="220" as="geometry"/>
+        </mxCell>
+
+        <!-- ============== TẦNG MÔ HÌNH NGÔN NGỮ ============== -->
+        <mxCell id="llm_layer" value="Tầng Mô hình ngôn ngữ"
+                style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;strokeWidth=2;fontSize=18;fontStyle=1;verticalAlign=top;align=center;"
+                vertex="1" parent="1">
+          <mxGeometry x="640" y="710" width="820" height="320" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="llm_service" value="&lt;b&gt;Dịch vụ LLM&lt;/b&gt;&lt;br&gt;(API)&lt;br&gt;&lt;br&gt;• Mở rộng / phân rã truy vấn&lt;br&gt;• Trích xuất thực thể&lt;br&gt;• Sinh câu trả lời&lt;br&gt;• Kiểm chứng (chiến lược Post)"
+                style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#b85450;strokeWidth=1.5;fontSize=14;align=center;"
+                vertex="1" parent="1">
+          <mxGeometry x="750" y="780" width="620" height="220" as="geometry"/>
+        </mxCell>
+
+        <!-- ============== MŨI TÊN GIỮA CÁC TẦNG (CÓ ĐÁNH SỐ) ============== -->
+
+        <!-- ① UI(q) -> G-Retrieval S1 -->
+        <mxCell id="arrow1" value="q"
+                style="endArrow=classic;html=1;rounded=0;edgeStyle=orthogonalEdgeStyle;strokeColor=#555555;strokeWidth=3;fontSize=16;fontStyle=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;"
+                edge="1" source="q_box" target="gret_s1" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="num1" value="①"
+                style="ellipse;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#555555;strokeWidth=2.5;fontSize=18;fontStyle=1;align=center;"
+                vertex="1" parent="1">
+          <mxGeometry x="240" y="220" width="42" height="42" as="geometry"/>
+        </mxCell>
+
+        <!-- ② G-Retrieval S1 -> LLM (request, dashed) -->
+        <mxCell id="arrow2" value="q + Danh mục thực thể"
+                style="endArrow=classic;html=1;rounded=0;edgeStyle=orthogonalEdgeStyle;strokeColor=#b85450;strokeWidth=2.5;dashed=1;fontSize=14;fontStyle=1;exitX=0.4;exitY=1;exitDx=0;exitDy=0;entryX=0.15;entryY=0;entryDx=0;entryDy=0;"
+                edge="1" source="gret_s1" target="llm_service" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="194" y="685"/>
+              <mxPoint x="843" y="685"/>
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="num2" value="②"
+                style="ellipse;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#b85450;strokeWidth=2.5;fontSize=18;fontStyle=1;align=center;"
+                vertex="1" parent="1">
+          <mxGeometry x="490" y="665" width="42" height="42" as="geometry"/>
+        </mxCell>
+
+        <!-- ③ LLM -> G-Retrieval S1 (response) -->
+        <mxCell id="arrow3" value="Q, E"
+                style="endArrow=classic;html=1;rounded=0;edgeStyle=orthogonalEdgeStyle;strokeColor=#b85450;strokeWidth=2.5;fontSize=14;fontStyle=1;exitX=0.2;exitY=0;exitDx=0;exitDy=0;entryX=0.6;entryY=1;entryDx=0;entryDy=0;"
+                edge="1" source="llm_service" target="gret_s1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="874" y="730"/>
+              <mxPoint x="236" y="730"/>
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="num3" value="③"
+                style="ellipse;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#b85450;strokeWidth=2.5;fontSize=18;fontStyle=1;align=center;"
+                vertex="1" parent="1">
+          <mxGeometry x="556" y="710" width="42" height="42" as="geometry"/>
+        </mxCell>
+
+        <!-- ④ G-Retrieval S2 -> KG (request, dashed) -->
+        <mxCell id="arrow4" value="truy vấn đồ thị (Node/Triplet/Path/Subgraph)"
+                style="endArrow=classic;html=1;rounded=0;edgeStyle=orthogonalEdgeStyle;strokeColor=#82b366;strokeWidth=2.5;dashed=1;fontSize=14;fontStyle=1;exitX=0.4;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;"
+                edge="1" source="gret_s2" target="kg_neo4j" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="434" y="685"/>
+              <mxPoint x="170" y="685"/>
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="num4" value="④"
+                style="ellipse;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#82b366;strokeWidth=2.5;fontSize=18;fontStyle=1;align=center;"
+                vertex="1" parent="1">
+          <mxGeometry x="285" y="665" width="42" height="42" as="geometry"/>
+        </mxCell>
+
+        <!-- ⑤ KG -> G-Retrieval S2 (response) -->
+        <mxCell id="arrow5" value="Nút / Cạnh / Đường đi"
+                style="endArrow=classic;html=1;rounded=0;edgeStyle=orthogonalEdgeStyle;strokeColor=#82b366;strokeWidth=2.5;fontSize=14;fontStyle=1;exitX=0.7;exitY=0;exitDx=0;exitDy=0;entryX=0.6;entryY=1;entryDx=0;entryDy=0;"
+                edge="1" source="kg_neo4j" target="gret_s2" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="206" y="730"/>
+              <mxPoint x="476" y="730"/>
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="num5" value="⑤"
+                style="ellipse;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#82b366;strokeWidth=2.5;fontSize=18;fontStyle=1;align=center;"
+                vertex="1" parent="1">
+          <mxGeometry x="335" y="710" width="42" height="42" as="geometry"/>
+        </mxCell>
+
+        <!-- ⑥ G-Retrieval S3 -> G-Generation S1 (internal Processing, solid) -->
+        <mxCell id="arrow6" value="(C, K)"
+                style="endArrow=classic;html=1;rounded=0;strokeColor=#444444;strokeWidth=3;fontSize=16;fontStyle=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;"
+                edge="1" source="gret_s3" target="ggen_s1" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="num6" value="⑥"
+                style="ellipse;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#444444;strokeWidth=2.5;fontSize=18;fontStyle=1;align=center;"
+                vertex="1" parent="1">
+          <mxGeometry x="799" y="455" width="42" height="42" as="geometry"/>
+        </mxCell>
+
+        <!-- ⑦ G-Generation S2 -> LLM (request, dashed) -->
+        <mxCell id="arrow7" value="P (1 hoặc 2 lượt)"
+                style="endArrow=classic;html=1;rounded=0;edgeStyle=orthogonalEdgeStyle;strokeColor=#b85450;strokeWidth=2.5;dashed=1;fontSize=14;fontStyle=1;exitX=0.4;exitY=1;exitDx=0;exitDy=0;entryX=0.7;entryY=0;entryDx=0;entryDy=0;"
+                edge="1" source="ggen_s2" target="llm_service" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="num7" value="⑦"
+                style="ellipse;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#b85450;strokeWidth=2.5;fontSize=18;fontStyle=1;align=center;"
+                vertex="1" parent="1">
+          <mxGeometry x="1210" y="690" width="42" height="42" as="geometry"/>
+        </mxCell>
+
+        <!-- ⑧ LLM -> G-Generation S2 (response) -->
+        <mxCell id="arrow8" value="a (thô)"
+                style="endArrow=classic;html=1;rounded=0;edgeStyle=orthogonalEdgeStyle;strokeColor=#b85450;strokeWidth=2.5;fontSize=14;fontStyle=1;exitX=0.85;exitY=0;exitDx=0;exitDy=0;entryX=0.7;entryY=1;entryDx=0;entryDy=0;"
+                edge="1" source="llm_service" target="ggen_s2" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="num8" value="⑧"
+                style="ellipse;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#b85450;strokeWidth=2.5;fontSize=18;fontStyle=1;align=center;"
+                vertex="1" parent="1">
+          <mxGeometry x="1310" y="690" width="42" height="42" as="geometry"/>
+        </mxCell>
+
+        <!-- ⑨ G-Generation S2 -> UI(a) -->
+        <mxCell id="arrow9" value="a"
+                style="endArrow=classic;html=1;rounded=0;edgeStyle=orthogonalEdgeStyle;strokeColor=#555555;strokeWidth=3;fontSize=16;fontStyle=1;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;"
+                edge="1" source="ggen_s2" target="a_box" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="num9" value="⑨"
+                style="ellipse;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#555555;strokeWidth=2.5;fontSize=18;fontStyle=1;align=center;"
+                vertex="1" parent="1">
+          <mxGeometry x="1244" y="225" width="42" height="42" as="geometry"/>
+        </mxCell>
+
+        <!-- ============== CHÚ THÍCH ============== -->
+        <mxCell id="legend" value="&lt;b&gt;Chú thích&lt;/b&gt;&lt;br&gt;— Mũi tên liền: dòng dữ liệu chính / phản hồi&amp;nbsp;&amp;nbsp;&amp;nbsp;— Mũi tên đứt: lời gọi tới tài nguyên ngoài&amp;nbsp;&amp;nbsp;&amp;nbsp;— Số ①–⑨: trình tự thời gian khi xử lý một câu hỏi&lt;br&gt;— q: câu hỏi gốc &amp;nbsp;|&amp;nbsp; Q, E: tập truy vấn đã làm giàu &amp;amp; tập thực thể &amp;nbsp;|&amp;nbsp; G: dữ liệu đồ thị truy xuất&lt;br&gt;— C, K: ngữ cảnh đa định dạng &amp;amp; tập dữ kiện chính &amp;nbsp;|&amp;nbsp; P: prompt hoàn chỉnh &amp;nbsp;|&amp;nbsp; a: câu trả lời"
+                style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fafafa;strokeColor=#999999;strokeWidth=1;fontSize=13;align=left;verticalAlign=top;spacingLeft=10;spacingTop=8;"
+                vertex="1" parent="1">
+          <mxGeometry x="40" y="1045" width="1420" height="50" as="geometry"/>
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

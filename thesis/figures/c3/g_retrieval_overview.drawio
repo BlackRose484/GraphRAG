@@ -1,0 +1,67 @@
+<mxfile host="app.diagrams.net" agent="Claude" version="22.0.0" type="device">
+  <diagram name="G-Retrieval Overview" id="g_ret_overview">
+    <mxGraphModel dx="1600" dy="500" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1500" pageHeight="450" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+
+        <!-- Đầu vào: q -->
+        <mxCell id="input_q" value="&lt;b&gt;q&lt;/b&gt;&lt;br&gt;Câu hỏi&lt;br&gt;ngôn ngữ tự nhiên"
+                style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;strokeWidth=2;fontSize=14;align=center;verticalAlign=middle;"
+                vertex="1" parent="1">
+          <mxGeometry x="40" y="160" width="200" height="120" as="geometry"/>
+        </mxCell>
+
+        <!-- Giai đoạn 1 -->
+        <mxCell id="stage1" value="&lt;b style=&quot;font-size:16px&quot;&gt;Giai đoạn 1&lt;/b&gt;&lt;br&gt;&lt;b&gt;Tiền xử lý &amp;amp; trích xuất thực thể&lt;/b&gt;&lt;br&gt;&lt;br&gt;• LLM mở rộng ∥ phân rã&lt;br&gt;• Đối chiếu Danh mục thực thể"
+                style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;strokeWidth=2;fontSize=14;align=center;verticalAlign=middle;"
+                vertex="1" parent="1">
+          <mxGeometry x="290" y="140" width="280" height="160" as="geometry"/>
+        </mxCell>
+
+        <!-- Giai đoạn 2 -->
+        <mxCell id="stage2" value="&lt;b style=&quot;font-size:16px&quot;&gt;Giai đoạn 2&lt;/b&gt;&lt;br&gt;&lt;b&gt;Truy vấn đa mức độ&lt;/b&gt;&lt;br&gt;&lt;br&gt;Bốn mức:&lt;br&gt;① Node ② Triplet&lt;br&gt;③ Path ④ Subgraph"
+                style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;strokeWidth=2;fontSize=14;align=center;verticalAlign=middle;"
+                vertex="1" parent="1">
+          <mxGeometry x="620" y="40" width="280" height="160" as="geometry"/>
+        </mxCell>
+
+        <!-- Giai đoạn 3 -->
+        <mxCell id="stage3" value="&lt;b style=&quot;font-size:16px&quot;&gt;Giai đoạn 3&lt;/b&gt;&lt;br&gt;&lt;b&gt;Tổ chức ngữ cảnh&lt;/b&gt;&lt;br&gt;&lt;br&gt;Bộ chuyển đổi định dạng&lt;br&gt;(4 định dạng) + trích K"
+                style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;strokeWidth=2;fontSize=14;align=center;verticalAlign=middle;"
+                vertex="1" parent="1">
+          <mxGeometry x="950" y="40" width="280" height="160" as="geometry"/>
+        </mxCell>
+
+        <!-- Đầu ra (C, K) -->
+        <mxCell id="output" value="&lt;b style=&quot;font-size:16px&quot;&gt;(C, K)&lt;/b&gt;&lt;br&gt;&lt;br&gt;Ngữ cảnh đã định dạng&lt;br&gt;+ Tập dữ kiện chính"
+                style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;strokeWidth=2;fontSize=14;align=center;verticalAlign=middle;"
+                vertex="1" parent="1">
+          <mxGeometry x="1280" y="160" width="200" height="120" as="geometry"/>
+        </mxCell>
+
+        <!-- ARROWS -->
+        <mxCell id="e_q_s1" value="q" style="endArrow=classic;html=1;rounded=0;strokeColor=#555555;strokeWidth=2.5;fontSize=14;fontStyle=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;"
+                edge="1" source="input_q" target="stage1" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="e_s1_s2" value="Q, E" style="endArrow=classic;html=1;rounded=0;edgeStyle=orthogonalEdgeStyle;strokeColor=#555555;strokeWidth=2.5;fontSize=14;fontStyle=1;exitX=1;exitY=0.3;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;"
+                edge="1" source="stage1" target="stage2" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="e_s2_s3" value="G" style="endArrow=classic;html=1;rounded=0;strokeColor=#555555;strokeWidth=2.5;fontSize=14;fontStyle=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;"
+                edge="1" source="stage2" target="stage3" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="e_s3_out" value="(C, K)" style="endArrow=classic;html=1;rounded=0;edgeStyle=orthogonalEdgeStyle;strokeColor=#555555;strokeWidth=2.5;fontSize=14;fontStyle=1;exitX=1;exitY=0.7;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;"
+                edge="1" source="stage3" target="output" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

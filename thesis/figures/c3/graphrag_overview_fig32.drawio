@@ -1,0 +1,189 @@
+<mxfile host="app.diagrams.net">
+  <diagram name="Hình 3.2 - Tổng quan luồng xử lý GraphRAG" id="graphrag_fig32">
+    <mxGraphModel dx="1600" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="780" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+
+        <!-- =================== USER ICON =================== -->
+        <mxCell id="user_icon" value="" style="shape=image;verticalLabelPosition=bottom;labelBackgroundColor=default;verticalAlign=top;aspect=fixed;imageAspect=0;image=data:image/svg+xml,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iIzMzMyI+PHBhdGggZD0iTTEyIDJDNi40OCAyIDIgNi40OCAyIDEyczQuNDggMTAgMTAgMTAgMTAtNC40OCAxMC0xMFMxNy41MiAyIDEyIDJ6bTAgM2MxLjY2IDAgMyAxLjM0IDMgM3MtMS4zNCAzLTMgMy0zLTEuMzQtMy0zIDEuMzQtMyAzLTN6bTAgMTQuMmMtMi41IDAtNC43MS0xLjI4LTYtMy4yMi4wMy0xLjk5IDQtMy4wOCA2LTMuMDggMiAwIDUuOTcgMS4wOSA2IDMuMDgtMS4yOSAxLjk0LTMuNSAzLjIyLTYgMy4yMnoiLz48L3N2Zz4=;" vertex="1" parent="1">
+          <mxGeometry x="30" y="260" width="70" height="70" as="geometry"/>
+        </mxCell>
+
+        <!-- =================== QUESTION BOX =================== -->
+        <mxCell id="question_box" value="Question" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#333333;strokeWidth=2;fontSize=14;" vertex="1" parent="1">
+          <mxGeometry x="20" y="365" width="120" height="40" as="geometry"/>
+        </mxCell>
+
+        <!-- User → Question -->
+        <mxCell id="u_q_arr" style="strokeWidth=2;strokeColor=#333;endArrow=block;endFill=1;" edge="1" source="user_icon" target="question_box" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- =================== G-RETRIEVAL TITLE =================== -->
+        <mxCell id="gret_title" value="G-Retrieval" style="text;html=1;fontSize=21;fontStyle=1;fontColor=#1565c0;align=center;" vertex="1" parent="1">
+          <mxGeometry x="500" y="18" width="270" height="32" as="geometry"/>
+        </mxCell>
+
+        <!-- =================== PRE-PROCESSING (green) =================== -->
+        <mxCell id="preproc_group" value="Pre-processing" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;strokeWidth=2.5;fontSize=15;fontStyle=1;verticalAlign=top;spacingTop=8;" vertex="1" parent="1">
+          <mxGeometry x="170" y="210" width="230" height="240" as="geometry"/>
+        </mxCell>
+        <mxCell id="qp_box" value="Query Processing" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f0fae8;strokeColor=#82b366;strokeWidth=1.5;fontSize=14;" vertex="1" parent="1">
+          <mxGeometry x="185" y="275" width="200" height="45" as="geometry"/>
+        </mxCell>
+        <mxCell id="ee_box" value="Entity Extraction" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f0fae8;strokeColor=#82b366;strokeWidth=1.5;fontSize=14;" vertex="1" parent="1">
+          <mxGeometry x="185" y="345" width="200" height="45" as="geometry"/>
+        </mxCell>
+        <mxCell id="pp_inner_arr" style="strokeWidth=1.5;strokeColor=#82b366;endArrow=block;endFill=1;" edge="1" source="qp_box" target="ee_box" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- Question → Pre-processing -->
+        <mxCell id="q_pp_arr" style="strokeWidth=2;strokeColor=#333;endArrow=block;endFill=1;" edge="1" source="question_box" target="preproc_group" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- =================== RETRIEVAL GRANULARITY (blue) =================== -->
+        <mxCell id="rg_group" value="Retrieval Granularity" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;strokeWidth=2.5;fontSize=15;fontStyle=1;verticalAlign=top;spacingTop=8;" vertex="1" parent="1">
+          <mxGeometry x="460" y="70" width="210" height="310" as="geometry"/>
+        </mxCell>
+        <mxCell id="rg_node" value="Node" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#6c8ebf;strokeWidth=1.5;fontSize=14;" vertex="1" parent="1">
+          <mxGeometry x="475" y="125" width="180" height="42" as="geometry"/>
+        </mxCell>
+        <mxCell id="rg_triplet" value="Triplet" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#6c8ebf;strokeWidth=1.5;fontSize=14;" vertex="1" parent="1">
+          <mxGeometry x="475" y="177" width="180" height="42" as="geometry"/>
+        </mxCell>
+        <mxCell id="rg_path" value="Path" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#6c8ebf;strokeWidth=1.5;fontSize=14;" vertex="1" parent="1">
+          <mxGeometry x="475" y="229" width="180" height="42" as="geometry"/>
+        </mxCell>
+        <mxCell id="rg_subgraph" value="Subgraph" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#6c8ebf;strokeWidth=1.5;fontSize=14;" vertex="1" parent="1">
+          <mxGeometry x="475" y="281" width="180" height="42" as="geometry"/>
+        </mxCell>
+
+        <!-- Pre-processing → Retrieval Granularity (Graph Retrieval label) -->
+        <mxCell id="pp_rg_arr" value="Graph Retrieval" style="strokeWidth=2;strokeColor=#555555;endArrow=block;endFill=1;fontSize=13;fontColor=#444;labelBackgroundColor=#ffffff;" edge="1" source="preproc_group" target="rg_group" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- =================== KNOWLEDGE GRAPH (neo4j) =================== -->
+        <mxCell id="kg_box" value="Knowledge Graph&#xa;&#xa;.neo4j" style="shape=cylinder3;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#555555;strokeWidth=2;fontSize=14;fontStyle=1;size=15;verticalAlign=middle;" vertex="1" parent="1">
+          <mxGeometry x="460" y="450" width="210" height="115" as="geometry"/>
+        </mxCell>
+
+        <!-- KG → Retrieval Granularity (upward) -->
+        <mxCell id="kg_rg_arr" style="strokeWidth=2;strokeColor=#555555;endArrow=block;endFill=1;exitX=0.5;exitY=0;entryX=0.5;entryY=1;" edge="1" source="kg_box" target="rg_group" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- =================== FORMAT CONVERSION (salmon/pink) =================== -->
+        <mxCell id="fc_group" value="Format Conversion" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;strokeWidth=2.5;fontSize=15;fontStyle=1;verticalAlign=top;spacingTop=8;" vertex="1" parent="1">
+          <mxGeometry x="730" y="70" width="210" height="320" as="geometry"/>
+        </mxCell>
+        <mxCell id="fc1" value="Natural&#xa;Language" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#b85450;strokeWidth=1.5;fontSize=13;" vertex="1" parent="1">
+          <mxGeometry x="745" y="120" width="180" height="42" as="geometry"/>
+        </mxCell>
+        <mxCell id="fc2" value="Adjacency&#xa;Table" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#b85450;strokeWidth=1.5;fontSize=13;" vertex="1" parent="1">
+          <mxGeometry x="745" y="172" width="180" height="42" as="geometry"/>
+        </mxCell>
+        <mxCell id="fc3" value="Code-like&#xa;(JSON)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#b85450;strokeWidth=1.5;fontSize=13;" vertex="1" parent="1">
+          <mxGeometry x="745" y="224" width="180" height="42" as="geometry"/>
+        </mxCell>
+        <mxCell id="fc4" value="Node&#xa;Sequence" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#b85450;strokeWidth=1.5;fontSize=13;" vertex="1" parent="1">
+          <mxGeometry x="745" y="276" width="180" height="42" as="geometry"/>
+        </mxCell>
+        <!-- Retrieval Granularity → Format Conversion -->
+        <mxCell id="rg_fc_arr" style="strokeWidth=2;strokeColor=#333;endArrow=block;endFill=1;" edge="1" source="rg_group" target="fc_group" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- =================== CONSTRUCT PROMPT =================== -->
+        <mxCell id="cp_title" value="Construct Prompt" style="text;html=1;fontSize=14;fontStyle=1;fontColor=#444444;align=center;" vertex="1" parent="1">
+          <mxGeometry x="730" y="415" width="210" height="25" as="geometry"/>
+        </mxCell>
+        <mxCell id="cp_question" value="Question" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#666666;strokeWidth=1.5;fontSize=14;" vertex="1" parent="1">
+          <mxGeometry x="730" y="446" width="210" height="42" as="geometry"/>
+        </mxCell>
+        <mxCell id="cp_context" value="Context" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#666666;strokeWidth=1.5;fontSize=14;" vertex="1" parent="1">
+          <mxGeometry x="730" y="498" width="210" height="42" as="geometry"/>
+        </mxCell>
+
+        <!-- Format Conversion → Construct Prompt (Context) -->
+        <mxCell id="fc_cp_arr" style="strokeWidth=2;strokeColor=#333;endArrow=block;endFill=1;" edge="1" source="fc_group" target="cp_context" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- Question (user) → Construct Prompt Question (dashed arc) -->
+        <mxCell id="q_cp_arr" style="strokeWidth=1.5;strokeColor=#888888;dashed=1;dashPattern=6 4;endArrow=block;endFill=1;" edge="1" source="question_box" target="cp_question" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="80" y="610"/>
+              <mxPoint x="835" y="610"/>
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- =================== DIVIDER LINE =================== -->
+        <mxCell id="divider" value="" style="endArrow=none;dashed=1;dashPattern=10 6;strokeColor=#aaaaaa;strokeWidth=2;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1005" y="30" as="sourcePoint"/>
+            <mxPoint x="1005" y="660" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- =================== G-GENERATION TITLE =================== -->
+        <mxCell id="ggen_title" value="G-Generation" style="text;html=1;fontSize=21;fontStyle=1;fontColor=#c62828;align=center;" vertex="1" parent="1">
+          <mxGeometry x="1100" y="18" width="250" height="32" as="geometry"/>
+        </mxCell>
+
+        <!-- =================== LLM NODE (circle) =================== -->
+        <mxCell id="llm_node" value="" style="ellipse;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#333333;strokeWidth=2.5;" vertex="1" parent="1">
+          <mxGeometry x="1030" y="155" width="170" height="170" as="geometry"/>
+        </mxCell>
+        <!-- LLM hub icon (text inside) -->
+        <mxCell id="llm_label" value="LLM" style="text;html=1;fontSize=22;fontStyle=1;fontColor=#333333;align=center;verticalAlign=middle;" vertex="1" parent="1">
+          <mxGeometry x="1060" y="215" width="110" height="50" as="geometry"/>
+        </mxCell>
+        <!-- Network spokes (simulated as small lines from center) -->
+        <mxCell id="llm_icon" value="" style="shape=image;verticalLabelPosition=bottom;aspect=fixed;imageAspect=0;image=data:image/svg+xml,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NCA2NCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjNTU1IiBzdHJva2Utd2lkdGg9IjMiPjxjaXJjbGUgY3g9IjMyIiBjeT0iMzIiIHI9IjYiIGZpbGw9IiM1NTUiLz48Y2lyY2xlIGN4PSIxMiIgY3k9IjEyIiByPSI1IiBmaWxsPSIjNTU1Ii8+PGNpcmNsZSBjeD0iNTIiIGN5PSIxMiIgcj0iNSIgZmlsbD0iIzU1NSIvPjxjaXJjbGUgY3g9IjEyIiBjeT0iNTIiIHI9IjUiIGZpbGw9IiM1NTUiLz48Y2lyY2xlIGN4PSI1MiIgY3k9IjUyIiByPSI1IiBmaWxsPSIjNTU1Ii8+PGNpcmNsZSBjeD0iMzIiIGN5PSI4IiByPSI1IiBmaWxsPSIjNTU1Ii8+PGNpcmNsZSBjeD0iMzIiIGN5PSI1NiIgcj0iNSIgZmlsbD0iIzU1NSIvPjxsaW5lIHgxPSIzMiIgeTE9IjMyIiB4Mj0iMTIiIHkyPSIxMiIvPjxsaW5lIHgxPSIzMiIgeTE9IjMyIiB4Mj0iNTIiIHkyPSIxMiIvPjxsaW5lIHgxPSIzMiIgeTE9IjMyIiB4Mj0iMTIiIHkyPSI1MiIvPjxsaW5lIHgxPSIzMiIgeTE9IjMyIiB4Mj0iNTIiIHkyPSI1MiIvPjxsaW5lIHgxPSIzMiIgeTE9IjMyIiB4Mj0iMzIiIHkyPSI4Ii8+PGxpbmUgeDE9IjMyIiB5MT0iMzIiIHgyPSIzMiIgeTI9IjU2Ii8+PC9zdmc+" vertex="1" parent="1">
+          <mxGeometry x="1068" y="160" width="90" height="90" as="geometry"/>
+        </mxCell>
+
+        <!-- =================== STRATEGY GENERATION (orange) =================== -->
+        <mxCell id="sg_group" value="Stragety Generation" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d6b656;strokeWidth=2.5;fontSize=15;fontStyle=1;verticalAlign=top;spacingTop=8;" vertex="1" parent="1">
+          <mxGeometry x="1270" y="90" width="230" height="265" as="geometry"/>
+        </mxCell>
+        <mxCell id="sg1" value="Pre-Generaion" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#d6b656;strokeWidth=1.5;fontSize=14;" vertex="1" parent="1">
+          <mxGeometry x="1285" y="148" width="200" height="48" as="geometry"/>
+        </mxCell>
+        <mxCell id="sg2" value="Mid-Generation" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#d6b656;strokeWidth=1.5;fontSize=14;" vertex="1" parent="1">
+          <mxGeometry x="1285" y="208" width="200" height="48" as="geometry"/>
+        </mxCell>
+        <mxCell id="sg3" value="Post-Generation" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#d6b656;strokeWidth=1.5;fontSize=14;" vertex="1" parent="1">
+          <mxGeometry x="1285" y="268" width="200" height="48" as="geometry"/>
+        </mxCell>
+
+        <!-- Construct Prompt → LLM -->
+        <mxCell id="cp_llm_arr" style="strokeWidth=2;strokeColor=#333;endArrow=block;endFill=1;" edge="1" source="cp_question" target="llm_node" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="955" y="467"/>
+              <mxPoint x="955" y="240"/>
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- LLM → Strategy Generation -->
+        <mxCell id="llm_sg_arr" style="strokeWidth=2;strokeColor=#333;endArrow=block;endFill=1;" edge="1" source="llm_node" target="sg_group" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- =================== CAPTION =================== -->
+        <mxCell id="caption" value="Hình 3.2. Tổng quan luồng xử lý GraphRAG" style="text;html=1;fontSize=14;fontStyle=2;fontColor=#c62828;align=center;" vertex="1" parent="1">
+          <mxGeometry x="350" y="685" width="700" height="28" as="geometry"/>
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

@@ -1,0 +1,82 @@
+<mxfile host="app.diagrams.net">
+  <diagram name="G-Generation Pipeline" id="g_generation">
+    <mxGraphModel dx="2200" dy="1200" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="2200" pageHeight="1100" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+
+        <!-- TITLE -->
+        <mxCell id="title" value="Phân hệ G-Generation — Luồng xử lý chi tiết" style="text;html=1;fontSize=20;fontStyle=1;fontColor=#333;align=center;" vertex="1" parent="1">
+          <mxGeometry x="600" y="10" width="600" height="35" as="geometry"/>
+        </mxCell>
+
+        <!-- INPUT -->
+        <mxCell id="input_box" value="&lt;b&gt;ĐẦU VÀO&lt;/b&gt;&lt;br&gt;(từ G-Retrieval)&lt;br&gt;formatted_contexts C&lt;br&gt;key_facts K&lt;br&gt;question q" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e0f2f1;strokeColor=#00695c;strokeWidth=2;fontSize=15;" vertex="1" parent="1">
+          <mxGeometry x="30" y="80" width="260" height="140" as="geometry"/>
+        </mxCell>
+
+        <!-- GĐ1: Prompt -->
+        <mxCell id="prompt_box" value="&lt;b&gt;GIAI ĐOẠN 1: Xây dựng Prompt (5 thành phần)&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e8f5e9;strokeColor=#2e7d32;strokeWidth=2;fontSize=15;verticalAlign=top;spacingTop=8;" vertex="1" parent="1">
+          <mxGeometry x="360" y="60" width="500" height="280" as="geometry"/>
+        </mxCell>
+        <mxCell id="p1" value="① Context Header [cố định]" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#c8e6c9;strokeColor=#2e7d32;fontSize=15;" vertex="1" parent="1">
+          <mxGeometry x="380" y="95" width="460" height="35" as="geometry"/>
+        </mxCell>
+        <mxCell id="p2" value="② Key Facts ← K" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#c8e6c9;strokeColor=#2e7d32;fontSize=15;" vertex="1" parent="1">
+          <mxGeometry x="380" y="140" width="460" height="35" as="geometry"/>
+        </mxCell>
+        <mxCell id="p3" value="③ Format Sections — C (5 định dạng)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#c8e6c9;strokeColor=#2e7d32;fontSize=15;" vertex="1" parent="1">
+          <mxGeometry x="380" y="185" width="460" height="35" as="geometry"/>
+        </mxCell>
+        <mxCell id="p4" value="④ Câu hỏi ← q" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#c8e6c9;strokeColor=#2e7d32;fontSize=15;" vertex="1" parent="1">
+          <mxGeometry x="380" y="230" width="460" height="35" as="geometry"/>
+        </mxCell>
+        <mxCell id="p5" value="⑤ Chỉ dẫn tạo sinh [cố định]" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#c8e6c9;strokeColor=#2e7d32;fontSize=15;" vertex="1" parent="1">
+          <mxGeometry x="380" y="275" width="460" height="35" as="geometry"/>
+        </mxCell>
+
+        <!-- GĐ2: Strategies -->
+        <mxCell id="strat_box" value="&lt;b&gt;GIAI ĐOẠN 2: Chiến lược tạo sinh (3 chiến lược)&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff8e1;strokeColor=#f57f17;strokeWidth=2;fontSize=15;verticalAlign=top;spacingTop=8;" vertex="1" parent="1">
+          <mxGeometry x="30" y="400" width="1300" height="310" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="pre" value="&lt;b&gt;Pre-Generation&lt;/b&gt;&lt;br&gt;1 LLM call&lt;br&gt;Context + Q + Instr → Answer&lt;br&gt;⚡ Nhanh · Chi phí thấp" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e3f2fd;strokeColor=#1565c0;strokeWidth=2;fontSize=15;" vertex="1" parent="1">
+          <mxGeometry x="60" y="445" width="360" height="120" as="geometry"/>
+        </mxCell>
+        <mxCell id="mid" value="&lt;b&gt;Mid-Generation ★ MẶC ĐỊNH&lt;/b&gt;&lt;br&gt;1 LLM call (guided)&lt;br&gt;C + Q + K + Template&lt;br&gt;→ Facts → Analysis → Conclusion" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e8f5e9;strokeColor=#2e7d32;strokeWidth=2;fontSize=15;" vertex="1" parent="1">
+          <mxGeometry x="470" y="445" width="380" height="120" as="geometry"/>
+        </mxCell>
+        <mxCell id="post" value="&lt;b&gt;Post-Generation&lt;/b&gt;&lt;br&gt;2 LLM calls&lt;br&gt;LLM#1: Q → a₀ (có thể sai)&lt;br&gt;LLM#2: a₀ + C + K → a (refined)&lt;br&gt;🎯 Chính xác nhất" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff3e0;strokeColor=#ef6c00;strokeWidth=2;fontSize=15;" vertex="1" parent="1">
+          <mxGeometry x="900" y="445" width="380" height="120" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="strat_note" value="Hệ thống chọn 1 trong 3 chiến lược theo cấu hình (mặc định: Mid)" style="text;html=1;fontSize=15;fontStyle=2;fontColor=#f57f17;align=center;" vertex="1" parent="1">
+          <mxGeometry x="250" y="600" width="700" height="25" as="geometry"/>
+        </mxCell>
+
+        <!-- GĐ3: QC -->
+        <mxCell id="qc_box" value="&lt;b&gt;GIAI ĐOẠN 3: Kiểm soát chất lượng (3 lớp anti-hallucination)&lt;/b&gt;&lt;br&gt;Lớp 1: Phòng ngừa (prompt constraint + entity grounding + facts injection)&lt;br&gt;Lớp 2: Phát hiện (mid: extract facts first · post: compare a₀ vs KG)&lt;br&gt;Lớp 3: Hậu kiểm (cross-reference entities + truy vết nguồn KG)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fce4ec;strokeColor=#c62828;strokeWidth=2;fontSize=15;" vertex="1" parent="1">
+          <mxGeometry x="1400" y="400" width="520" height="310" as="geometry"/>
+        </mxCell>
+
+        <!-- OUTPUT -->
+        <mxCell id="output_box" value="&lt;b&gt;ĐẦU RA G-Generation&lt;/b&gt;&lt;br&gt;Câu trả lời ngôn ngữ tự nhiên&lt;br&gt;+ entities_cited&lt;br&gt;+ source_nodes&lt;br&gt;+ strategy_used" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e3f2fd;strokeColor=#1565c0;strokeWidth=2;fontSize=15;" vertex="1" parent="1">
+          <mxGeometry x="1500" y="80" width="380" height="140" as="geometry"/>
+        </mxCell>
+
+        <!-- LLM -->
+        <mxCell id="llm" value="&lt;b&gt;LLM&lt;/b&gt;&lt;br&gt;(via LiteLLM)&lt;br&gt;Gemini / GPT / Claude" style="shape=cylinder3;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666;fontSize=15;size=12;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="950" y="80" width="200" height="90" as="geometry"/>
+        </mxCell>
+
+        <!-- FLOW -->
+        <mxCell id="f1" style="strokeWidth=3;strokeColor=#333;" edge="1" source="input_box" target="prompt_box" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="f2" style="strokeWidth=3;strokeColor=#333;exitX=0.5;exitY=1;entryX=0.35;entryY=0;" edge="1" source="prompt_box" target="strat_box" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="f3" style="strokeWidth=3;strokeColor=#333;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" edge="1" source="strat_box" target="qc_box" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="f4" style="strokeWidth=3;strokeColor=#333;exitX=0.5;exitY=0;entryX=0.5;entryY=1;" edge="1" source="qc_box" target="output_box" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="f_llm1" value="prompt" style="strokeWidth=1.5;strokeColor=#666;dashed=1;fontSize=15;fontColor=#888;" edge="1" source="prompt_box" target="llm" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="f_llm2" value="response" style="strokeWidth=1.5;strokeColor=#666;dashed=1;fontSize=15;fontColor=#888;" edge="1" source="llm" target="output_box" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

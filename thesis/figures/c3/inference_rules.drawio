@@ -1,0 +1,135 @@
+<mxfile host="app.diagrams.net" agent="Claude" version="22.0.0" type="device">
+  <diagram name="Inference Rules" id="inference_rules">
+    <mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1100" pageHeight="800" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+
+        <!-- ================ PANEL 1: QUAN HỆ TRỰC TIẾP ================ -->
+        <mxCell id="panel_direct" value="Quan hệ trực tiếp trong Knowledge Graph"
+                style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;strokeWidth=2;fontSize=16;fontStyle=1;verticalAlign=top;align=center;"
+                vertex="1" parent="1">
+          <mxGeometry x="40" y="30" width="1020" height="290" as="geometry"/>
+        </mxCell>
+
+        <!-- Entities (ellipses) -->
+        <mxCell id="ent_actor" value="&lt;b&gt;Actor&lt;/b&gt;&lt;br&gt;Vân Quyền"
+                style="ellipse;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#6c8ebf;strokeWidth=1.5;fontSize=14;align=center;"
+                vertex="1" parent="1">
+          <mxGeometry x="80" y="190" width="140" height="80" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="ent_ra" value="&lt;b&gt;RoleAssignment&lt;/b&gt;"
+                style="ellipse;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#6c8ebf;strokeWidth=1.5;fontSize=14;align=center;"
+                vertex="1" parent="1">
+          <mxGeometry x="290" y="100" width="160" height="60" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="ent_char" value="&lt;b&gt;Character&lt;/b&gt;&lt;br&gt;Thị Màu"
+                style="ellipse;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#6c8ebf;strokeWidth=1.5;fontSize=14;align=center;"
+                vertex="1" parent="1">
+          <mxGeometry x="290" y="220" width="160" height="60" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="ent_version" value="&lt;b&gt;Version&lt;/b&gt;"
+                style="ellipse;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#6c8ebf;strokeWidth=1.5;fontSize=14;align=center;"
+                vertex="1" parent="1">
+          <mxGeometry x="540" y="100" width="140" height="60" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="ent_scene" value="&lt;b&gt;Scene&lt;/b&gt;&lt;br&gt;Thị Màu lên chùa"
+                style="ellipse;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#6c8ebf;strokeWidth=1.5;fontSize=14;align=center;"
+                vertex="1" parent="1">
+          <mxGeometry x="730" y="100" width="170" height="60" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="ent_play" value="&lt;b&gt;Play&lt;/b&gt;&lt;br&gt;Quan Âm Thị Kính"
+                style="ellipse;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#6c8ebf;strokeWidth=1.5;fontSize=14;align=center;"
+                vertex="1" parent="1">
+          <mxGeometry x="800" y="220" width="170" height="60" as="geometry"/>
+        </mxCell>
+
+        <!-- Edges with UPPERCASE labels -->
+        <mxCell id="e_ra_actor" value="PERFORMED_BY"
+                style="endArrow=classic;html=1;rounded=0;strokeColor=#6c8ebf;strokeWidth=1.8;fontSize=12;fontStyle=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.3;entryDx=0;entryDy=0;"
+                edge="1" source="ent_ra" target="ent_actor" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="e_ra_char" value="FOR_CHARACTER"
+                style="endArrow=classic;html=1;rounded=0;strokeColor=#6c8ebf;strokeWidth=1.8;fontSize=12;fontStyle=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;"
+                edge="1" source="ent_ra" target="ent_char" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="e_ra_version" value="IN_VERSION"
+                style="endArrow=classic;html=1;rounded=0;strokeColor=#6c8ebf;strokeWidth=1.8;fontSize=12;fontStyle=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;"
+                edge="1" source="ent_ra" target="ent_version" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="e_scene_version" value="HAS_VERSION"
+                style="endArrow=classic;html=1;rounded=0;strokeColor=#6c8ebf;strokeWidth=1.8;fontSize=12;fontStyle=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;"
+                edge="1" source="ent_scene" target="ent_version" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="e_play_scene" value="HAS_SCENE"
+                style="endArrow=classic;html=1;rounded=0;strokeColor=#6c8ebf;strokeWidth=1.8;fontSize=12;fontStyle=1;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;"
+                edge="1" source="ent_play" target="ent_scene" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="e_play_char" value="HAS_CHARACTER"
+                style="endArrow=classic;html=1;rounded=0;strokeColor=#6c8ebf;strokeWidth=1.8;fontSize=12;fontStyle=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;"
+                edge="1" source="ent_play" target="ent_char" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- Connector arrow between panels -->
+        <mxCell id="connector" value="Suy luận động qua duyệt đường đi nhiều bước"
+                style="endArrow=classic;html=1;rounded=0;strokeColor=#82b366;strokeWidth=2;fontSize=13;fontStyle=2;dashed=1;"
+                edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="550" y="320" as="sourcePoint"/>
+            <mxPoint x="550" y="380" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- ================ PANEL 2: QUAN HỆ SUY LUẬN ================ -->
+        <mxCell id="panel_inferred" value="Quan hệ suy luận (phát hiện tại thời điểm truy vấn)"
+                style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;strokeWidth=2;fontSize=16;fontStyle=1;verticalAlign=top;align=center;"
+                vertex="1" parent="1">
+          <mxGeometry x="40" y="400" width="1020" height="350" as="geometry"/>
+        </mxCell>
+
+        <!-- 3 chuỗi suy luận -->
+        <mxCell id="chain1" value="&lt;b&gt;Chuỗi 1 — Nhân vật → Diễn viên đảm nhận&lt;/b&gt;&lt;br&gt;&lt;br&gt;Vân Quyền &lt;b&gt;←&lt;/b&gt; diễn vai &lt;b&gt;←&lt;/b&gt; Thị Màu&lt;br&gt;&lt;font style=&quot;font-size:12px&quot;&gt;(qua RoleAssignment, 2 bước)&lt;/font&gt;"
+                style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#82b366;strokeWidth=1.5;fontSize=14;align=center;verticalAlign=middle;"
+                vertex="1" parent="1">
+          <mxGeometry x="80" y="460" width="300" height="120" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="chain2" value="&lt;b&gt;Chuỗi 2 — Diễn viên → Vở tham gia&lt;/b&gt;&lt;br&gt;&lt;br&gt;Vân Quyền &lt;b&gt;→&lt;/b&gt; tham gia &lt;b&gt;→&lt;/b&gt; Quan Âm Thị Kính&lt;br&gt;&lt;font style=&quot;font-size:12px&quot;&gt;(Actor → RoleAssignment → Version → Scene → Play, 4 bước)&lt;/font&gt;"
+                style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#82b366;strokeWidth=1.5;fontSize=14;align=center;verticalAlign=middle;"
+                vertex="1" parent="1">
+          <mxGeometry x="400" y="460" width="300" height="120" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="chain3" value="&lt;b&gt;Chuỗi 3 — Nhân vật → Trích đoạn xuất hiện&lt;/b&gt;&lt;br&gt;&lt;br&gt;Thị Màu &lt;b&gt;→&lt;/b&gt; xuất hiện trong &lt;b&gt;→&lt;/b&gt; Thị Màu lên chùa&lt;br&gt;&lt;font style=&quot;font-size:12px&quot;&gt;(Character → RoleAssignment → Version → Scene, 3 bước)&lt;/font&gt;"
+                style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#82b366;strokeWidth=1.5;fontSize=14;align=center;verticalAlign=middle;"
+                vertex="1" parent="1">
+          <mxGeometry x="720" y="460" width="300" height="120" as="geometry"/>
+        </mxCell>
+
+        <!-- Note about materialization vs. dynamic -->
+        <mxCell id="note" value="&lt;b&gt;Cơ chế hai chiến lược suy luận:&lt;/b&gt;&lt;br&gt;• &lt;b&gt;Vật chất hoá&lt;/b&gt; (mô hình hoá trước): quan hệ tần suất cao như &lt;i&gt;Diễn viên → Vở tham gia&lt;/i&gt; được tính sẵn và lưu thành cạnh tường minh để truy vấn hằng số.&lt;br&gt;• &lt;b&gt;Suy luận động&lt;/b&gt; (duyệt đường đi tại thời điểm truy vấn): các chuỗi phụ thuộc tham số đầu vào hoặc cần thông tin trung gian được duyệt ở thời điểm truy vấn với độ sâu biến đổi."
+                style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fafafa;strokeColor=#999999;strokeWidth=1;fontSize=12;align=left;verticalAlign=top;spacingLeft=15;spacingTop=10;"
+                vertex="1" parent="1">
+          <mxGeometry x="80" y="610" width="940" height="120" as="geometry"/>
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

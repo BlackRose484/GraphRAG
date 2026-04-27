@@ -1,0 +1,84 @@
+<mxfile host="app.diagrams.net" agent="Claude" version="22.0.0" type="device">
+  <diagram name="G-Generation Overview" id="g_gen_overview">
+    <mxGraphModel dx="1600" dy="500" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1500" pageHeight="450" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+
+        <!-- Đầu vào: (C, K) -->
+        <mxCell id="input_ck" value="&lt;b&gt;(C, K)&lt;/b&gt;&lt;br&gt;&lt;br&gt;Ngữ cảnh đã định dạng&lt;br&gt;+ Tập dữ kiện chính"
+                style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;strokeWidth=2;fontSize=14;align=center;verticalAlign=middle;"
+                vertex="1" parent="1">
+          <mxGeometry x="40" y="280" width="220" height="120" as="geometry"/>
+        </mxCell>
+
+        <!-- Bước 1: Xây dựng Prompt -->
+        <mxCell id="build_prompt" value="&lt;b style=&quot;font-size:16px&quot;&gt;Xây dựng Prompt 𝒫&lt;/b&gt;&lt;br&gt;&lt;br&gt;Tổ hợp 4 thành phần:&lt;br&gt;① Tiêu đề ngữ cảnh&lt;br&gt;② Dữ kiện chính&lt;br&gt;③ Khối ngữ cảnh&lt;br&gt;④ Câu hỏi + Chỉ dẫn"
+                style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;strokeWidth=2;fontSize=13;align=center;verticalAlign=middle;"
+                vertex="1" parent="1">
+          <mxGeometry x="320" y="160" width="280" height="180" as="geometry"/>
+        </mxCell>
+
+        <!-- Câu hỏi q (input riêng vào prompt builder) -->
+        <mxCell id="input_q" value="&lt;b&gt;q&lt;/b&gt;&lt;br&gt;Câu hỏi gốc"
+                style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;strokeWidth=2;fontSize=14;align=center;verticalAlign=middle;"
+                vertex="1" parent="1">
+          <mxGeometry x="40" y="80" width="220" height="80" as="geometry"/>
+        </mxCell>
+
+        <!-- Bước 2: Chiến lược tạo sinh -->
+        <mxCell id="strategies" value="&lt;b style=&quot;font-size:16px&quot;&gt;Chiến lược tạo sinh&lt;/b&gt;&lt;br&gt;&lt;br&gt;• Pre (1 lượt)&lt;br&gt;• Mid (1 lượt, có ràng buộc)&lt;br&gt;• Post (2 lượt, đối chiếu)&lt;br&gt;&lt;br&gt;+ Kiểm soát ảo giác (2 lớp)"
+                style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;strokeWidth=2;fontSize=13;align=center;verticalAlign=middle;"
+                vertex="1" parent="1">
+          <mxGeometry x="700" y="160" width="280" height="180" as="geometry"/>
+        </mxCell>
+
+        <!-- LLM Service -->
+        <mxCell id="llm_box" value="&lt;b style=&quot;font-size:16px&quot;&gt;LLM&lt;/b&gt;&lt;br&gt;(1 hoặc 2 lượt)"
+                style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;strokeWidth=2;fontSize=14;align=center;verticalAlign=middle;"
+                vertex="1" parent="1">
+          <mxGeometry x="730" y="40" width="220" height="80" as="geometry"/>
+        </mxCell>
+
+        <!-- Đầu ra: a -->
+        <mxCell id="output_a" value="&lt;b&gt;a&lt;/b&gt;&lt;br&gt;Câu trả lời"
+                style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;strokeWidth=2;fontSize=14;align=center;verticalAlign=middle;"
+                vertex="1" parent="1">
+          <mxGeometry x="1080" y="240" width="220" height="100" as="geometry"/>
+        </mxCell>
+
+        <!-- ARROWS -->
+        <mxCell id="e_ck_build" style="endArrow=classic;html=1;rounded=0;edgeStyle=orthogonalEdgeStyle;strokeColor=#555555;strokeWidth=2.5;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;"
+                edge="1" source="input_ck" target="build_prompt" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="e_q_build" style="endArrow=classic;html=1;rounded=0;edgeStyle=orthogonalEdgeStyle;strokeColor=#555555;strokeWidth=2.5;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.2;entryDx=0;entryDy=0;"
+                edge="1" source="input_q" target="build_prompt" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="e_build_strat" value="𝒫" style="endArrow=classic;html=1;rounded=0;strokeColor=#555555;strokeWidth=2.5;fontSize=15;fontStyle=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;"
+                edge="1" source="build_prompt" target="strategies" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="e_strat_llm" style="endArrow=classic;html=1;rounded=0;edgeStyle=orthogonalEdgeStyle;strokeColor=#b85450;strokeWidth=2;dashed=1;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;"
+                edge="1" source="strategies" target="llm_box" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="e_llm_strat" style="endArrow=classic;html=1;rounded=0;edgeStyle=orthogonalEdgeStyle;strokeColor=#b85450;strokeWidth=2;exitX=0.7;exitY=1;exitDx=0;exitDy=0;entryX=0.7;entryY=0;entryDx=0;entryDy=0;"
+                edge="1" source="llm_box" target="strategies" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="e_strat_out" value="a" style="endArrow=classic;html=1;rounded=0;edgeStyle=orthogonalEdgeStyle;strokeColor=#555555;strokeWidth=2.5;fontSize=15;fontStyle=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;"
+                edge="1" source="strategies" target="output_a" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

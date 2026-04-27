@@ -1,0 +1,101 @@
+<mxfile host="app.diagrams.net">
+  <diagram name="G-Retrieval Pipeline" id="g_retrieval">
+    <mxGraphModel dx="2200" dy="1200" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="2200" pageHeight="1100" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+
+        <!-- TITLE -->
+        <mxCell id="title" value="Phân hệ G-Retrieval — Luồng xử lý chi tiết" style="text;html=1;fontSize=20;fontStyle=1;fontColor=#333;align=center;" vertex="1" parent="1">
+          <mxGeometry x="600" y="10" width="600" height="35" as="geometry"/>
+        </mxCell>
+
+        <!-- INPUT -->
+        <mxCell id="input_box" value="&lt;b&gt;ĐẦU VÀO&lt;/b&gt;&lt;br&gt;Câu hỏi ngôn ngữ tự nhiên&lt;br&gt;&quot;Ai đóng vai Thị Màu&lt;br&gt;trong vở Quan Âm Thị Kính?&quot;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e3f2fd;strokeColor=#1565c0;strokeWidth=2;fontSize=15;" vertex="1" parent="1">
+          <mxGeometry x="30" y="80" width="300" height="120" as="geometry"/>
+        </mxCell>
+
+        <!-- GĐ1 -->
+        <mxCell id="preproc_box" value="&lt;b&gt;GIAI ĐOẠN 1: Tiền xử lý &amp; Trích xuất thực thể&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e8f5e9;strokeColor=#2e7d32;strokeWidth=2;fontSize=15;verticalAlign=top;spacingTop=8;" vertex="1" parent="1">
+          <mxGeometry x="400" y="60" width="700" height="450" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="norm" value="Bước 1 — Chuẩn hóa:&lt;br&gt;Unicode NFC → Trim → Case-insensitive" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#c8e6c9;strokeColor=#388e3c;fontSize=15;" vertex="1" parent="1">
+          <mxGeometry x="430" y="100" width="640" height="55" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="ta_box" value="&lt;b&gt;⚡ Luồng A: Expand + Extract&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e3f2fd;strokeColor=#1565c0;strokeWidth=2;fontSize=15;verticalAlign=top;spacingTop=8;" vertex="1" parent="1">
+          <mxGeometry x="430" y="180" width="310" height="200" as="geometry"/>
+        </mxCell>
+        <mxCell id="ta_llm" value="LLM Call&lt;br&gt;QUERY_EXPAND_AND_EXTRACT" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#bbdefb;strokeColor=#1565c0;fontSize=15;" vertex="1" parent="1">
+          <mxGeometry x="445" y="220" width="280" height="55" as="geometry"/>
+        </mxCell>
+        <mxCell id="ta_in" value="Input: q + Entity Catalog&lt;br&gt;(danh sách thực thể từ Neo4j)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e8eaf6;strokeColor=#5c6bc0;fontSize=15;" vertex="1" parent="1">
+          <mxGeometry x="445" y="285" width="280" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="ta_out" value="Output: q' + E_candidate" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e8eaf6;strokeColor=#5c6bc0;fontSize=15;" vertex="1" parent="1">
+          <mxGeometry x="445" y="342" width="280" height="35" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="tb_box" value="&lt;b&gt;⚡ Luồng B: Decompose&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff3e0;strokeColor=#ef6c00;strokeWidth=2;fontSize=15;verticalAlign=top;spacingTop=8;" vertex="1" parent="1">
+          <mxGeometry x="770" y="180" width="310" height="130" as="geometry"/>
+        </mxCell>
+        <mxCell id="tb_llm" value="LLM Call QUERY_DECOMPOSE" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe0b2;strokeColor=#ef6c00;fontSize=15;" vertex="1" parent="1">
+          <mxGeometry x="785" y="220" width="280" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="tb_out" value="Output: sub_questions {q₁...qₙ}" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff8e1;strokeColor=#ef6c00;fontSize=15;" vertex="1" parent="1">
+          <mxGeometry x="785" y="270" width="280" height="35" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="par_note" value="ThreadPoolExecutor → Latency ≈ max(t_A, t_B)" style="text;html=1;fontSize=15;fontStyle=2;fontColor=#2e7d32;align=center;" vertex="1" parent="1">
+          <mxGeometry x="500" y="395" width="500" height="25" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="xval" value="&lt;b&gt;Bước 3 — Kiểm tra chéo KG&lt;/b&gt;&lt;br&gt;E_candidate vs Neo4j → loại bỏ/hợp nhất → E_verified" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fce4ec;strokeColor=#c62828;fontSize=15;" vertex="1" parent="1">
+          <mxGeometry x="430" y="430" width="640" height="60" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="pq" value="→ ProcessedQuery P {original, expanded, sub_q, entities}" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e0f2f1;strokeColor=#00695c;strokeWidth=2;fontSize=15;" vertex="1" parent="1">
+          <mxGeometry x="500" y="510" width="500" height="45" as="geometry"/>
+        </mxCell>
+
+        <!-- GĐ2 -->
+        <mxCell id="ret_box" value="&lt;b&gt;GIAI ĐOẠN 2: Truy vấn đa mức độ (4 mức + CommunityIndex bổ trợ)&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff8e1;strokeColor=#f57f17;strokeWidth=2;fontSize=15;verticalAlign=top;spacingTop=8;" vertex="1" parent="1">
+          <mxGeometry x="30" y="590" width="1070" height="200" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="lv1" value="&lt;b&gt;① Node&lt;/b&gt;&lt;br&gt;Thuộc tính&lt;br&gt;thực thể" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e3f2fd;strokeColor=#1565c0;strokeWidth=2;fontSize=15;" vertex="1" parent="1">
+          <mxGeometry x="50" y="640" width="185" height="80" as="geometry"/>
+        </mxCell>
+        <mxCell id="lv2" value="&lt;b&gt;② Triplet&lt;/b&gt;&lt;br&gt;Bộ ba&lt;br&gt;(S, R, O)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e8f5e9;strokeColor=#2e7d32;strokeWidth=2;fontSize=15;" vertex="1" parent="1">
+          <mxGeometry x="255" y="640" width="185" height="80" as="geometry"/>
+        </mxCell>
+        <mxCell id="lv3" value="&lt;b&gt;③ Path&lt;/b&gt;&lt;br&gt;Chuỗi quan hệ&lt;br&gt;1–3 bước" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff3e0;strokeColor=#ef6c00;strokeWidth=2;fontSize=15;" vertex="1" parent="1">
+          <mxGeometry x="460" y="640" width="185" height="80" as="geometry"/>
+        </mxCell>
+        <mxCell id="lv4" value="&lt;b&gt;④ Subgraph&lt;/b&gt;&lt;br&gt;Vùng lân cận&lt;br&gt;2-hop" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fce4ec;strokeColor=#c62828;strokeWidth=2;fontSize=15;" vertex="1" parent="1">
+          <mxGeometry x="665" y="640" width="185" height="80" as="geometry"/>
+        </mxCell>
+        <mxCell id="lv5" value="&lt;b&gt;CommunityIndex&lt;/b&gt;&lt;br&gt;Chỉ mục cộng đồng&lt;br&gt;(play-centric, pre-computed)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f3e5f5;strokeColor=#7b1fa2;strokeWidth=2;fontSize=15;dashed=1;dashPattern=8 4;" vertex="1" parent="1">
+          <mxGeometry x="870" y="640" width="195" height="80" as="geometry"/>
+        </mxCell>
+
+        <!-- GĐ3 -->
+        <mxCell id="ctx_box" value="&lt;b&gt;GIAI ĐOẠN 3: Tổ chức ngữ cảnh&lt;/b&gt;&lt;br&gt;Chuyển đổi GraphData thông qua&lt;br&gt;GraphFormatConverter (5 formats)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ede7f6;strokeColor=#4527a0;strokeWidth=2;fontSize=15;" vertex="1" parent="1">
+          <mxGeometry x="1150" y="590" width="480" height="200" as="geometry"/>
+        </mxCell>
+
+        <!-- OUTPUT -->
+        <mxCell id="output_box" value="&lt;b&gt;ĐẦU RA G-Retrieval&lt;/b&gt;&lt;br&gt;formatted_contexts C&lt;br&gt;key_facts K&lt;br&gt;graph_data G" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e0f2f1;strokeColor=#00695c;strokeWidth=2;fontSize=15;" vertex="1" parent="1">
+          <mxGeometry x="1700" y="590" width="250" height="200" as="geometry"/>
+        </mxCell>
+
+        <!-- FLOW -->
+        <mxCell id="f1" style="strokeWidth=3;strokeColor=#333;" edge="1" source="input_box" target="preproc_box" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="f2" style="strokeWidth=3;strokeColor=#333;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" edge="1" source="preproc_box" target="ret_box" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="f3" style="strokeWidth=3;strokeColor=#333;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" edge="1" source="ret_box" target="ctx_box" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="f4" style="strokeWidth=3;strokeColor=#333;" edge="1" source="ctx_box" target="output_box" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

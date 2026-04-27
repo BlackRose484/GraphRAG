@@ -1,0 +1,181 @@
+<mxfile host="app.diagrams.net" agent="Claude" version="22.0.0" type="device">
+  <diagram name="Generation Strategies" id="gen_strategies">
+    <mxGraphModel dx="1400" dy="1000" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1400" pageHeight="950" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+
+        <!-- ĐẦU VÀO CHUNG: 𝒫 -->
+        <mxCell id="input_p" value="&lt;b style=&quot;font-size:17px&quot;&gt;Đầu vào: 𝒫&lt;/b&gt;&lt;br&gt;&lt;br&gt;Prompt hoàn chỉnh"
+                style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;strokeWidth=2;fontSize=14;align=center;verticalAlign=middle;"
+                vertex="1" parent="1">
+          <mxGeometry x="40" y="430" width="200" height="100" as="geometry"/>
+        </mxCell>
+
+        <!-- ============== CHIẾN LƯỢC 1 - PRE ============== -->
+        <mxCell id="pre_panel" value="Chiến lược 1 — Pre-Generation"
+                style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;strokeWidth=2;fontSize=15;fontStyle=1;verticalAlign=top;align=center;"
+                vertex="1" parent="1">
+          <mxGeometry x="300" y="40" width="1060" height="200" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="pre_in" value="&lt;b&gt;Đầu vào&lt;/b&gt;&lt;br&gt;&lt;br&gt;Ngữ cảnh + Câu hỏi&lt;br&gt;+ Chỉ dẫn"
+                style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#6c8ebf;strokeWidth=1.5;fontSize=13;align=center;verticalAlign=middle;"
+                vertex="1" parent="1">
+          <mxGeometry x="340" y="100" width="240" height="110" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="pre_llm" value="&lt;b&gt;LLM&lt;/b&gt;&lt;br&gt;(1 lượt)"
+                style="rhombus;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;strokeWidth=1.5;fontSize=14;fontStyle=1;align=center;verticalAlign=middle;"
+                vertex="1" parent="1">
+          <mxGeometry x="700" y="115" width="160" height="80" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="pre_out" value="&lt;b&gt;Đầu ra&lt;/b&gt;&lt;br&gt;&lt;br&gt;``Vai Thị Màu được đóng&lt;br&gt;bởi diễn viên Vân Quyền.''"
+                style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;strokeWidth=1.5;fontSize=13;align=center;verticalAlign=middle;"
+                vertex="1" parent="1">
+          <mxGeometry x="980" y="100" width="320" height="110" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="e_pre_in_llm" style="endArrow=classic;html=1;rounded=0;strokeColor=#6c8ebf;strokeWidth=2;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;"
+                edge="1" source="pre_in" target="pre_llm" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e_pre_llm_out" style="endArrow=classic;html=1;rounded=0;strokeColor=#6c8ebf;strokeWidth=2;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;"
+                edge="1" source="pre_llm" target="pre_out" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- ============== CHIẾN LƯỢC 2 - MID ============== -->
+        <mxCell id="mid_panel" value="Chiến lược 2 — Mid-Generation"
+                style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;strokeWidth=2;fontSize=15;fontStyle=1;verticalAlign=top;align=center;"
+                vertex="1" parent="1">
+          <mxGeometry x="300" y="270" width="1060" height="220" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="mid_in" value="&lt;b&gt;Đầu vào&lt;/b&gt;&lt;br&gt;&lt;br&gt;Ngữ cảnh + Câu hỏi&lt;br&gt;+ Dữ kiện chính K&lt;br&gt;+ Khuôn mẫu cấu trúc"
+                style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#82b366;strokeWidth=1.5;fontSize=13;align=center;verticalAlign=middle;"
+                vertex="1" parent="1">
+          <mxGeometry x="340" y="335" width="240" height="120" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="mid_llm" value="&lt;b&gt;LLM&lt;/b&gt;&lt;br&gt;(1 lượt&lt;br&gt;có ràng buộc)"
+                style="rhombus;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;strokeWidth=1.5;fontSize=14;fontStyle=1;align=center;verticalAlign=middle;"
+                vertex="1" parent="1">
+          <mxGeometry x="700" y="345" width="160" height="100" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="mid_out" value="&lt;b&gt;Đầu ra (có cấu trúc)&lt;/b&gt;&lt;br&gt;&lt;br&gt;1. Facts: Thị Màu — Vân Quyền&lt;br&gt;2. Analysis: liên kết qua RoleAssignment&lt;br&gt;3. Conclusion: Vân Quyền đóng vai Thị Màu"
+                style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;strokeWidth=1.5;fontSize=13;align=center;verticalAlign=middle;"
+                vertex="1" parent="1">
+          <mxGeometry x="980" y="320" width="320" height="140" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="e_mid_in_llm" style="endArrow=classic;html=1;rounded=0;strokeColor=#82b366;strokeWidth=2;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;"
+                edge="1" source="mid_in" target="mid_llm" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e_mid_llm_out" style="endArrow=classic;html=1;rounded=0;strokeColor=#82b366;strokeWidth=2;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;"
+                edge="1" source="mid_llm" target="mid_out" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- ============== CHIẾN LƯỢC 3 - POST ============== -->
+        <mxCell id="post_panel" value="Chiến lược 3 — Post-Generation (hai lượt)"
+                style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;strokeWidth=2;fontSize=15;fontStyle=1;verticalAlign=top;align=center;"
+                vertex="1" parent="1">
+          <mxGeometry x="300" y="520" width="1060" height="380" as="geometry"/>
+        </mxCell>
+
+        <!-- Lượt 1 -->
+        <mxCell id="post_label1" value="&lt;b&gt;Lượt 1 — sinh sơ bộ&lt;/b&gt;"
+                style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=13;fontStyle=1;fontColor=#666666;"
+                vertex="1" parent="1">
+          <mxGeometry x="320" y="560" width="180" height="30" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="post_in1" value="&lt;b&gt;Đầu vào&lt;/b&gt;&lt;br&gt;&lt;br&gt;Chỉ câu hỏi&lt;br&gt;(không có ngữ cảnh)"
+                style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#d79b00;strokeWidth=1.5;fontSize=13;align=center;verticalAlign=middle;"
+                vertex="1" parent="1">
+          <mxGeometry x="340" y="600" width="220" height="100" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="post_llm1" value="&lt;b&gt;LLM #1&lt;/b&gt;"
+                style="rhombus;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;strokeWidth=1.5;fontSize=14;fontStyle=1;align=center;verticalAlign=middle;"
+                vertex="1" parent="1">
+          <mxGeometry x="630" y="615" width="120" height="70" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="post_out1" value="&lt;b&gt;a₀ (sơ bộ)&lt;/b&gt;&lt;br&gt;&lt;br&gt;``Thị Màu thường được&lt;br&gt;đóng bởi nghệ sĩ&lt;br&gt;nổi tiếng…''&lt;br&gt;&lt;font style=&quot;font-size:11px;font-style:italic&quot;&gt;(có thể sai lệch)&lt;/font&gt;"
+                style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;strokeWidth=1.5;fontSize=13;align=center;verticalAlign=middle;"
+                vertex="1" parent="1">
+          <mxGeometry x="820" y="590" width="280" height="120" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="e_post1_in_llm" style="endArrow=classic;html=1;rounded=0;strokeColor=#d79b00;strokeWidth=2;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;"
+                edge="1" source="post_in1" target="post_llm1" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e_post1_llm_out" style="endArrow=classic;html=1;rounded=0;strokeColor=#d79b00;strokeWidth=2;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;"
+                edge="1" source="post_llm1" target="post_out1" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- Lượt 2 -->
+        <mxCell id="post_label2" value="&lt;b&gt;Lượt 2 — đối chiếu &amp;amp; hiệu chỉnh&lt;/b&gt;"
+                style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=13;fontStyle=1;fontColor=#666666;"
+                vertex="1" parent="1">
+          <mxGeometry x="320" y="730" width="280" height="30" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="post_in2" value="&lt;b&gt;Đầu vào&lt;/b&gt;&lt;br&gt;&lt;br&gt;a₀ + Ngữ cảnh + Dữ kiện chính&lt;br&gt;+ ``Kiểm tra và sửa''"
+                style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#d79b00;strokeWidth=1.5;fontSize=13;align=center;verticalAlign=middle;"
+                vertex="1" parent="1">
+          <mxGeometry x="340" y="770" width="220" height="110" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="post_llm2" value="&lt;b&gt;LLM #2&lt;/b&gt;"
+                style="rhombus;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;strokeWidth=1.5;fontSize=14;fontStyle=1;align=center;verticalAlign=middle;"
+                vertex="1" parent="1">
+          <mxGeometry x="630" y="790" width="120" height="70" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="post_out2" value="&lt;b&gt;a (đã hiệu chỉnh)&lt;/b&gt;&lt;br&gt;&lt;br&gt;``Theo Knowledge Graph,&lt;br&gt;vai Thị Màu được đóng&lt;br&gt;bởi diễn viên Vân Quyền.''"
+                style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;strokeWidth=1.5;fontSize=13;align=center;verticalAlign=middle;"
+                vertex="1" parent="1">
+          <mxGeometry x="820" y="765" width="280" height="120" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="e_post2_in_llm" style="endArrow=classic;html=1;rounded=0;strokeColor=#d79b00;strokeWidth=2;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;"
+                edge="1" source="post_in2" target="post_llm2" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e_post2_llm_out" style="endArrow=classic;html=1;rounded=0;strokeColor=#d79b00;strokeWidth=2;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;"
+                edge="1" source="post_llm2" target="post_out2" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- a₀ feed vào lượt 2 (dashed) -->
+        <mxCell id="e_a0_in2" style="endArrow=classic;html=1;rounded=0;edgeStyle=orthogonalEdgeStyle;strokeColor=#d79b00;strokeWidth=1.5;dashed=1;exitX=0.2;exitY=1;exitDx=0;exitDy=0;entryX=0.7;entryY=0;entryDx=0;entryDy=0;"
+                edge="1" source="post_out1" target="post_in2" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- 𝒫 input → 3 chiến lược -->
+        <mxCell id="e_p_pre" style="endArrow=classic;html=1;rounded=0;edgeStyle=orthogonalEdgeStyle;strokeColor=#555555;strokeWidth=2;exitX=1;exitY=0.3;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;"
+                edge="1" source="input_p" target="pre_panel" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e_p_mid" style="endArrow=classic;html=1;rounded=0;edgeStyle=orthogonalEdgeStyle;strokeColor=#555555;strokeWidth=2;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;"
+                edge="1" source="input_p" target="mid_panel" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e_p_post" style="endArrow=classic;html=1;rounded=0;edgeStyle=orthogonalEdgeStyle;strokeColor=#555555;strokeWidth=2;exitX=1;exitY=0.7;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;"
+                edge="1" source="input_p" target="post_panel" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
