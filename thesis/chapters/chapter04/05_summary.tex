@@ -1,0 +1,13 @@
+% =============================================================================
+%  Tiểu kết chương 4
+% =============================================================================
+
+\section*{Tiểu kết}
+\addcontentsline{toc}{section}{Tiểu kết}
+
+Chương này trình bày quá trình hiện thực hoá và đánh giá hệ thống GraphRAG dựa trên các thiết kế ở Chương 3. Phần cài đặt đã xây dựng môi trường thực nghiệm hoàn chỉnh với Knowledge Graph trên Neo4j, pipeline GraphRAG đầy đủ và hai hệ thống tham chiếu là RAG truyền thống và LLM-only. Ba hệ thống chia sẻ cùng mô hình ngôn ngữ và cùng tham số sinh, đảm bảo chênh lệch kết quả chỉ phản ánh khác biệt về nguồn tri thức và cơ chế truy xuất.
+
+Thực nghiệm định lượng được triển khai với bốn nhóm thí nghiệm tương ứng bốn câu hỏi nghiên cứu, sử dụng hệ thống độ đo đa chiều bao gồm cả chất lượng truy xuất và chất lượng tạo sinh. Kết quả cho thấy kết hợp đa mức độ truy xuất nâng điểm tổng hợp từ 0,54 lên 0,76, định dạng có cấu trúc cho kết quả cao hơn định dạng thiếu quan hệ (0,72 so với 0,65), và Mid-Generation mang lại cân bằng tốt nhất giữa chất lượng và chi phí. So với RAG truyền thống, GraphRAG vượt trội từ +0,10 đến +0,20 điểm trên toàn bộ các độ đo IR, khẳng định lợi ích của cấu trúc đồ thị trong miền tri thức quan hệ phức tạp.
+
+Ở bước triển khai, hệ thống được đưa lên hạ tầng đám mây và kiểm nghiệm với người dùng qua hai hình thức thực nghiệm: chấm điểm đa tiêu chí và đánh giá so sánh. Cách thiết kế này cho phép thu thập phản hồi ở cả mức chi tiết từng tiêu chí lẫn mức phán xét tổng thể, bổ sung cho đánh giá định lượng ở khía cạnh chất lượng chủ quan. Tổng hợp các kết quả trên tạo cơ sở cho những đánh giá tổng kết và hướng phát triển được trình bày trong chương tiếp theo.
+

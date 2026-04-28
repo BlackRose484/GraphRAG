@@ -1,0 +1,11 @@
+% =============================================================================
+%  Tiểu kết chương 3
+% =============================================================================
+
+\section*{Tiểu kết}
+\addcontentsline{toc}{section}{Tiểu kết}
+Chương này đã trình bày quá trình phân tích và thiết kế kiến trúc GraphRAG cho miền nghệ thuật Chèo, với trọng tâm tập trung vào hai tầng cốt lõi là tầng tri thức và tầng xử lý GraphRAG. Cách phân tầng này đảm bảo khả năng kiểm soát tri thức thông qua đồ thị tri thức và duy trì tính minh bạch của quá trình suy luận.
+
+Ở tầng tri thức, ontology Chèo được kế thừa và chuẩn hoá thành đồ thị tri thức dạng property graph, kèm các cơ chế suy luận quan hệ gián tiếp ở mức ứng dụng và chiến lược lập chỉ mục chuyên biệt nhằm khắc phục hạn chế của bộ suy luận ontology thuần tuý, đáp ứng yêu cầu truy vấn thời gian thực. Ở tầng xử lý GraphRAG, phân hệ G-Retrieval được xây dựng theo hướng đa mức độ để xử lý linh hoạt nhiều dạng truy vấn, còn phân hệ G-Generation tích hợp tri thức có kiểm soát với prompt đóng vai trò trung tâm điều hướng quá trình sinh và hạn chế hiện tượng ảo giác.
+
+Bên cạnh phần thiết kế kiến trúc, chương cũng xây dựng bộ dữ liệu đánh giá CheoBench v2 với cách phân tầng truy vấn Local, Community, Global tương ứng với đặc trưng của GraphRAG - làm công cụ đi kèm phục vụ cho việc triển khai và đánh giá thực nghiệm ở chương tiếp theo.

@@ -1,0 +1,329 @@
+% =============================================================================
+%  Section 3.2 — Thiết kế tầng tri thức
+%  Subsections:
+%    3.2.1  Ontology Chèo - nền tảng tri thức
+%    3.2.2  Chuyển đổi và mở rộng lược đồ
+%    3.2.3  Cơ chế hỗ trợ truy xuất
+%    3.2.4  Danh mục thực thể
+% =============================================================================
+
+\section{Thiết kế tầng tri thức}
+\label{sec:knowledge_design}
+
+\subsection{Ontology Chèo - nền tảng tri thức}
+\label{sec:ontology_cheo}
+
+Hệ thống GraphRAG được đề xuất kế thừa ontology về nghệ thuật Chèo xây dựng trong khóa luận tốt nghiệp của chị Trương Quỳnh Giang~\cite{Giang2025}. Ontology được hình thức hoá theo chuẩn OWL, là cơ sở lý thuyết phù hợp để xây dựng nên đồ thị tri thức phục vụ cho hệ thống truy xuất thông tin.
+
+\textbf{Kiến trúc.}
+Ontology tổ chức tri thức theo mô hình phân lớp với 7 lớp, 7 thuộc tính quan hệ (object properties) và 17 thuộc tính dữ liệu (data properties), với chi tiết từng lớp cùng vai trò ngữ nghĩa và tập thuộc tính dữ liệu tương ứng (Bảng~\ref{tab:ontology_classes}).
+
+\begin{table}[ht!]
+  \centering
+  \caption{Bảy lớp trong Chèo Ontology và các thuộc tính dữ liệu tương ứng.}
+  \label{tab:ontology_classes}
+  \renewcommand{\arraystretch}{1.35}
+  \small
+  \begin{tabular}{p{3.5cm} p{3.3cm} p{7.99cm}}
+    \toprule
+    \textbf{Lớp} & \textbf{Vai trò} & \textbf{Thuộc tính dữ liệu} \\
+    \midrule
+    \texttt{Play}
+      & Vở chèo
+      & \texttt{title}, \texttt{summary}, \texttt{author}, \texttt{sceneNumber} \\[2pt]
+    \texttt{Character}
+      & Nhân vật trong vở
+      & \texttt{charName}, \texttt{description}, \texttt{mainType}, \texttt{subType}, \texttt{charGender} \\[2pt]
+    \texttt{Actor}
+      & Diễn viên
+      & \texttt{actorName}, \texttt{actorGender} \\[2pt]
+    \texttt{Scene}
+      & Trích đoạn
+      & \texttt{sceneName}, \texttt{sceneSummary}, \texttt{versionNumber} \\[2pt]
+    \texttt{Version}
+      & Phiên bản biểu diễn
+      & \texttt{showDate}, \texttt{vidVersion}, \texttt{videoDuration}, \texttt{resolution},
+        \texttt{aspectRatio}, \texttt{startTime}, \texttt{endTime}, \texttt{ID} \\[2pt]
+    \texttt{RoleAssignment}
+      &  Phân công vai diễn
+      & - \\[2pt]
+    \texttt{Appearance}
+      & Một lần xuất hiện trong video
+      & \texttt{start}, \texttt{end}, \texttt{emotion}, \texttt{subtitle}, \texttt{ED} \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+Bảy thuộc tính quan hệ tạo thành cấu trúc liên kết giữa các thực thể trong đồ thị: lớp Play kết nối tới Character và Scene qua \texttt{HAS\_CHARACTER} và \texttt{HAS\_SCENE}; Scene kết nối tới Version qua \texttt{HAS\_VERSION}. Lớp trung gian \texttt{RoleAssignment} kết nối ra ba hướng qua \texttt{PERFORMED\_BY}~(Actor), \texttt{FOR\_CHARACTER}~(Character) và \texttt{IN\_VERSION}~(Version), đồng thời nối sang Appearance qua \texttt{HAS\_APPEARANCE}.
+
+\textbf{Độ phủ tri thức.}
+Ontology bao quát \textbf{bảy vở chèo} kinh điển trong kho lưu trữ của Trường Đại học Sân khấu – Điện ảnh Hà Nội: Quan Âm Thị Kính, Kim Nham, Trương Viên, Lưu Bình Dương Lễ, Chu Mãi Thần, Từ Thức và Trịnh Nguyên. Tổng cộng \textbf{400 thực thể} (individuals) được định nghĩa tường minh, gồm 7 vở diễn, 38 nhân vật, 41 diễn viên, 15 trích đoạn, 27 phiên bản biểu diễn, 76 phân công vai diễn và 196 Appearance. Mỗi Appearance ghi nhận một lần xuất hiện của vai diễn trong video kèm thời điểm bắt đầu, thời điểm kết thúc, cảm xúc và lời thoại. Toàn bộ thực thể được xây dựng từ dữ liệu thực tế của nhà trường, đảm bảo tính xác thực của cơ sở tri thức.
+
+\textbf{Cơ sở kế thừa.}
+Với một hệ thống GraphRAG, ontology đáp ứng được ba tiêu chí nền tảng để trở thành nguồn tri thức đáng tin cậy: (i) \textit{chất lượng cơ sở dữ liệu}, (ii) \textit{khả năng mô hình hóa miền thông tin} và (iii) \textit{chiều sâu dữ liệu}. Về chất lượng cơ sở dữ liệu, cấu trúc OWL với ràng buộc domain/range trên từng object property đảm bảo tính nhất quán logic có thể kiểm tra bằng reasoner, loại bỏ các mâu thuẫn ngữ nghĩa ở lớp lưu trữ. Về khả năng mô hình hóa miền, thông qua các lớp \texttt{RoleAssignment} và \texttt{Appearance} biểu diễn được đặc thù của nghệ thuật biểu diễn sống - cùng một trích đoạn có thể được dàn dựng nhiều lần với dàn diễn viên hoàn toàn khác nhau - mà các mô hình quan hệ phẳng không nắm bắt được. Về chiều sâu dữ liệu, thông tin ở mức thời điểm xuất hiện trong \texttt{Appearance} tạo nền tảng cho các phân tích vượt ngoài phạm vi truy xuất thực thể đơn thuần, cung cấp được nhiều thông tin hơn về các trích đoạn nhỏ, nét diễn của từng diễn viên hay đặc điểm của từng nhân vật.
+
+Tuy nhiên, khi đặt trong bối cảnh hệ thống hỏi-đáp thời gian thực, mô hình OWL thuần tuý bộc lộ hai hạn chế kỹ thuật cơ bản:
+
+\begin{enumerate}
+\item \textit{Truy vấn đa bước và suy luận quan hệ gián tiếp tốn chi phí cao.} Mặc dù SPARQL hỗ trợ property path, việc biểu diễn các truy vấn đa bước với độ sâu biến đổi trong thực tế vẫn gặp khó khăn về kiểm soát và tối ưu hoá. Bên cạnh đó, khai thác quan hệ gián tiếp qua bộ suy luận ontology toàn cục có chi phí tính toán lớn trên đồ thị kích thước lớn, không khả thi để thực hiện tại thời điểm truy vấn trong các hệ thống yêu cầu phản hồi nhanh.
+
+\item \textit{Truy vấn theo thuộc tính văn bản không được tối ưu sẵn.} Các truy vấn tìm kiếm theo tên trong SPARQL thường phải kết hợp phép lọc và đối sánh biểu thức chính quy trên thuộc tính chuỗi, không được tối ưu hoá ở mức lưu trữ và dẫn đến chi phí quét toàn bộ dữ liệu. Đồng thời, OWL/SPARQL không cung cấp sẵn cơ chế tìm kiếm toàn văn như so khớp không phân biệt hoa-thường hay khớp gần đúng (fuzzy matching) - vốn là yêu cầu phổ biến với câu hỏi ngôn ngữ tự nhiên, đặc biệt khi xử lý tên riêng tiếng Việt có nhiều biến thể.
+\end{enumerate}
+
+Hai hạn chế trên là cơ sở kỹ thuật dẫn đến quyết định chuyển đổi sang mô hình property graph, nhằm đảm bảo hiệu năng truy xuất mà vẫn duy trì được cấu trúc ngữ nghĩa của ontology ban đầu.
+
+\subsection{Chuyển đổi và mở rộng lược đồ}
+\label{sec:schema_extension}
+
+Để khắc phục các hạn chế của OWL nêu ở mục trước và phục vụ các truy vấn đặc thù của hệ thống GraphRAG, lược đồ tri thức được xây dựng qua hai pha kế tiếp. \textit{Pha thứ nhất} ánh xạ cấu trúc ngữ nghĩa của ontology gốc sang mô hình property graph, kết quả là một đồ thị tri thức cơ sở giữ nguyên ngữ nghĩa của ontology nhưng truy vấn nhanh hơn. \textit{Pha thứ hai} mở rộng đồ thị này bằng các phân lớp con phục vụ hai lớp truy vấn đặc thù - truy vấn phân loại theo loại vai diễn và truy vấn phân tích yếu tố biểu diễn - tạo ra đồ thị tri thức cuối cùng được dùng trong toàn bộ hệ thống (Bảng~\ref{tab:schema_extension}, Hình~\ref{fig:kg_schema}).
+
+\textbf{Chuyển đổi sang mô hình property graph.}
+Mô hình \textit{property graph} biểu diễn tri thức bằng \textit{nút} (đại diện cho thực thể) và \textit{cạnh có hướng} (đại diện cho quan hệ giữa hai thực thể); cả nút lẫn cạnh đều có thể mang thuộc tính. So với OWL, mô hình này hỗ trợ trực tiếp truy vấn theo đường đi với độ sâu linh hoạt và cho phép lập chỉ mục ở mức cơ sở dữ liệu, qua đó giảm phụ thuộc vào suy luận ontology tốn kém và tối ưu hoá truy vấn theo thuộc tính văn bản. Cấu trúc ngữ nghĩa của ontology được bảo toàn thông qua ba quy tắc ánh xạ trực tiếp:
+
+\begin{itemize}
+  \item Mỗi lớp ontology trở thành một \textit{nhãn nút} (node label).
+  \item Mỗi cá thể trở thành một \textit{nút} kèm tập thuộc tính dữ liệu.
+  \item Mỗi quan hệ ngữ nghĩa trở thành một \textit{loại cạnh} có hướng.
+\end{itemize}
+
+Ví dụ minh hoạ với nhân vật Thị Màu trong vở Quan Âm Thị Kính:
+
+\begin{tcolorbox}[colback=gray!5, colframe=black!50, arc=4pt, boxrule=0.5pt]
+{\small
+\begin{verbatim}
+Ontology (OWL)              →   Property Graph
+---------------------------------------------------------------
+Lớp Character               →   Nhãn nút :Character
+Lớp Play                    →   Nhãn nút :Play
+Cá thể "Thị Màu"            →   Nút :Character {name, mainType, ...}
+Cá thể "Quan Âm Thị Kính"   →   Nút :Play {title, summary, ...}
+Quan hệ hasCharacter        →   Cạnh (Quan Âm Thị Kính)
+                                     --HAS_CHARACTER→ (Thị Màu)
+\end{verbatim}
+}
+\end{tcolorbox}
+
+Quy trình chuyển đổi (Hình~\ref{fig:ontology_conversion}) đọc tệp ontology gốc, trích xuất toàn bộ cá thể cùng lớp tương ứng và các giá trị thuộc tính, sau đó áp dụng ba quy tắc trên để sinh ra tập nút và cạnh tương ứng. Dữ liệu được nạp theo nguyên tắc \textit{idempotent} - thực thể đã tồn tại được cập nhật thay vì tạo trùng lặp - nhờ đó quá trình nạp có thể chạy lại nhiều lần mà không thay đổi trạng thái cuối. Kết thúc pha này, hệ thống có một đồ thị tri thức cơ sở giữ nguyên toàn bộ độ phủ và ngữ nghĩa của ontology gốc, đồng thời chuyển sang cấu trúc thuận lợi cho truy vấn đa bước, lập chỉ mục bản địa và tìm kiếm toàn văn được hỗ trợ sẵn ở tầng property graph.
+
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=\textwidth]{figures/c3/ontology_conversion.jpg}
+  \caption{Quy trình chuyển đổi Ontology OWL~2 sang đồ thị tri thức.}
+  \label{fig:ontology_conversion}
+\end{figure}
+
+\textbf{Mở rộng phân lớp nhân vật.}
+Đồ thị cơ sở thu được sau pha chuyển đổi vẫn lưu loại vai diễn dưới dạng thuộc tính chuỗi thừa kế từ ontology gốc - tức là tất cả nhân vật đều mang chung nhãn \texttt{Character} và chỉ khác nhau ở giá trị thuộc tính \texttt{mainType} (Đào, Kép, Hề, Lão, Mụ). Cách biểu diễn thuộc tính phẳng này buộc tầng truy xuất phải lọc theo giá trị thuộc tính tại thời điểm truy vấn thay vì nhận dạng trực tiếp qua nhãn nút. Trong pipeline GraphRAG, các truy vấn đồ thị được sinh tự động từ ngôn ngữ tự nhiên và ánh xạ chủ yếu dựa trên nhãn nút; việc giữ phân loại thuộc tính phẳng làm suy yếu khả năng ánh xạ chính xác từ câu hỏi người dùng sang đồ thị. Lớp \texttt{Character} do đó được mở rộng thành năm lớp con tương ứng với năm loại vai truyền thống của nghệ thuật Chèo:
+
+\begin{itemize}
+  \item \texttt{DaoCharacter} - nhân vật vai \textit{Đào} (nữ chính diện),
+    thường là người phụ nữ đoan trang, hiền thục hoặc lả lơi tinh nghịch.
+  \item \texttt{KepCharacter} - nhân vật vai \textit{Kép} (nam chính diện),
+    thường là người đàn ông học thức, trượng phu hoặc trai trẻ.
+  \item \texttt{HeCharacter} - nhân vật vai \textit{Hề} (vai hài), giữ vai trò
+    gây cười và phản biện xã hội trong vở chèo.
+  \item \texttt{MuCharacter} - nhân vật vai \textit{Mụ} (nữ lớn tuổi), thường
+    là bà mẹ, bà chủ quán hoặc nhân vật cao niên.
+  \item \texttt{LaoCharacter} - nhân vật vai \textit{Lão} (nam lớn tuổi),
+    thường là ông cụ, người cha hoặc lão nông.
+\end{itemize}
+
+Sau mở rộng, mỗi nhân vật mang đồng thời nhãn cha \texttt{Character} và nhãn con tương ứng. Ví dụ:
+
+\begin{tcolorbox}[colback=gray!5, colframe=black!50, arc=4pt, boxrule=0.5pt]
+{\small
+\begin{verbatim}
+Thị Kính:     :Character + :DaoCharacter   (subType: "Chín")
+Thị Màu:      :Character + :DaoCharacter   (subType: "Lệch")
+Lưu Bình:     :Character + :KepCharacter   (subType: "Pha")
+Sùng Bà:      :Character + :MuCharacter    (subType: "Ác")
+Mãng Ông:     :Character + :LaoCharacter   (subType: "Say")
+\end{verbatim}
+}
+\end{tcolorbox}
+
+Phân lớp này biến \texttt{mainType} từ thuộc tính chuỗi thành nhãn nút có thể truy vấn trực tiếp - các câu hỏi dạng ``những nhân vật vai Đào trong vở \textit{X}'' được giải quyết bằng pattern matching trên nhãn thay vì lọc thuộc tính. Bên cạnh đó, thuộc tính \texttt{subType} (Chín, Lệch, Pha, Say, Áo dài, Áo ngắn\ldots) tiếp tục được giữ nguyên trên nút để biểu diễn các phân loại tinh hơn trong cùng một loại vai.
+
+\textbf{Mở rộng phân loại biểu diễn.}
+Lớp \texttt{Appearance} trong đồ thị cơ sở lưu trữ mọi lần xuất hiện của nhân vật trên sân khấu dưới dạng thực thể duy nhất, không phân biệt thể loại biểu đạt - một lần xuất hiện có thể đồng thời chứa cử chỉ, trang phục và trạng thái cảm xúc, nhưng tất cả đều bị gộp vào cùng một loại nút. Với hệ thống hỏi-đáp có thể nhận câu hỏi về từng loại yếu tố biểu diễn riêng lẻ, lớp \texttt{Appearance} được phân thành các nhóm con độc lập về ngữ nghĩa:
+
+\begin{itemize}
+  \item \texttt{Mood} - trạng thái cảm xúc của nhân vật tại một lần xuất hiện
+    cụ thể, thừa kế các thuộc tính thời gian (\texttt{start}, \texttt{end})
+    và cảm xúc (\texttt{emotion}) từ \texttt{Appearance} gốc.
+  \item \texttt{Costume} - trang phục đặc trưng theo loại vai (vd: Đào-Chín,
+    Hề-Áo ngắn), được tham chiếu chung cho mọi vai diễn cùng loại.
+  \item \texttt{FaceGesture} - cử chỉ khuôn mặt đại diện cho từng loại cảm
+    xúc, mã hoá quy ước biểu cảm trong nghệ thuật Chèo.
+  \item \texttt{MoodType} - loại cảm xúc canonical (vd: \texttt{moodType\_Sad},
+    \texttt{moodType\_Angry}\ldots), đóng vai trò \textit{neo ngữ nghĩa} cho
+    quan hệ \texttt{REPRESENT} giữa Costume và cảm xúc đại diện.
+\end{itemize}
+
+Nhờ phân lớp con này, các câu hỏi về một thể loại biểu diễn cụ thể được truy xuất trực tiếp qua nhãn nút thay vì qua bộ lọc thuộc tính chuỗi:
+
+\begin{tcolorbox}[colback=gray!5, colframe=black!50, arc=4pt, boxrule=0.5pt]
+{\small
+\begin{verbatim}
+Câu hỏi: "Trang phục nào được dùng cho các vai Đào-Chín?"
+
+Đồ thị cơ sở:    duyệt toàn bộ :Appearance
+                 → lọc theo thuộc tính chuỗi mô tả
+Đồ thị mở rộng:  truy xuất trực tiếp các nút :Costume
+                 liên kết tới nhân vật vai Đào-Chín
+\end{verbatim}
+}
+\end{tcolorbox}
+
+Bên cạnh các lớp con đã có instance, hệ thống cũng giữ sẵn một số lớp cha mở rộng cho hướng phát triển tương lai - \texttt{PhysicalGesture} (gồm \texttt{HandGesture}, \texttt{LegGesture}), \texttt{Artifact}, \texttt{CostumeArtifact} - để mã hoá cử chỉ tay/chân và đạo cụ khi dữ liệu chú thích từ video được bổ sung. Đồ thị tri thức cuối cùng vì vậy bao quát đầy đủ tri thức của ontology gốc và bổ sung phân lớp con phục vụ hai loại truy vấn đặc thù nêu ở đầu mục (Bảng~\ref{tab:schema_extension}, Hình~\ref{fig:kg_schema}).
+
+\begin{table}[ht!]
+  \centering
+  \caption{Các lớp con bổ sung trong đồ thị tri thức Chèo.}
+  \label{tab:schema_extension}
+  \renewcommand{\arraystretch}{1.3}
+  \footnotesize
+  \begin{tabular}{p{3.6cm} p{2.8cm} p{8.39cm}}
+    \toprule
+    \textbf{Lớp con} & \textbf{Lớp cha} & \textbf{Ngữ nghĩa và vai trò thiết kế} \\
+    \midrule
+    \texttt{DaoCharacter}
+      & \texttt{Character}
+      & Vai Đào - nữ chính diện; truy vấn phân loại qua nhãn nút. \\[2pt]
+    \texttt{KepCharacter}
+      & \texttt{Character}
+      & Vai Kép - nam chính diện. \\[2pt]
+    \texttt{HeCharacter}
+      & \texttt{Character}
+      & Vai Hề - nhân vật hài, phản biện. \\[2pt]
+    \texttt{MuCharacter}
+      & \texttt{Character}
+      & Vai Mụ - nhân vật nữ lớn tuổi. \\[2pt]
+    \texttt{LaoCharacter}
+      & \texttt{Character}
+      & Vai Lão - nhân vật nam lớn tuổi. \\[4pt]
+    \texttt{Mood}
+      & \texttt{Appearance}
+      & Trạng thái cảm xúc của nhân vật tại một lần xuất hiện; gắn với
+        thời gian \texttt{start}/\texttt{end} và giá trị
+        \texttt{emotion} thừa kế từ \texttt{Appearance}. \\[2pt]
+    \texttt{Costume}
+      & \texttt{Appearance}
+      & Trang phục đặc trưng theo loại vai (Đào-Chín, Hề-Áo ngắn\ldots);
+        liên kết tới các diễn viên thông qua quan hệ \texttt{IS\_WEAR\_BY}. \\[2pt]
+    \texttt{FaceGesture}
+      & \texttt{Appearance}
+      & Cử chỉ khuôn mặt đại diện cho từng loại cảm xúc theo quy ước
+        biểu cảm trong nghệ thuật Chèo. \\[2pt]
+    \texttt{MoodType}
+      & \texttt{Appearance}
+      & Loại cảm xúc canonical (\texttt{moodType\_Sad},
+        \texttt{moodType\_Happy}\ldots), đóng vai trò neo ngữ nghĩa cho
+        quan hệ \texttt{REPRESENT}. \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\begin{figure}[!ht]
+  \centering
+  \includegraphics[width=\textwidth]{figures/c3/Ontology2.jpg}
+  \caption{Lược đồ đồ thị tri thức Chèo sau mở rộng.}
+  \label{fig:kg_schema}
+\end{figure}
+
+\textbf{Mở rộng quan hệ.}
+Bên cạnh phân lớp con, đồ thị tri thức cũng được làm giàu bằng các quan hệ mới (Bảng~\ref{tab:relation_extension}) phục vụ truy vấn theo trục biểu diễn (cảm xúc, trang phục) và truy vấn suy diễn xuyên thực thể (cộng tác diễn viên, nguyên mẫu xuyên vở). Ngoài hai quan hệ \texttt{EXPRESS} và \texttt{IS\_WEAR\_BY} được thiết lập ngay tại pha mở rộng schema, bốn quan hệ còn lại được sinh ra qua bộ luật suy diễn (Phụ lục~B) trình bày ở Mục~\ref{sec:retrieval_optimization}.
+
+\begin{table}[ht!]
+  \centering
+  \caption{Các quan hệ bổ sung trong đồ thị tri thức Chèo.}
+  \label{tab:relation_extension}
+  \renewcommand{\arraystretch}{1.3}
+  \footnotesize
+  \begin{tabular}{p{3.6cm} p{4.4cm} p{6.79cm}}
+    \toprule
+    \textbf{Quan hệ} & \textbf{Domain $\to$ Range} & \textbf{Vai trò ngữ nghĩa} \\
+    \midrule
+    \texttt{EXPRESS}
+      & \texttt{Actor} $\to$ \texttt{Mood}
+      & Diễn viên biểu lộ cảm xúc qua một lần xuất hiện cụ thể. \\[2pt]
+    \texttt{IS\_WEAR\_BY}
+      & \texttt{Costume} $\to$ \texttt{Actor}
+      & Trang phục được mặc bởi diễn viên đảm nhận vai. \\[2pt]
+    \texttt{PERFORMS}
+      & \texttt{Actor} $\to$ \texttt{Character}
+      & Quan hệ trực tiếp diễn viên - nhân vật, rút gọn từ chuỗi qua
+        \texttt{RoleAssignment}. \\[2pt]
+    \texttt{COLLABORATES\_WITH}
+      & \texttt{Actor} $\leftrightarrow$ \texttt{Actor}
+      & Hai diễn viên cùng tham gia một phiên bản trình diễn (đối xứng). \\[2pt]
+    \texttt{REPRESENT}
+      & \texttt{Costume} $\to$ \texttt{MoodType}
+      & Trang phục thể hiện một loại cảm xúc khi co-occur thường xuyên. \\[2pt]
+    \texttt{ARCHETYPE\_SIMILAR}
+      & \texttt{Character} $\leftrightarrow$ \texttt{Character}
+      & Hai nhân vật ở hai vở khác nhau có cùng kiểu hình kịch (đối xứng). \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+% ============================================================
+
+\subsection{Cơ chế hỗ trợ truy xuất}
+\label{sec:retrieval_optimization}
+
+Hiệu năng truy xuất trên đồ thị tri thức không chỉ phụ thuộc vào lược đồ mà còn vào hai cơ chế bổ trợ: cách xử lý các quan hệ gián tiếp - những quan hệ không tồn tại dưới dạng cạnh trực tiếp - và cách lập chỉ mục để truy cập thực thể nhanh chóng.
+
+\textbf{Bổ sung luật suy luận quan hệ gián tiếp.}
+Đồ thị mở rộng chứa toàn bộ tri thức tường minh của miền, nhưng nhiều câu hỏi thực tế đòi hỏi khai thác \textit{tri thức ngầm} - các quan hệ chỉ tồn tại dưới dạng chuỗi liên kết nhiều bước hoặc dưới dạng quy ước nghệ thuật chưa được mã hoá tường minh. Để bù đắp khoảng cách giữa cấu trúc dữ liệu và ngữ nghĩa câu hỏi, hệ thống định nghĩa một bộ luật suy diễn được áp dụng \textit{vật chất hoá} trên đồ thị tại thời điểm xây dựng. Toàn bộ luật được phát biểu hình thức bằng SWRL hoặc SPARQL CONSTRUCT và liệt kê đầy đủ ở Phụ lục~B. Phần này chỉ trình bày \textit{động cơ thiết kế} của ba nhóm luật, lý giải vì sao mỗi nhóm cần thiết với hệ thống GraphRAG.
+
+\textit{(i) Nhóm luật sinh tri thức -- vật chất hoá quan hệ gián tiếp.}
+Một số câu hỏi tần suất cao đòi hỏi truy xuất quan hệ chỉ tồn tại dưới dạng chuỗi nhiều bước trong ontology gốc. Tiêu biểu là quan hệ giữa diễn viên và nhân vật (``x đóng những vai nào?''): trong đồ thị cơ sở, truy vấn này phải duyệt qua nút trung gian \texttt{RoleAssignment} - một thực thể \textit{reify} dùng để biểu diễn quan hệ ba ngôi giữa diễn viên, nhân vật và phiên bản trình diễn. Cùng dạng đó, các quan hệ \textit{cộng tác giữa diễn viên} (tồn tại ngầm khi hai diễn viên cùng tham gia một phiên bản trình diễn) và \textit{tương đồng nguyên mẫu xuyên vở} (hai nhân vật cùng phân loại vai diễn ở các vở khác nhau) cũng yêu cầu duyệt qua nhiều cạnh để xác định. Việc giữ các quan hệ này ở dạng \textit{ngầm} buộc tầng truy xuất phải thực hiện đường đi nhiều bước cho mỗi câu hỏi, làm tăng độ trễ và phức tạp hoá Cypher sinh tự động. Bộ luật vật chất hoá những quan hệ này thành cạnh tường minh, giúp các câu hỏi tương ứng được giải quyết bằng truy vấn 1-bước thay vì 3-5 bước.
+
+\textit{(ii) Nhóm luật xác thực dữ liệu.}
+Khác với nhóm trên, nhóm luật này không sinh tri thức mới mà nhằm \textit{phát hiện} các vi phạm mẫu mong đợi trong dữ liệu - ví dụ vai diễn có giới tính diễn viên không khớp giới tính nhân vật, hay nhân vật chưa được phân lớp con loại vai. Trong bối cảnh ontology được xây dựng thủ công với hàng trăm cá thể, các vi phạm dạng này khó phát hiện nếu chỉ duyệt thủ công; bộ luật xác thực hoạt động như một lớp kiểm tra chất lượng tự động, gắn nhãn cá thể vi phạm để truy xuất hoặc xử lý sau. Một kết quả đáng chú ý là luật phát hiện \textit{Appearance mồ côi} đã chỉ ra 17 lượt xuất hiện tồn tại trong ontology gốc nhưng không được tham chiếu bởi bất kỳ \texttt{RoleAssignment} nào - một vấn đề chất lượng dữ liệu mà ngay cả người soạn ontology cũng không nhận ra trong quá trình xây dựng.
+
+\textit{(iii) Nhóm luật tri thức nghệ thuật chèo.}
+Một số tri thức nghệ thuật không thể biểu diễn trực tiếp bằng các thuộc tính phẳng - chẳng hạn quy ước giới tính theo loại vai (vai Đào và Mụ luôn là nữ, vai Kép và Lão luôn là nam) hay khái niệm \textit{nguyên mẫu nhân vật} (hai nhân vật ở hai vở khác nhau có thể chia sẻ cùng kiểu hình kịch). Bộ luật ở nhóm này mã hoá các quy ước nghệ thuật vào schema dưới dạng OWL Restriction hoặc cạnh suy diễn, cho phép truy vấn so sánh xuyên vở (vd: ``so sánh số phận các nhân vật vai Đào-Chín'') và đảm bảo tính nhất quán ngữ nghĩa khi mở rộng dữ liệu sang các vở mới.
+
+Toàn bộ logic suy luận được điều khiển ở tầng ứng dụng, không phụ thuộc vào bộ suy luận ontology toàn cục, nhờ đó duy trì độ trễ thấp và kiểm soát được phạm vi suy luận theo từng loại câu hỏi. Việc tách bạch ba nhóm luật theo \textit{động cơ thiết kế} - sinh tri thức, xác thực và mã hoá tri thức nghệ thuật - cũng giúp dễ dàng mở rộng bộ luật trong tương lai khi miền tri thức được làm giàu thêm.
+
+\textbf{Chỉ mục đa mức.}
+Lược đồ xác định \textit{cái gì} có trong đồ thị; chỉ mục xác định \textit{tốc độ} truy cập vào từng loại thông tin đó. Hệ thống tổ chức chỉ mục theo ba mức phục vụ ba nhóm truy vấn khác nhau (Bảng~\ref{tab:index_strategy}).
+
+\begin{table}[ht]
+  \centering
+  \caption{Chiến lược chỉ mục ba mức trên đồ thị tri thức Chèo.}
+  \label{tab:index_strategy}
+  \renewcommand{\arraystretch}{1.35}
+  \small
+  \begin{tabular}{p{3.2cm} p{4.8cm} p{6.79cm}}
+    \toprule
+    \textbf{Mức chỉ mục} & \textbf{Cơ chế} & \textbf{Mục tiêu và truy vấn điển hình} \\
+    \midrule
+    Chỉ mục định danh
+      & Ràng buộc duy nhất trên định danh chuẩn của từng loại nút
+      & Truy xuất $O(1)$ theo định danh; đảm bảo tính idempotent khi nạp lại dữ liệu \\[4pt]
+    Chỉ mục thuộc tính
+      & Chỉ mục có thứ tự trên các trường tên hiển thị của thực thể
+      & Tìm kiếm $O(\log n)$ theo tên - trường xuất hiện trong phần lớn câu hỏi người dùng \\[4pt]
+    Chỉ mục toàn văn
+      & Chuẩn hoá hoa-thường khi đối chiếu chuỗi
+      & Khớp không phân biệt hoa-thường cho tên riêng tiếng Việt với nhiều biến thể viết tắt \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+Mức định danh phục vụ tra cứu điểm đơn khi thực thể đã được xác định trước, đồng thời đảm bảo tính idempotent khi nạp dữ liệu. Mức thuộc tính giải quyết tìm kiếm theo tên - trường xuất hiện trong phần lớn câu hỏi người dùng - bằng cách hạ chi phí từ quét toàn bộ tập nút xuống $O(\log n)$. Mức toàn văn xử lý biến thể viết hoa của tên riêng tiếng Việt thông qua chuẩn hoá hoa-thường khi đối chiếu chuỗi. Hai mức sau cùng nhau giải quyết hạn chế~(2) của ontology gốc đã nêu ở Mục~\ref{sec:ontology_cheo}.
+
+\subsection{Danh mục thực thể}
+\label{sec:entity_catalog}
+
+Bên cạnh đồ thị tri thức và các chỉ mục, tầng tri thức duy trì một thành phần phụ trợ là \textbf{Danh mục thực thể} - bản trích xuất tên hiển thị của toàn bộ thực thể có trong đồ thị tri thức, được nạp vào bộ nhớ tại thời điểm khởi tạo hệ thống. Tại thời điểm khởi tạo, hệ thống quét bốn nhãn chính (\texttt{Play}, \texttt{Character}, \texttt{Actor}, \texttt{Scene}) để thu thập tên hiển thị của toàn bộ cá thể; kết quả được giữ trong bộ nhớ tiến trình dưới dạng bốn danh sách phẳng.
+
+Danh mục thực thể đảm nhận hai chức năng song song. \textit{Thứ nhất}, nó đóng vai trò \textit{ràng buộc định danh} cho LLM ở giai đoạn trích xuất thực thể: prompt trích xuất chứa sẵn danh sách tên hợp lệ kèm ràng buộc \emph{chỉ chọn thực thể thuộc danh sách}, qua đó loại bỏ khả năng mô hình tạo ra tên không tồn tại trong đồ thị ngay từ bước đầu tiên - một trong những cơ chế chống ảo giác chủ chốt của hệ thống. \textit{Thứ hai}, danh mục đóng vai trò chuẩn hoá định danh: các biến thể viết hoa hoặc viết tắt trong câu hỏi người dùng được khớp về tên định danh chuẩn trước khi tham gia truy vấn đồ thị, giảm thiểu rủi ro lệch khớp do khác biệt hình thức.
+
+Vì được nạp một lần tại khởi tạo, danh mục là một bản chụp tĩnh; mọi thay đổi của đồ thị tri thức sau đó đòi hỏi khởi động lại tiến trình để đồng bộ. Trong phạm vi nghiên cứu này, đồ thị là tĩnh nên cơ chế đồng bộ động chưa được triển khai.
+
+Cùng với lược đồ mở rộng (Mục~\ref{sec:schema_extension}) và các cơ chế hỗ trợ truy xuất (Mục~\ref{sec:retrieval_optimization}), Danh mục thực thể hoàn thiện tầng tri thức của hệ thống GraphRAG.
+

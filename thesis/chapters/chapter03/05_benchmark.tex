@@ -1,0 +1,107 @@
+% =============================================================================
+%  Section 3.4 — Thiết kế bộ dữ liệu đánh giá (Benchmark)
+%  Subsections:
+%    3.4.1  Nguyên tắc xây dựng bộ dữ liệu đánh giá
+%    3.4.2  Phân loại truy vấn
+%    3.4.3  Mức độ bao phủ của bộ dữ liệu
+% =============================================================================
+
+\section{Thiết kế bộ dữ liệu đánh giá (Benchmark)}
+
+\subsection{Nguyên tắc xây dựng bộ dữ liệu đánh giá}
+
+Để đánh giá hiệu quả của hệ thống một cách khách quan và có kiểm soát, một bộ dữ liệu đánh giá chuyên biệt được xây dựng dựa trên tri thức có trong đồ thị tri thức, có đối chiếu với tư liệu chuyên môn về nghệ thuật Chèo từ Trường Đại học Sân khấu – Điện ảnh Hà Nội để đảm bảo tính chính xác. Bộ dữ liệu được xây dựng ưu tiên (i) \textit{tính chính xác}, (ii) \textit{tính đại diện} và (iii) \textit{khả năng đo lường rõ ràng}, tương tự các nghiên cứu về benchmark cho hệ thống hỏi đáp dựa trên tri thức có cấu trúc \cite{peng2025m3gqa}.
+
+Bộ dữ liệu đánh giá được xây dựng theo 4 nguyên tắc chính. Thứ nhất là \textit{tính hiện thực} (realism), trong đó mọi thực thể và quan hệ xuất hiện trong câu hỏi đều tồn tại trong đồ thị tri thức, đảm bảo rằng hệ thống có đủ tri thức để trả lời. Thứ hai là \textit{tính toàn diện} (coverage), các câu hỏi được thiết kế để bao phủ nhiều loại truy vấn khác nhau, đặc biệt bao gồm các truy vấn yêu cầu suy luận đa bước, vốn được xem là thách thức cốt lõi trong các hệ thống KGQA hiện đại \cite{wang2023multihop}. Thứ ba là \textit{tính đo lường được} (measurability), mỗi câu hỏi đều có ground truth rõ ràng nhằm hỗ trợ đánh giá định lượng. Cuối cùng là \textit{tính cân bằng} (balance), đảm bảo phân bố hợp lý giữa các mức độ phức tạp của truy vấn.
+
+Bộ kiểm thử gồm 100 câu hỏi được xây dựng thủ công và nhận cố vấn từ các chuyên gia về nghệ thuật Chèo nhằm đảm bảo tính chính xác. Mặc dù số lượng không lớn, thiết kế tập trung vào độ phức tạp quan hệ và khả năng suy luận, phù hợp với xu hướng benchmark hiện đại nhấn mạnh reasoning thay vì chỉ retrieval \cite{peng2025m3gqa}.
+
+\subsection{Phân loại truy vấn}
+\label{sec:query_classification}
+
+Các câu hỏi trong bộ dữ liệu đánh giá được phân loại thành ba nhóm: Local, Community và Global. Việc phân loại này được xây dựng dựa trên ba tiêu chí chính: (i) \textit{phạm vi truy xuất trong đồ thị}, (ii) \textit{độ phức tạp suy luận đa bước} và (iii) \textit{đặc trưng của kiến trúc GraphRAG}.
+
+Xét theo phạm vi truy xuất, các nghiên cứu về GraphRAG cho thấy sự khác biệt rõ rệt giữa truy vấn cục bộ và truy vấn toàn cục. Edge et al. \cite{edge2024graphrag} chỉ ra rằng các hệ thống Retrieval-Augmented Generation truyền thống chủ yếu phù hợp với các truy vấn cục bộ, trong đó thông tin cần thiết có thể được truy xuất từ một số lượng nhỏ các đoạn văn bản hoặc thực thể liên quan. Ngược lại, các truy vấn toàn cục yêu cầu tổng hợp thông tin từ toàn bộ tập dữ liệu, tương ứng với bài toán tóm tắt theo truy vấn (query-focused summarization), vượt ra ngoài khả năng của các phương pháp truy xuất cục bộ. Trên cơ sở đó, GraphRAG đề xuất các cơ chế truy xuất ở nhiều mức độ, bao gồm local search và global search. Từ góc nhìn này, có thể xác định thêm một mức trung gian là community-level, trong đó truy vấn yêu cầu khai thác thông tin trong một cụm thực thể có liên kết chặt chẽ trong đồ thị. Mức này phản ánh cấu trúc tự nhiên của đồ thị tri thức, nơi các thực thể thường được tổ chức thành các cộng đồng (communities) thông qua các quan hệ ngữ nghĩa.
+
+Xét theo độ phức tạp suy luận, các truy vấn trong hệ thống hỏi đáp tri thức thường yêu cầu suy luận qua nhiều bước (multi-hop reasoning), trong đó câu trả lời được suy ra thông qua chuỗi các quan hệ trong đồ thị \cite{wang2023multihop}. Các nghiên cứu gần đây cho thấy hiệu năng của hệ thống phụ thuộc đáng kể vào khả năng xử lý các truy vấn multi-hop, đặc biệt khi số lượng bước suy luận tăng lên \cite{shah2024multihop}. Do đó, việc phân loại truy vấn theo số bước suy luận là cần thiết để đánh giá hệ thống một cách toàn diện.
+
+Hiện nay, các benchmark hiện đại cho hệ thống GraphRAG nhấn mạnh rằng việc đánh giá cần bao phủ nhiều mức độ truy vấn khác nhau, từ truy vấn đơn giản đến truy vấn yêu cầu tổng hợp tri thức phức tạp \cite{peng2025m3gqa}. Điều này nhằm đảm bảo rằng hệ thống không chỉ hoạt động tốt ở các trường hợp đơn giản mà còn có khả năng xử lý các truy vấn có cấu trúc quan hệ phức tạp.
+
+Trên cơ sở các tiêu chí trên, các truy vấn trong bộ kiểm thử được phân loại như sau:
+
+\textbf{Local queries} (35\%) là các truy vấn yêu cầu truy xuất thông tin trực tiếp từ một hoặc một số ít thực thể trung tâm, với số bước suy luận nhỏ (thường từ một đến hai bước).
+
+\begin{tcolorbox}[colback=gray!5, colframe=black!50, arc=4pt, boxrule=0.5pt]
+{\small
+\begin{verbatim}
+{
+  "id": "CASE_014",
+  "category": "local_queries",
+  "subcategory": "direct_relation",
+  "question": "Ai đóng vai Nô trong vở Quan Âm Thị Kính?",
+  "ground_truth": {
+    "answer": "Văn Quân và Mạnh Phóng đóng vai Nô.",
+    "related_entities": ["Văn Quân", "Mạnh Phóng", "Nô", 
+                        "Quan Âm Thị Kính"]
+  }
+}
+\end{verbatim}
+}
+\end{tcolorbox}
+Truy vấn trên có thể được biểu diễn dưới dạng một chuỗi quan hệ ngắn trong đồ thị tri thức, bắt đầu từ thực thể vở diễn, liên kết đến nhân vật, sau đó tới vai diễn và cuối cùng là nghệ sĩ biểu diễn. Toàn bộ quá trình truy xuất được giới hạn trong một vùng lân cận nhỏ của đồ thị và không yêu cầu tổng hợp thông tin từ nhiều nguồn khác nhau. Do đó, truy vấn này đại diện cho lớp bài toán truy xuất cục bộ, trong đó câu trả lời có thể được xác định thông qua một truy vấn đồ thị đơn với số bước duyệt hữu hạn.
+
+\textbf{Community queries} (32\%) là các truy vấn yêu cầu kết nối nhiều thực thể trong cùng một cụm quan hệ và tổng hợp thông tin từ nhiều đường dẫn trong đồ thị.
+
+\begin{tcolorbox}[colback=gray!5, colframe=black!50, arc=4pt, boxrule=0.5pt]
+{\small
+\begin{verbatim}
+{
+  "id": "CASE_051",
+  "category": "community_queries",
+  "subcategory": "play_cast",
+  "question": "Những diễn viên nào đã tham gia đồng thời 
+               cả vở Quan Âm Thị Kính và Kim Nham?",
+  "ground_truth": {
+    "answer": "An Chinh, Tuấn Kha, Bá Dũng, Huy Toàn, Ngọc Minh",
+    "related_entities": ["Quan Âm Thị Kính", "Kim Nham"]
+  }
+}
+\end{verbatim}
+}
+\end{tcolorbox}
+Trong truy vấn này, hệ thống cần thực hiện hai quá trình truy xuất độc lập để xác định tập các nghệ sĩ tham gia từng vở diễn, sau đó kết hợp các kết quả thông qua phép giao tập hợp. Về mặt cấu trúc, truy vấn bao gồm nhiều đường dẫn trong đồ thị xuất phát từ các thực thể khác nhau, và không thể được giải quyết bằng một truy vấn cục bộ đơn lẻ. Điều này cho thấy truy vấn yêu cầu khai thác một cụm thực thể có liên kết chặt chẽ, đồng thời thực hiện tổng hợp thông tin ở mức trung gian.
+
+\textbf{Global queries} (33\%) là các truy vấn yêu cầu tổng hợp thông tin từ nhiều phần khác nhau của đồ thị tri thức và đòi hỏi suy luận đa bước trên phạm vi rộng.
+
+\begin{tcolorbox}[colback=gray!5, colframe=black!50, arc=4pt, boxrule=0.5pt]
+{\small
+\begin{verbatim}
+{
+  "id": "CASE_083",
+  "category": "global_queries",
+  "subcategory": "thematic_synthesis",
+  "question": "So sánh số phận bi kịch của Súy Vân và Thị Kính?",
+  "ground_truth": {
+    "answer": "...",
+    "related_entities": ["Súy Vân", "Thị Kính"]
+  }
+}
+\end{verbatim}
+}
+\end{tcolorbox}
+
+Khác với hai nhóm trước, truy vấn này không chỉ yêu cầu truy xuất thực thể và quan hệ, mà còn đòi hỏi tổng hợp và diễn giải thông tin từ nhiều phần khác nhau của đồ thị tri thức. Hệ thống cần khai thác các tiểu đồ thị liên quan đến từng nhân vật, bao gồm các mối quan hệ, sự kiện và bối cảnh, sau đó kết hợp các thông tin này để đưa ra một nhận định mang tính khái quát. Do đó, truy vấn thuộc loại toàn cục, trong đó truy xuất tri thức và tạo sinh ngôn ngữ đóng vai trò bổ trợ lẫn nhau, phù hợp với mô hình query-focused summarization trong GraphRAG \cite{edge2024graphrag}.
+
+Việc phân loại truy vấn theo ba mức Local, Community và Global cho phép đánh giá hệ thống một cách có cấu trúc theo từng cấp độ truy xuất và suy luận, đồng thời phản ánh đúng đặc trưng của các hệ thống GraphRAG hiện đại.
+
+\subsection{Mức độ bao phủ của bộ dữ liệu}
+
+Bộ dữ liệu đánh giá được thiết kế để khai thác tri thức trong đồ thị tri thức Chèo một cách toàn diện, trải dài từ tầng thực thể cụ thể đến tầng suy luận trừu tượng về chủ đề nghệ thuật.
+
+Ở \textit{tầng thực thể}, bộ câu hỏi chạm tới cả năm lớp thực thể chính của ontology - \texttt{Play} (vở chèo), \texttt{Character} (nhân vật), \texttt{Actor} (diễn viên), \texttt{Scene} (trích đoạn) và \texttt{Version} (phiên bản biểu diễn); hai lớp còn lại (\texttt{RoleAssignment}, \texttt{Appearance}) không xuất hiện trực tiếp trong câu hỏi do chúng đóng vai trò trung gian theo mẫu \textit{reification} - kỹ thuật mô hình hoá biến một quan hệ thành một thực thể độc lập có thể mang thuộc tính riêng. Ví dụ, \texttt{RoleAssignment} đại diện cho việc một diễn viên đảm nhận một vai trong một phiên bản cụ thể, còn \texttt{Appearance} đại diện cho một lần xuất hiện trên sân khấu kèm thời điểm và biểu hiện diễn xuất. Mỗi lớp chính đều xuất hiện vừa ở vai trò chủ thể truy vấn (``Ai đóng vai X?'', ``Vở Y có những trích đoạn nào?'') vừa ở vai trò ngữ cảnh trả lời, qua đó đảm bảo hệ thống phải thực sự duyệt qua toàn bộ các loại nút của đồ thị thay vì chỉ tập trung vào một vài kiểu thường gặp. 
+
+Ở \textit{tầng quan hệ}, các câu hỏi buộc hệ thống phải đi qua hầu hết các object property của ontology, từ \texttt{PERFORMED\_BY}, \texttt{FOR\_CHARACTER} cho quan hệ diễn viên-vai diễn, cho đến \texttt{HAS\_CHARACTER}, \texttt{HAS\_SCENE}, \texttt{HAS\_VERSION} và \texttt{IN\_VERSION} cho cấu trúc vở-trích đoạn-phiên bản. Nhiều câu hỏi cần phối hợp nhiều property liên tiếp, chẳng hạn truy vấn ``diễn viên nào đóng vai Tuần Ty trong trích đoạn Tuần Ty-Đào Huế của vở Chu Mãi Thần'' đòi hỏi chuỗi bốn bước truy cập đồ thị để trả về đúng cá thể.
+
+Ở \textit{tầng nội dung}, bộ câu hỏi bao phủ nhiều lớp thông tin đặc thù của nghệ thuật Chèo: thông tin tiểu sử và tính cách nhân vật; các mối quan hệ xã hội (vợ-chồng, mẹ-con, bạn hữu, và các xung đột đạo đức); cấu trúc nghệ thuật của vở diễn cùng dàn diễn viên qua từng phiên bản; sự nghiệp diễn xuất của nghệ sĩ trải dài trên nhiều vở; các chủ đề và biểu tượng nghệ thuật (oan khuất, hy sinh, triết lý Phật giáo, hình tượng người phụ nữ trong xã hội phong kiến); cũng như hệ phân loại nhân vật truyền thống của chèo (Đào, Kép, Hề, Lão). Đặc biệt, các câu hỏi không bị bó hẹp trong phạm vi một vở - nhiều câu hỏi yêu cầu so sánh và tổng hợp liên vở (như đối chiếu số phận bi kịch giữa các nhân vật nữ chính, hay truy vết sự nghiệp của những diễn viên tham gia đồng thời nhiều vở). Dạng truy vấn này buộc hệ thống xây dựng ngữ cảnh toàn cục thay vì chỉ dựa vào một vùng lân cận nhỏ của đồ thị, qua đó phơi bày điểm yếu cốt lõi của các kiến trúc RAG truyền thống vốn chỉ tối ưu cho truy vấn cục bộ~\cite{edge2024graphrag}.
+
+Bên cạnh các lớp tri thức phổ biến, bộ câu hỏi còn bao phủ một số tình huống đặc thù của miền nghệ thuật biểu diễn sống: cùng một vai diễn có thể được nhiều diễn viên thể hiện trong các phiên bản khác nhau, trong khi cùng một kiểu nhân vật (như Hề) có thể xuất hiện trong nhiều trích đoạn thuộc các vở khác nhau nhưng được mô hình hóa như những cá thể độc lập trong đồ thị. Việc hệ thống phải nhận diện và phân biệt chính xác các trường hợp này chính là bài kiểm tra trực tiếp dành cho khả năng xử lý mẫu reification - một thiết kế then chốt của ontology Chèo được kế thừa.

@@ -1,0 +1,448 @@
+% =============================================================================
+%  Section 3.3 — Thiết kế tầng xử lý GraphRAG
+%  Subsections:
+%    3.3.1  Thiết kế phân hệ G-Retrieval
+%      - Tiền xử lý và trích xuất thực thể
+%      - Truy vấn đa mức độ
+%      - Tổ chức ngữ cảnh
+%    3.3.2  Thiết kế phân hệ G-Generation
+%      - Xây dựng cấu trúc Prompt
+%      - Các chiến lược tạo sinh
+% =============================================================================
+
+\section{Thiết kế tầng xử lý GraphRAG}
+
+\subsection{Thiết kế phân hệ G-Retrieval}
+\label{sec:g_retrieval}
+
+Phân hệ G-Retrieval chịu trách nhiệm xác định và trích xuất phần tri thức phù hợp từ đồ thị tri thức để cung cấp ngữ cảnh cho quá trình tạo sinh câu trả lời. Trong kiến trúc GraphRAG, chất lượng câu trả lời phụ thuộc trực tiếp vào chất lượng ngữ cảnh được truy xuất; do đó, thiết kế của phân hệ này đóng vai trò quyết định đối với hiệu năng tổng thể của hệ thống.
+
+Phân hệ G-Retrieval được tổ chức thành ba giai đoạn xử lý tuần tự (Hình~\ref{fig:g_retrieval_overview}): (1) tiền xử lý và trích xuất thực thể, (2) truy vấn đa mức độ, và (3) tổ chức ngữ cảnh. Đầu vào tổng thể của phân hệ là câu hỏi ngôn ngữ tự nhiên $q$ từ người dùng; đầu ra là tập ngữ cảnh đã được định dạng $C = \{(f_i, text_i)\}$, trong đó $f_i$ là định dạng biểu diễn và $text_i$ là nội dung văn bản tương ứng. Cùng với $C$, giai đoạn này còn sản sinh tập dữ kiện chính $K$ (key facts) - các mệnh đề ngắn tóm lược những thông tin quan trọng nhất từ kết quả truy xuất - được dùng bổ trợ cho G-Generation.
+
+\begin{figure}[!ht]
+  \centering
+  \includegraphics[width=\textwidth]{figures/c3/g_retrieval_overview.jpg}
+  \caption{Sơ đồ tổng quan phân hệ G-Retrieval.}
+  \label{fig:g_retrieval_overview}
+\end{figure}
+
+
+\subsubsection{Tiền xử lý và trích xuất thực thể}
+
+Giai đoạn đầu tiên của phân hệ G-Retrieval làm giàu truy vấn gốc và xác định các thực thể liên quan trong đồ thị tri thức. Để giảm độ trễ, hai tác vụ LLM được thực hiện \textit{song song} (Hình~\ref{fig:entity_extraction}), đưa độ trễ tổng về mức $\max(t_A, t_B)$ thay vì $t_A + t_B$.
+
+\textbf{Đầu vào.} Câu hỏi ngôn ngữ tự nhiên $q$ từ người dùng. Ví dụ:
+
+\begin{tcolorbox}[colback=gray!5, colframe=black!50, arc=4pt, boxrule=0.5pt]
+{\small
+\begin{verbatim}
+q = "Ai đóng vai Thị Màu trong vở Quan Âm Thị Kính?"
+\end{verbatim}
+}
+\end{tcolorbox}
+
+\textbf{Tác vụ A - Mở rộng truy vấn, trích xuất thực thể và phân loại.} Một lượt gọi LLM thực hiện đồng thời ba việc trong cùng một prompt: (i) mở rộng câu hỏi gốc bằng các thuật ngữ và ngữ cảnh nghệ thuật Chèo để tạo truy vấn mở rộng $q'$, (ii) trích xuất các thực thể có trong câu hỏi và phân loại theo bốn nhóm \textit{characters}, \textit{actors}, \textit{plays}, \textit{scenes}, (iii) phân loại câu hỏi vào một trong ba mức \textit{Local} / \textit{Community} / \textit{Global} theo phạm vi tri thức cần thiết. Đầu vào của LLM gồm $q$ kèm \textbf{Danh mục thực thể} (xem Mục~\ref{sec:entity_catalog}) được tiêm trực tiếp vào prompt, cùng ràng buộc ``chỉ chọn thực thể có trong Danh mục thực thể''. Đầu ra là một đối tượng JSON gồm $q'$, tập thực thể $E$ đã chuẩn hoá về tên định danh, và nhãn loại truy vấn $t \in \{\textit{Local},\, \textit{Community},\, \textit{Global}\}$.
+
+Cơ chế gộp này có ba lợi ích. Thứ nhất, việc tiêm Danh mục thực thể vào prompt biến quá trình trích xuất thành \textit{ràng buộc định danh}: LLM không thể tạo ra tên không tồn tại trong đồ thị tri thức, qua đó loại bỏ một dạng ảo giác cốt lõi ngay từ bước đầu tiên. Thứ hai, gộp ba tác vụ vào cùng một lượt gọi giúp tiết kiệm số lượt gọi LLM so với việc tách rời. Thứ ba, nhãn $t$ được dùng làm tín hiệu \textit{định tuyến} cho hai giai đoạn sau: chọn tập mức truy xuất (Mục~\ref{sec:multi_granularity}) và chọn chiến lược tạo sinh (Mục~\ref{sec:g_generation}); nhờ đó hệ thống tự thích ứng theo độ phức tạp câu hỏi mà không phát sinh thêm độ trễ.
+
+Prompt của Tác vụ A còn chứa một quy tắc dành riêng cho \textit{truy vấn toàn cục}: nếu câu hỏi yêu cầu tổng hợp, so sánh hay liệt kê trên toàn bộ tri thức (ví dụ ``So sánh các nhân vật nữ chính trong các vở''), LLM được hướng dẫn đưa toàn bộ tên vở chèo vào nhóm \textit{plays} để giai đoạn truy xuất tiếp theo có đủ điểm neo. Trong trường hợp LLM vẫn trả về tập thực thể rỗng, hệ thống có thêm cơ chế dự phòng — đưa toàn bộ vở chèo trong đồ thị tri thức vào tập thực thể.
+
+\textbf{Tác vụ B - Phân rã truy vấn.} Một lượt gọi LLM khác phân rã câu hỏi gốc thành tập câu hỏi con $\{q_1, q_2, \ldots, q_n\}$ phục vụ suy luận đa bước. Các câu hỏi con không tham gia vào quá trình trích xuất thực thể; chúng được lưu trong đối tượng \textit{ProcessedQuery} để hiển thị ở giao diện người dùng và phục vụ đối chiếu khi gỡ lỗi.
+
+Hệ thống đồng thời hỗ trợ một \textit{chế độ đơn giản hoá} dành cho tình huống cần giảm chi phí gọi LLM - ví dụ khi câu hỏi ngắn gọn, rõ ràng. Trong chế độ này, hai tác vụ song song được bỏ qua; thực thể được trích xuất trực tiếp từ $q$ bằng kết hợp biểu thức chính quy với một lượt gọi LLM duy nhất.
+
+\textbf{Đầu ra.} Giai đoạn tiền xử lý sản sinh ba đối tượng:
+\begin{itemize}
+  \item Đối tượng \textit{ProcessedQuery} $Q = (q,\ q',\ \{q_1, \ldots, q_n\})$, gồm truy vấn gốc, truy vấn mở rộng và tập câu hỏi con.
+  \item Tập thực thể $E$ phân loại theo bốn nhóm \textit{characters}, \textit{actors}, \textit{plays}, \textit{scenes}, mỗi thực thể đã được chuẩn hoá về tên định danh trong Danh mục thực thể. Đây là đầu vào trực tiếp cho giai đoạn truy xuất đồ thị tiếp theo.
+  \item Nhãn loại truy vấn $t \in \{\textit{Local}, \textit{Community}, \textit{Global}\}$, đóng vai trò tín hiệu định tuyến để chọn tập mức truy xuất ở Mục~\ref{sec:multi_granularity} và chọn chiến lược tạo sinh ở Mục~\ref{sec:g_generation}.
+\end{itemize}
+
+\begin{tcolorbox}[colback=gray!5, colframe=black!50, arc=4pt, boxrule=0.5pt]
+{\small
+\begin{verbatim}
+Q = {
+  original:   "Ai đóng vai Thị Màu
+               trong vở Quan Âm Thị Kính?",
+  expanded:   "Diễn viên nào đảm nhận vai diễn
+               nhân vật Thị Màu trong vở chèo
+               Quan Âm Thị Kính?",
+  decomposed: [
+    "Thị Màu là nhân vật trong vở nào?",
+    "Ai đóng vai Thị Màu?"
+  ]
+}
+
+E = {
+  characters: ["Thị Màu"],
+  actors: [],
+  plays: ["Quan Âm Thị Kính"],
+  scenes: []
+}
+
+t = "Local"
+\end{verbatim}
+}
+\end{tcolorbox}
+
+\begin{figure}[!ht]
+  \centering
+  \includegraphics[width=\textwidth]{figures/c3/entity_extraction.jpg}
+  \caption{Quy trình trích xuất thực thể song song.}
+  \label{fig:entity_extraction}
+\end{figure}
+
+
+\subsubsection{Truy vấn đa mức độ}
+\label{sec:multi_granularity}
+
+Giai đoạn thứ hai thực hiện truy xuất tri thức từ đồ thị tri thức dựa trên tập thực thể đã trích xuất $E$. Một câu hỏi tra cứu đơn về nhân vật đòi hỏi loại thông tin hoàn toàn khác so với câu hỏi so sánh xuyên suốt nhiều vở diễn. Nếu hệ thống chỉ dùng một cách truy xuất duy nhất, câu trả lời dễ rơi vào một trong hai tình huống: thiếu thông tin khi cách truy xuất quá nông, hoặc nhiễu tràn lan khi truy xuất quá rộng. Phân hệ G-Retrieval vì vậy tổ chức \textbf{bốn mức độ truy xuất} (Bảng~\ref{tab:retrieval_levels}), mỗi mức khai thác một khía cạnh khác nhau của cấu trúc đồ thị.
+
+\textbf{Đầu vào.} Tập thực thể $E$ và nhãn loại truy vấn $t$ từ giai đoạn tiền xử lý.
+
+\begin{table}[ht]
+  \centering
+  \caption{Bốn mức độ truy xuất trong phân hệ G-Retrieval.}
+  \label{tab:retrieval_levels}
+  \resizebox{\textwidth}{!}{%
+  \begin{tabular}{c p{5.6cm} l p{4.2cm}}
+    \hline
+    \textbf{Mức} & \textbf{Mô tả truy xuất} & \textbf{Đầu ra} & \textbf{Vai trò} \\
+    \hline
+    \textcircled{1} Node & Tìm thực thể theo tên hiển thị trong các nhãn ontology & Thuộc tính thực thể & Định danh, mô tả cơ bản \\
+    \textcircled{2} Triplet & Trích các bộ ba quan hệ trực tiếp giữa hai thực thể & Bộ ba (S, P, O) & Quan hệ trực tiếp giữa hai thực thể \\
+    \textcircled{3} Path & Duyệt đường dẫn 1-3 bước qua các nút trung gian & Chuỗi 1-3 bước & Suy luận đa bước qua trung gian \\
+    \textcircled{4} Subgraph & Mở rộng vùng lân cận 1-2 bước với cấu trúc quan hệ đầy đủ & Vùng lân cận 2 bước & Tổng hợp cấu trúc xung quanh thực thể \\
+    \hline
+  \end{tabular}%
+  }
+\end{table}
+
+\textbf{Định tuyến mức truy xuất theo loại truy vấn.} Tập mức được kích hoạt phụ thuộc vào nhãn $t$ do Tác vụ A trả về (Bảng~\ref{tab:level_mapping}). Cách định tuyến này tránh chạy mọi mức cho mọi câu hỏi — câu tra cứu đơn không cần Subgraph, câu so sánh xuyên vở thì cần đủ cả bốn — qua đó kiểm soát kích thước ngữ cảnh và chi phí truy vấn.
+
+\begin{table}[ht]
+  \centering
+  \caption{Ánh xạ mức truy xuất theo loại truy vấn.}
+  \label{tab:level_mapping}
+  \resizebox{\textwidth}{!}{%
+  \begin{tabular}{l l l}
+    \hline
+    \textbf{Loại truy vấn} & \textbf{Mức kích hoạt} & \textbf{Ví dụ} \\
+    \hline
+    Local      & Node, Triplet                 & ``Ai đóng vai Thị Màu?'' \\
+    Community  & Node, Triplet, Path           & ``Diễn viên nào đóng cả Quan Âm Thị Kính lẫn Kim Nham?'' \\
+    Global     & Node, Triplet, Path, Subgraph & ``So sánh số phận Súy Vân và Thị Kính'' \\
+    \hline
+  \end{tabular}%
+  }
+\end{table}
+
+Trong vận hành tự động, $t$ được tính sẵn ở Tác vụ A nên không phát sinh thêm độ trễ. Trong các kịch bản thực nghiệm có kiểm soát (Chương~4), tập mức truy xuất được cấu hình thủ công để đo riêng đóng góp của từng mức, tách biệt hiệu năng truy xuất khỏi hiệu năng phân loại của LLM. Mỗi mức cũng tự áp giới hạn số kết quả trả về để tổng kích thước ngữ cảnh không vượt quá khả năng tiếp nhận của mô hình ngôn ngữ; các ngưỡng cụ thể là tham số cấu hình ở tầng cài đặt.
+
+Mức \textbf{Node} truy xuất thuộc tính của thực thể theo bốn nhãn gốc của ontology - Character, Actor, Play, Scene - sử dụng so khớp chuỗi không phân biệt hoa-thường trên các trường tên. Các nhãn con của Character (Mục~\ref{sec:schema_extension}) được bao phủ gián tiếp do chúng kế thừa từ nhãn gốc. Tên thực thể được gộp truy xuất theo lô để hạn chế số lượt gọi cơ sở dữ liệu. Khi không có kết quả khớp trực tiếp, hệ thống kích hoạt cơ chế dự phòng tìm kiếm mờ trên các trường tên.
+
+Mức \textbf{Triplet} khai thác ba mẫu quan hệ chính của ontology: (i) Character $\leftrightarrow$ Actor thông qua RoleAssignment - mẫu quan trọng nhất, liên kết nhân vật với diễn viên; (ii) Play $\rightarrow$ Character qua quan hệ \texttt{HAS\_CHARACTER}; và (iii) Play $\rightarrow$ Scene qua quan hệ \texttt{HAS\_SCENE}. Mỗi mẫu trả về các bộ ba $(S, P, O)$ kèm thông tin định danh hai thực thể đầu cuối; khi không có kết quả, mức này trả về một mẫu quan hệ diễn viên-nhân vật tiêu biểu làm dự phòng.
+
+Mức \textbf{Path} duyệt đường dẫn với độ dài biến đổi 1-3 bước, xuất phát từ các thực thể thuộc nhóm Character, Actor hoặc Play trong $E$. Tên hiển thị của tất cả nút trên đường dẫn được trích xuất, tạo ra chuỗi dạng ``Thị Màu $\rightarrow$ RoleAssignment $\rightarrow$ Version $\rightarrow$ Trích đoạn: \ldots'' giúp LLM nhận diện chuỗi suy luận trung gian. Mức này được kích hoạt cho truy vấn Community và Global, khi câu trả lời nằm cách thực thể gốc nhiều bước nhảy.
+
+Mức \textbf{Subgraph} mở rộng vùng lân cận xung quanh mỗi thực thể trung tâm trong phạm vi 1-2 bước, thu thập đồng thời cả nút lẫn quan hệ trên các đường dẫn. Khác với mức Path chỉ trả về chuỗi tên, mức Subgraph trả về cấu trúc đồ thị đầy đủ gồm thuộc tính nút và kiểu quan hệ. Mức này được kích hoạt cho truy vấn Global, cung cấp ngữ cảnh phong phú nhất khi LLM cần hiểu cấu trúc quan hệ tổng thể để tổng hợp hoặc so sánh xuyên nhiều thực thể.
+
+\textbf{Đầu ra.} Đối tượng dữ liệu đồ thị $G$ (Hình~\ref{fig:multi_granularity}) hợp nhất kết quả từ các mức được kích hoạt:
+
+\begin{tcolorbox}[colback=gray!5, colframe=black!50, arc=4pt, boxrule=0.5pt]
+{\small
+\begin{verbatim}
+G = {
+  nodes:    danh sách nút (kèm thuộc tính),
+  triplets: danh sách bộ ba (chủ thể, quan hệ, đối tượng),
+  paths:    danh sách đường dẫn (chuỗi 1-3 bước),
+  subgraph: vùng lân cận (nút + quan hệ)
+}
+\end{verbatim}
+}
+\end{tcolorbox}
+
+Tuỳ loại truy vấn $t$, một số trường trong $G$ có thể rỗng: truy vấn Local chỉ điền \texttt{nodes} và \texttt{triplets}, trong khi \texttt{paths} và \texttt{subgraph} trống. Cách này giúp kiểm soát kích thước ngữ cảnh gửi đến LLM và tránh pha loãng thông tin quan trọng bằng dữ liệu không liên quan.
+
+\begin{figure}[!ht]
+  \centering
+  \includegraphics[width=\textwidth]{figures/c3/multi_granularity.jpg}
+  \caption{Bốn mức truy xuất trong G-Retrieval.}
+  \label{fig:multi_granularity}
+\end{figure}
+
+
+\subsubsection{Tổ chức ngữ cảnh}
+
+Giai đoạn cuối cùng của phân hệ G-Retrieval chuyển đổi dữ liệu đồ thị thô $G$ thành các biểu diễn văn bản phù hợp với mô hình ngôn ngữ, đồng thời trích xuất tập dữ kiện chính dùng bổ trợ cho tạo sinh.
+
+\textbf{Đầu vào.} Dữ liệu đồ thị $G$ từ giai đoạn truy xuất.
+
+\textbf{Quy trình xử lý.} Khác với văn bản tuần tự, $G$ cung cấp thông tin ở nhiều mức độ khác nhau, do đó mỗi cách biểu diễn khai thác một khía cạnh khác của tri thức (Hình~\ref{fig:context_organization}). Bộ chuyển đổi định dạng sinh ra bốn biểu diễn văn bản riêng biệt (Bảng~\ref{tab:format_converter}), phục vụ cho các chiến lược tạo sinh khác nhau ở giai đoạn G-Generation.
+
+\begin{table}[ht]
+  \centering
+  \caption{Bốn định dạng biểu diễn ngữ cảnh.}
+  \label{tab:format_converter}
+  \resizebox{\textwidth}{!}{%
+  \begin{tabular}{l p{9cm}}
+    \hline
+    \textbf{Định dạng} & \textbf{Giá trị cốt lõi} \\
+    \hline
+    natural\_language & Khai thác năng lực hiểu ngôn ngữ của LLM qua văn phong tự nhiên \\
+    adjacency\_table  & Cung cấp cấu trúc lưới chéo, hạn chế ảo giác \\
+    code\_like        & Bảo toàn schema và siêu dữ liệu qua JSON \\
+    node\_sequence    & Trực quan hóa các ràng buộc liên kết đa bước \\
+    \hline
+  \end{tabular}%
+  }
+\end{table}
+
+\textbf{Định dạng ngôn ngữ tự nhiên (\texttt{natural\_language}).} Định dạng này chuyển trực tiếp các bộ ba (triplet) thành câu văn tiếng Việt hoàn chỉnh thông qua một bảng ánh xạ từ vựng quan hệ (ví dụ: \texttt{HAS\_CHARACTER} $\rightarrow$ ``có nhân vật''). Biểu diễn này kết hợp linh hoạt với dữ liệu từ hai mức truy xuất \textit{Node} và \textit{Triplet}, tận dụng khả năng đọc hiểu văn bản vốn có của LLM, đồng thời tạo ra câu trả lời mang văn phong tự nhiên sát với đặc thù giao tiếp của miền dữ liệu nghệ thuật Chèo.
+
+\vspace{0.5em}
+\begin{tcolorbox}[colback=gray!5, colframe=black!50, arc=4pt, boxrule=0.5pt, left=4pt, right=4pt, top=4pt, bottom=4pt, boxsep=0pt]
+\small \texttt{"Nhân vật Thị Màu thuộc vở diễn Quan Âm Thị Kính và được thể hiện bởi diễn viên Vân Quyền."}
+\end{tcolorbox}
+
+\textbf{Định dạng bảng kề Markdown (\texttt{adjacency\_table}).} Cấu trúc đồ thị được trích xuất thành bảng hai chiều ba cột: Nút khởi đầu, Loại quan hệ và Nút đích. Định dạng này phát huy hiệu quả nhất với dữ liệu từ mức \textit{Triplet}. Cấu trúc dạng lưới tạo ranh giới dữ liệu rõ ràng, giúp mô hình ngôn ngữ đối chiếu chéo giữa các quan hệ, đồng thời giảm nguy cơ pha loãng thông tin khi gặp ngữ cảnh có mật độ cao - qua đó hạn chế hiện tượng ảo giác khi câu hỏi yêu cầu truy cứu các hệ thực thể đan xen phức tạp.
+
+\vspace{0.5em}
+\begin{tcolorbox}[colback=gray!5, colframe=black!50, arc=4pt, boxrule=0.5pt, left=4pt, right=4pt, top=4pt, bottom=4pt, boxsep=0pt]
+\small
+\begin{verbatim}
+| Nút Khởi Đầu | Loại Quan Hệ | Nút Đích         |
+|--------------|--------------|------------------|
+| Thị Màu      | THUỘC_VỞ     | Quan Âm Thị Kính |
+| Thị Màu      | ĐÓNG_BỞI     | Vân Quyền        |
+\end{verbatim}
+\end{tcolorbox}
+
+\textbf{Định dạng cấu trúc JSON (\texttt{code\_like}).} Toàn bộ tập node và quan hệ cùng siêu dữ liệu đi kèm được đóng gói thành các đối tượng JSON. Định dạng này phù hợp nhất với dữ liệu từ mức \textit{Subgraph} vì giữ nguyên vẹn cấu trúc đồ thị phức tạp. Việc bảo toàn schema và phân loại của đồ thị tri thức cho phép LLM duy trì tư duy phân tích có cấu trúc, hiệu quả với các truy vấn yêu cầu bóc tách thuộc tính chi tiết của nhiều đối tượng liên kết dày đặc.
+
+\vspace{0.5em}
+\begin{tcolorbox}[colback=gray!5, colframe=black!50, arc=4pt, boxrule=0.5pt, left=4pt, right=4pt, top=4pt, bottom=4pt, boxsep=0pt]
+\small
+\begin{verbatim}
+{
+  "nodes": [{"id": "Thị Màu", "label": "Character"}],
+  "relationships": [{"start": "Thị Màu", "type": "THUỘC_VỞ",
+                     "end": "Quan Âm Thị Kính"}]
+}
+\end{verbatim}
+\end{tcolorbox}
+
+\textbf{Định dạng chuỗi thực thể (\texttt{node\_sequence}).} Biểu diễn này chuyển các đường dẫn đồ thị thành chuỗi tuyến tính dạng $A \rightarrow B \rightarrow C$. Định dạng kế thừa trực tiếp kết quả của mức truy xuất \textit{Path}, mô phỏng các lộ trình suy luận đa bước (multi-hop). Nhờ đó, mô hình có sẵn một lộ trình suy diễn tường minh cho các câu hỏi mang tính diễn biến tuần tự hoặc truy tìm nguồn gốc nhiều tầng.
+
+\vspace{0.5em}
+\begin{tcolorbox}[colback=gray!5, colframe=black!50, arc=4pt, boxrule=0.5pt, left=4pt, right=4pt, top=4pt, bottom=4pt, boxsep=0pt]
+\small \texttt{Vân Quyền $\rightarrow$ Thị Màu $\rightarrow$ Quan Âm Thị Kính}
+\end{tcolorbox}
+
+\textbf{Đầu ra.} Hai thành phần:
+\begin{itemize}
+  \item Tập ngữ cảnh đa định dạng $C = \{(f_i, text_i)\}$ với $f_i$ là định dạng và $text_i$ là nội dung tương ứng.
+  \item Tập dữ kiện chính $K$ (\textit{key facts}) dạng bullet points ngắn gọn, tổng hợp các thông tin cốt lõi nhất từ $G$ theo nguyên tắc: (i) mỗi thực thể xuất hiện trong ngữ cảnh được kèm nhãn loại (ví dụ ``Nhân vật: Thị Màu''), (ii) các quan hệ trực tiếp có mức độ liên quan cao nhất tới tập thực thể $E$ được liệt kê trước, (iii) thông tin dư thừa hoặc chi tiết đặc thù phiên bản được lược bỏ. $K$ đóng vai trò ``điểm neo'' giúp LLM tham chiếu nhanh trong quá trình tạo sinh.
+\end{itemize}
+
+\begin{figure}[!ht]
+  \centering
+  \includegraphics[width=\textwidth]{figures/c3/context_organization.jpg}
+  \caption{Quy trình tổ chức ngữ cảnh.}
+  \label{fig:context_organization}
+\end{figure}
+% ===========================================================
+\subsection{Thiết kế phân hệ G-Generation}
+\label{sec:g_generation}
+
+Phân hệ G-Generation chịu trách nhiệm chuyển hoá ngữ cảnh tri thức đã được chuẩn bị từ phân hệ G-Retrieval thành câu trả lời ngôn ngữ tự nhiên thông qua mô hình ngôn ngữ lớn. Trong kiến trúc phân tầng, LLM không truy cập trực tiếp đồ thị tri thức mà chỉ tiếp nhận ngữ cảnh văn bản đã qua xử lý; nhờ đó có thể thay thế mô hình mà không ảnh hưởng đến pipeline truy xuất, đồng thời kiểm soát được lượng thông tin mà mô hình nhận được.
+
+Đầu vào tổng thể của phân hệ là bộ $(C, K, q)$ - trong đó $C = \{(f_i, text_i)\}$ là tập ngữ cảnh đa định dạng, $K$ là tập dữ kiện chính, và $q$ là câu hỏi gốc - kế thừa trực tiếp từ đầu ra của giai đoạn Tổ chức ngữ cảnh. Đầu ra là câu trả lời $a$ dưới dạng ngôn ngữ tự nhiên (Hình~\ref{fig:g_generation_overview}). Phân hệ được tổ chức thành hai thành phần: (i) bộ xây dựng prompt từ $(C, K, q)$, và (ii) bộ thực thi chiến lược tạo sinh gọi LLM để sinh $a$.
+
+\begin{figure}[!ht]
+  \centering
+  \includegraphics[width=\textwidth]{figures/c3/g_generation_overview.jpg}
+  \caption{Sơ đồ tổng quan phân hệ G-Generation.}
+  \label{fig:g_generation_overview}
+\end{figure}
+
+
+\subsubsection{Xây dựng cấu trúc Prompt}
+
+LLM được sử dụng trong hệ thống không trải qua quá trình huấn luyện bổ sung (\textit{fine-tuning}) cho miền dữ liệu nghệ thuật Chèo. Toàn bộ tri thức miền được cung cấp thông qua cơ chế tiêm ngữ cảnh tại thời điểm suy luận (\textit{inference-time context injection}): tập ngữ cảnh đa định dạng $C$ và dữ kiện chính $K$ - đã được giai đoạn Tổ chức ngữ cảnh của G-Retrieval chuẩn bị hoàn chỉnh - được tổ hợp thành chuỗi văn bản liền mạch rồi ghép vào prompt gửi đến LLM.
+
+Chuỗi ngữ cảnh đã tổ hợp $\mathcal{C}$ sau đó được ghép với câu hỏi $q$ và chỉ dẫn tạo sinh theo một cấu trúc prompt cố định gồm bốn thành phần tuần tự (Bảng~\ref{tab:prompt_structure}). Nguyên tắc then chốt là đặt toàn bộ tri thức hỗ trợ (①②③) trước câu hỏi (④), phù hợp với cơ chế phân bổ trọng số chú ý (attention weight distribution) của kiến trúc Transformer - mô hình có xu hướng tham chiếu mạnh hơn tới các token xuất hiện trước trong chuỗi đầu vào khi thực hiện suy luận.
+
+\begin{table}[ht]
+  \centering
+  \caption{Các thành phần cấu trúc prompt.}
+  \label{tab:prompt_structure}
+  \resizebox{\textwidth}{!}{%
+  \begin{tabular}{c l l l}
+    \hline
+    \textbf{TT} & \textbf{Thành phần} & \textbf{Nội dung} & \textbf{Nguồn} \\
+    \hline
+    \textcircled{1} & Tiêu đề ngữ cảnh & ``Thông tin từ đồ thị tri thức về Chèo'' & Hằng số cố định \\
+    \textcircled{2} & Dữ kiện chính & Tóm tắt dữ kiện quan trọng (dạng gạch đầu dòng) & $K$ từ G-Retrieval \\
+    \textcircled{3} & Khối ngữ cảnh & Ngữ cảnh theo các định dạng được chọn & $C$ từ G-Retrieval \\
+    \textcircled{4} & Câu hỏi + Chỉ dẫn & Câu hỏi và ràng buộc tạo sinh & Khuôn mẫu theo chiến lược \\
+    \hline
+  \end{tabular}%
+  }
+\end{table}
+
+Việc lựa chọn tập con định dạng nào trong $C$ để đưa vào prompt phụ thuộc vào đặc tính của câu hỏi và chiến lược tạo sinh, không phải là phép gán cứng. Bốn định dạng từ giai đoạn Tổ chức ngữ cảnh có mức độ tương thích tự nhiên khác nhau với từng chiến lược:
+\begin{itemize}
+  \item \texttt{natural\_language} có tính phổ quát cao, phù hợp với mọi chiến lược vì tận dụng trực tiếp năng lực đọc hiểu văn bản vốn có của LLM.
+  \item \texttt{adjacency\_table} phát huy tối đa hiệu quả khi chiến lược cần đối chiếu chéo nhiều quan hệ (Pre, Post), nhờ cấu trúc bảng phân tách rõ ràng ranh giới thực thể.
+  \item \texttt{code\_like} (JSON) thích hợp với các chiến lược yêu cầu bóc tách siêu dữ liệu chi tiết (Mid, Post), đặc biệt khi câu hỏi đòi hỏi phân tích thuộc tính từ mức Subgraph.
+  \item \texttt{node\_sequence} hữu ích khi câu hỏi mang tính truy vết nhiều bước (multi-hop), cung cấp sẵn lộ trình suy diễn tuyến tính cho LLM.
+\end{itemize}
+
+Việc kiểm soát độ dài ngữ cảnh tổng thể được đảm bảo ngay từ nguồn nhờ các giới hạn số lượng kết quả trong từng mức truy xuất (Mục~\ref{sec:multi_granularity}). Số định dạng được kích hoạt trong prompt cũng ảnh hưởng trực tiếp đến độ dài: Pre-Generation và Mid-Generation cùng dùng hai định dạng để tối ưu tốc độ, trong khi Post-Generation dùng ba định dạng - chấp nhận chi phí prompt cao hơn để có thêm cơ sở đối chiếu khi kiểm định ở lượt thứ hai.
+
+Ví dụ một prompt $\mathcal{P}$ hoàn chỉnh (chiến lược Pre) cho câu hỏi ``Ai đóng vai Thị Màu?'':
+
+\begin{tcolorbox}[colback=gray!5, colframe=black!50, arc=4pt, boxrule=0.5pt, left=4pt, right=4pt, top=4pt, bottom=4pt]
+{\small
+\begin{verbatim}
+# Thông tin từ đồ thị tri thức về Chèo      ← ①
+
+## Tóm tắt quan trọng:                      ← ②
+- Nhân vật: Thị Màu
+- Diễn viên: Vân Quyền
+- Vở: Quan Âm Thị Kính
+
+## Mô tả tự nhiên:                          ← ③
+Nhân vật Thị Màu thuộc vở diễn Quan Âm
+Thị Kính và được thể hiện bởi Vân Quyền.
+
+## Bảng quan hệ:                            ← ③
+| Nút Bắt Đầu | Quan Hệ    | Nút Đích         |
+|-------------|------------|-------------------|
+| Thị Màu     | THUỘC_VỞ   | Quan Âm Thị Kính  |
+| Thị Màu     | ĐÓNG_BỞI   | Vân Quyền         |
+
+# Câu hỏi                                  ← ④
+Ai đóng vai Thị Màu?
+
+# Yêu cầu
+Trả lời dựa trên thông tin đồ thị ở trên.
+Nhớ trích dẫn cụ thể tên từ đồ thị.
+\end{verbatim}
+}
+\end{tcolorbox}
+
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=0.85\textwidth]{figures/c3/prompt_structure.jpg}
+  \caption{Cấu trúc các thành phần của prompt.}
+  \label{fig:prompt_structure}
+\end{figure}
+
+
+\subsubsection{Các chiến lược tạo sinh}
+
+Phân hệ G-Generation triển khai ba chiến lược tạo sinh (Hình~\ref{fig:generation_strategies}), khác nhau ở mức độ kiểm soát quá trình suy luận của mô hình, số lượt gọi LLM và chi phí độ trễ.
+
+Chiến lược \textbf{Pre-Generation} tối ưu hoá biểu diễn đầu vào: toàn bộ ngữ cảnh truy xuất từ đồ thị tri thức được tổ chức và cung cấp trực tiếp cho mô hình trong một prompt duy nhất. Mô hình ngôn ngữ được xem như một bộ suy luận dạng hộp đen, không chịu ràng buộc về cấu trúc suy luận tường minh; hiệu quả phụ thuộc hoàn toàn vào chất lượng và độ rõ ràng của ngữ cảnh. Pre-Generation phù hợp với các truy vấn tra cứu trực tiếp - nơi quan hệ giữa thực thể đã rõ ràng trong dữ liệu - nhờ chi phí thấp và độ trễ nhỏ.
+
+Chiến lược \textbf{Mid-Generation} kiểm soát quá trình suy luận bằng cách áp một khuôn mẫu tạo sinh có cấu trúc. Prompt buộc LLM thực hiện tuần tự ba bước trích xuất dữ kiện, phân tích và kết luận; mọi kết luận phải được liên kết tường minh với bằng chứng từ ngữ cảnh. So với Pre-Generation, Mid-Generation đánh đổi một phần chi phí để tăng độ tin cậy, đặc biệt với các truy vấn yêu cầu suy luận nhiều bước hoặc tổng hợp thông tin từ nhiều quan hệ trong đồ thị.
+
+Chiến lược \textbf{Post-Generation} bổ sung một bước kiểm định hậu kỳ nhằm phát hiện sai lệch trong câu trả lời. Mô hình trước tiên sinh câu trả lời sơ bộ $a_0$ chỉ dựa trên tri thức tham số hoá (parametric knowledge) - không được cung cấp ngữ cảnh từ đồ thị tri thức. Câu trả lời $a_0$ sau đó được đối chiếu với ngữ cảnh từ đồ thị tri thức trong lượt gọi thứ hai để phát hiện và hiệu chỉnh sai sót. Tách biệt giữa sinh và kiểm chứng cho phép phát hiện sự không nhất quán giữa tri thức nội tại của mô hình và dữ liệu thực tế, đổi lại chi phí tính toán và độ trễ lớn hơn hai chiến lược còn lại.
+
+\textbf{Lựa chọn chiến lược theo loại truy vấn.} Ba chiến lược thể hiện sự đánh đổi rõ rệt giữa chi phí tính toán và mức độ kiểm soát suy luận, do đó được ánh xạ trực tiếp theo nhãn loại truy vấn $t$ đã sinh ở giai đoạn tiền xử lý (Bảng~\ref{tab:strategy_mapping}). Cùng cơ chế định tuyến với việc chọn mức truy xuất, ánh xạ này không phát sinh thêm độ trễ vì nhãn $t$ đã có sẵn.
+
+\begin{table}[ht]
+  \centering
+  \caption{Ánh xạ chiến lược tạo sinh theo loại truy vấn.}
+  \label{tab:strategy_mapping}
+  \resizebox{\textwidth}{!}{%
+  \begin{tabular}{l l p{8cm}}
+    \hline
+    \textbf{Loại truy vấn} & \textbf{Chiến lược} & \textbf{Lý do lựa chọn} \\
+    \hline
+    Local      & Pre-Generation  & Tra cứu trực tiếp; quan hệ đã rõ trong ngữ cảnh, ưu tiên độ trễ thấp. \\
+    Community  & Mid-Generation  & Cần suy luận nhiều bước hoặc tổng hợp cụm quan hệ; khuôn mẫu cấu trúc giúp mô hình bám bằng chứng. \\
+    Global     & Post-Generation & Tổng hợp xuyên vở, sai sót khó phát hiện; kiểm định hậu kỳ hạn chế ảo giác. \\
+    \hline
+  \end{tabular}%
+  }
+\end{table}
+
+Trong các kịch bản thực nghiệm ở Chương~4, mỗi chiến lược được cấu hình thủ công để đo riêng đóng góp của nó, tách biệt khỏi cơ chế định tuyến tự động. Trong triển khai vận hành, chiến lược được chuyển đổi tự động theo nhãn $t$ ngay tại thời điểm chạy mà không cần khởi động lại pipeline.
+
+\textbf{Đầu vào.} Prompt $\mathcal{P}$ đã tổ hợp ở giai đoạn xây dựng prompt.
+
+\textbf{Quy trình xử lý.} Chiến lược đã chọn gọi LLM (một hoặc hai lượt tuỳ chiến lược), nhận câu trả lời dạng văn bản và trả về cho phân hệ giao diện để hiển thị tới người dùng.
+
+\textbf{Đầu ra.} Câu trả lời $a$ dưới dạng ngôn ngữ tự nhiên.
+
+\vspace{0.5em}
+\noindent \textit{Ví dụ đầu ra chiến lược Mid} (câu hỏi: ``Ai đóng vai Thị Màu?''):
+\begin{tcolorbox}[colback=gray!5, colframe=black!50, arc=4pt, boxrule=0.5pt]
+{\small
+\begin{verbatim}
+1. Thông tin từ đồ thị:
+   - Nhân vật: Thị Màu
+   - Diễn viên: Vân Quyền
+   - Quan hệ: Thị Màu ← PERFORMED_BY ← Vân Quyền
+
+2. Phân tích:
+   Theo dữ liệu đồ thị tri thức, nhân vật Thị Màu
+   được thể hiện bởi diễn viên Vân Quyền.
+
+3. Kết luận:
+   Vai Thị Màu được đóng bởi Vân Quyền.
+\end{verbatim}
+}
+\end{tcolorbox}
+
+
+
+\vspace{0.5em}
+\noindent \textit{Ví dụ luồng xử lý chiến lược Post}:
+\begin{tcolorbox}[colback=gray!5, colframe=black!50, arc=4pt, boxrule=0.5pt]
+{\small
+\begin{verbatim}
+Lượt 1: sinh câu trả lời sơ bộ a_0
+        (chỉ dùng tri thức nội tại của LLM, không
+        đưa ngữ cảnh từ đồ thị tri thức)
+→ a_0 có thể mơ hồ hoặc sai lệch
+
+Lượt 2: đối chiếu a_0 với ngữ cảnh C và dữ kiện K
+        từ đồ thị tri thức
+→ sinh câu trả lời chính thức sau hiệu chỉnh
+\end{verbatim}
+}
+\end{tcolorbox}
+
+Ba chiến lược tạo thành một phổ liên tục về mức độ kiểm soát đối với quá trình suy luận: Pre-Generation ưu tiên tối ưu hoá đầu vào và tận dụng năng lực nội tại của LLM với chi phí thấp; Mid-Generation bổ sung ràng buộc cấu trúc nhằm định hướng suy luận và tăng độ tin cậy; Post-Generation triển khai thêm cơ chế kiểm định hậu kỳ để phát hiện và hiệu chỉnh sai lệch. Mối quan hệ đánh đổi giữa số lượt gọi mô hình, mức độ kiểm soát suy luận và chất lượng đầu ra cung cấp cơ sở lựa chọn chiến lược phù hợp với từng loại truy vấn (Bảng~\ref{tab:gen_strategies}).
+
+\begin{table}[ht]
+  \centering
+  \caption{So sánh ba chiến lược tạo sinh.}
+  \label{tab:gen_strategies}
+  \resizebox{\textwidth}{!}{%
+  \begin{tabular}{l c p{5cm} p{4cm} p{4cm}}
+    \hline
+    \textbf{Chiến lược} & \textbf{Lượt gọi LLM} & \textbf{Định dạng phù hợp} & \textbf{Ưu điểm} & \textbf{Hạn chế} \\
+    \hline
+    Pre & 1 & NL, Adjacency Table & Tốc độ cao, chi phí thấp & Không có kiểm tra nội bộ \\
+    Mid & 1 & NL, Code-like & Suy luận có cấu trúc, cân bằng chất lượng/chi phí & Phụ thuộc mức tuân thủ template \\
+    Post & 2 & NL, Adjacency Table, Code-like & Chính xác nhất, đối chiếu tường minh & Chi phí gấp đôi, độ trễ cao \\
+    \hline
+  \end{tabular}%
+  }
+\end{table}
+
+\begin{figure}[!ht]
+  \centering
+  \includegraphics[width=\textwidth]{figures/c3/generation_strategies.jpg}
+  \caption{Ba chiến lược tạo sinh.}
+  \label{fig:generation_strategies}
+\end{figure}
+
+\textbf{Tổng hợp cơ chế chống ảo giác.} Hiện tượng ảo giác (\textit{hallucination}) - việc mô hình ngôn ngữ sinh thông tin không có căn cứ trong ngữ cảnh được cung cấp - là rủi ro cốt lõi khi tích hợp LLM vào hệ thống truy vấn tri thức. Thay vì coi đây là một cơ chế riêng, hệ thống đã tích hợp sẵn năm cơ chế giảm thiểu ảo giác trong các thành phần đã thiết kế, phân theo thời điểm can thiệp. \textit{Trước khi gọi LLM}: (i) trích xuất thực thể bị ràng buộc trong Danh mục thực thể (Mục~\ref{sec:entity_catalog}), loại bỏ khả năng tham chiếu thực thể không tồn tại; (ii) Dữ kiện chính $K$ đặt ở vị trí ưu tiên trong prompt (Mục~\ref{sec:g_generation}), định hướng suy luận theo sự kiện đã xác minh từ đồ thị; (iii) chỉ dẫn ràng buộc yêu cầu mô hình trích dẫn đúng tên thực thể từ ngữ cảnh, thu hẹp không gian sinh. \textit{Trong quá trình tạo sinh}: (iv) chiến lược Mid buộc mô hình suy luận tường minh theo chuỗi \textit{facts $\rightarrow$ analysis $\rightarrow$ conclusion}, cho phép kiểm tra nhất quán giữa bằng chứng và kết luận; (v) chiến lược Post đối chiếu hai lượt giữa câu trả lời sơ bộ $a_0$ và ngữ cảnh từ đồ thị tri thức để phát hiện và hiệu chỉnh sai lệch. Năm cơ chế này không tách thành module riêng mà là các thuộc tính chống ảo giác xuyên suốt thiết kế của G-Retrieval và G-Generation.
+
+
