@@ -166,44 +166,51 @@ Quy trình chuyển đổi (Hình~\ref{fig:ontology_conversion}) đọc tệp on
 \end{figure}
 
 \textbf{Mở rộng phân lớp nhân vật.}
-Đồ thị cơ sở thu được sau pha chuyển đổi vẫn lưu loại vai diễn dưới dạng thuộc tính chuỗi thừa kế từ ontology gốc - tức là tất cả nhân vật đều mang chung nhãn \texttt{Character} và chỉ khác nhau ở giá trị thuộc tính \texttt{mainType} (Đào, Kép, Hề, Lão, Mụ). Cách biểu diễn thuộc tính phẳng này buộc tầng truy xuất phải lọc theo giá trị thuộc tính tại thời điểm truy vấn thay vì nhận dạng trực tiếp qua nhãn nút. Trong pipeline GraphRAG, các truy vấn đồ thị được sinh tự động từ ngôn ngữ tự nhiên và ánh xạ chủ yếu dựa trên nhãn nút; việc giữ phân loại thuộc tính phẳng làm suy yếu khả năng ánh xạ chính xác từ câu hỏi người dùng sang đồ thị. Lớp \texttt{Character} do đó được mở rộng thành ba lớp con:
+Đồ thị cơ sở thu được sau pha chuyển đổi vẫn lưu loại vai diễn dưới dạng thuộc tính chuỗi thừa kế từ ontology gốc - tức là tất cả nhân vật đều mang chung nhãn \texttt{Character} và chỉ khác nhau ở giá trị thuộc tính \texttt{mainType} (Đào, Kép, Hề, Lão, Mụ). Cách biểu diễn thuộc tính phẳng này buộc tầng truy xuất phải lọc theo giá trị thuộc tính tại thời điểm truy vấn thay vì nhận dạng trực tiếp qua nhãn nút. Trong pipeline GraphRAG, các truy vấn đồ thị được sinh tự động từ ngôn ngữ tự nhiên và ánh xạ chủ yếu dựa trên nhãn nút; việc giữ phân loại thuộc tính phẳng làm suy yếu khả năng ánh xạ chính xác từ câu hỏi người dùng sang đồ thị. Lớp \texttt{Character} do đó được mở rộng thành năm lớp con tương ứng với năm loại vai truyền thống của nghệ thuật Chèo:
 
 \begin{itemize}
-  \item \texttt{Main\_Character} - nhân vật chính diện giữ vai trò trung tâm trong
-    cốt truyện, tương ứng với loại Đào (nữ chính) và Kép (nam chính) trong hệ thống
-    phân loại nhân vật Chèo truyền thống.
-  \item \texttt{Supporting\_Character} - nhân vật phụ trong các cảnh hỗ trợ hoặc
-    hài, bao gồm các loại Hề, Lão và Mụ.
-  \item \texttt{Antagonist} - nhân vật phản diện tạo xung đột kịch tính (Sùng Bà, Trần Phương, Đào Huế\ldots).
+  \item \texttt{DaoCharacter} - nhân vật vai \textit{Đào} (nữ chính diện),
+    thường là người phụ nữ đoan trang, hiền thục hoặc lả lơi tinh nghịch.
+  \item \texttt{KepCharacter} - nhân vật vai \textit{Kép} (nam chính diện),
+    thường là người đàn ông học thức, trượng phu hoặc trai trẻ.
+  \item \texttt{HeCharacter} - nhân vật vai \textit{Hề} (vai hài), giữ vai trò
+    gây cười và phản biện xã hội trong vở chèo.
+  \item \texttt{MuCharacter} - nhân vật vai \textit{Mụ} (nữ lớn tuổi), thường
+    là bà mẹ, bà chủ quán hoặc nhân vật cao niên.
+  \item \texttt{LaoCharacter} - nhân vật vai \textit{Lão} (nam lớn tuổi),
+    thường là ông cụ, người cha hoặc lão nông.
 \end{itemize}
 
-Một số ví dụ về cách gán nhãn sau khi mở rộng:
+Sau mở rộng, mỗi nhân vật mang đồng thời nhãn cha \texttt{Character} và nhãn con tương ứng. Ví dụ:
 
 \begin{tcolorbox}[colback=gray!5, colframe=black!50, arc=4pt, boxrule=0.5pt]
 {\small
 \begin{verbatim}
-Thị Kính:     :Character + :Main_Character        (loại Đào)
-Súy Vân:      :Character + :Main_Character        (loại Đào)
-Sùng Bà:      :Character + :Supporting_Character  (loại Mụ)
-              + :Antagonist                       (vai phản diện)
-Trần Phương:  :Character + :Supporting_Character + :Antagonist
+Thị Kính:     :Character + :DaoCharacter   (subType: "Chín")
+Thị Màu:      :Character + :DaoCharacter   (subType: "Lệch")
+Lưu Bình:     :Character + :KepCharacter   (subType: "Pha")
+Sùng Bà:      :Character + :MuCharacter    (subType: "Ác")
+Mãng Ông:     :Character + :LaoCharacter   (subType: "Say")
 \end{verbatim}
 }
 \end{tcolorbox}
 
-Khác với năm vai truyền thống Đào/Kép/Hề/Lão/Mụ vốn xác định bởi đặc trưng diễn xướng, lớp \texttt{Antagonist} được định danh theo \textit{chức năng tự sự} trong vở. Việc gán nhãn này được thực hiện thủ công ở giai đoạn làm giàu đồ thị tri thức dựa trên trường \texttt{description} của ontology gốc, với tiêu chí: nhân vật có hành động chủ động gây ra xung đột chính của vở. Một nhân vật có thể đồng thời mang vai truyền thống và nhãn \texttt{Antagonist} mà không chồng chéo về ngữ nghĩa.
+Phân lớp này biến \texttt{mainType} từ thuộc tính chuỗi thành nhãn nút có thể truy vấn trực tiếp - các câu hỏi dạng ``những nhân vật vai Đào trong vở \textit{X}'' được giải quyết bằng pattern matching trên nhãn thay vì lọc thuộc tính. Bên cạnh đó, thuộc tính \texttt{subType} (Chín, Lệch, Pha, Say, Áo dài, Áo ngắn\ldots) tiếp tục được giữ nguyên trên nút để biểu diễn các phân loại tinh hơn trong cùng một loại vai.
 
 \textbf{Mở rộng phân loại biểu diễn.}
-Lớp \texttt{Appearance} trong đồ thị cơ sở lưu trữ mọi lần xuất hiện của nhân vật trên sân khấu dưới dạng thực thể duy nhất, không phân biệt thể loại biểu đạt - một lần xuất hiện có thể đồng thời chứa cử chỉ tay, trang phục và lời hát, nhưng tất cả đều bị gộp vào cùng một loại nút. Với hệ thống hỏi-đáp có thể nhận câu hỏi về từng loại yếu tố biểu diễn riêng lẻ, lớp \texttt{Appearance} được phân thành ba nhóm con độc lập về ngữ nghĩa:
+Lớp \texttt{Appearance} trong đồ thị cơ sở lưu trữ mọi lần xuất hiện của nhân vật trên sân khấu dưới dạng thực thể duy nhất, không phân biệt thể loại biểu đạt - một lần xuất hiện có thể đồng thời chứa cử chỉ, trang phục và trạng thái cảm xúc, nhưng tất cả đều bị gộp vào cùng một loại nút. Với hệ thống hỏi-đáp có thể nhận câu hỏi về từng loại yếu tố biểu diễn riêng lẻ, lớp \texttt{Appearance} được phân thành các nhóm con độc lập về ngữ nghĩa:
 
 \begin{itemize}
-  \item \texttt{Physical\_Gesture} - chuyển động thân thể trong diễn xuất; được
-    phân chi tiết thành \texttt{Hand\_Gesture} (cử chỉ tay) và
-    \texttt{Leg\_Movement} (bộ chân).
-  \item \texttt{Costume\_Artifact} - yếu tố trang phục và đạo cụ sân khấu gắn
-    với từng lần xuất hiện của nhân vật.
-  \item \texttt{Vocal\_Expression} - biểu đạt thanh nhạc và lời hát; hỗ trợ
-    phân tích phong cách diễn xướng theo từng loại vai.
+  \item \texttt{Mood} - trạng thái cảm xúc của nhân vật tại một lần xuất hiện
+    cụ thể, thừa kế các thuộc tính thời gian (\texttt{start}, \texttt{end})
+    và cảm xúc (\texttt{emotion}) từ \texttt{Appearance} gốc.
+  \item \texttt{Costume} - trang phục đặc trưng theo loại vai (vd: Đào-Chín,
+    Hề-Áo ngắn), được tham chiếu chung cho mọi vai diễn cùng loại.
+  \item \texttt{FaceGesture} - cử chỉ khuôn mặt đại diện cho từng loại cảm
+    xúc, mã hoá quy ước biểu cảm trong nghệ thuật Chèo.
+  \item \texttt{MoodType} - loại cảm xúc canonical (vd: \texttt{moodType\_Sad},
+    \texttt{moodType\_Angry}\ldots), đóng vai trò \textit{neo ngữ nghĩa} cho
+    quan hệ \texttt{REPRESENT} giữa Costume và cảm xúc đại diện.
 \end{itemize}
 
 Nhờ phân lớp con này, các câu hỏi về một thể loại biểu diễn cụ thể được truy xuất trực tiếp qua nhãn nút thay vì qua bộ lọc thuộc tính chuỗi:
@@ -211,58 +218,61 @@ Nhờ phân lớp con này, các câu hỏi về một thể loại biểu diễ
 \begin{tcolorbox}[colback=gray!5, colframe=black!50, arc=4pt, boxrule=0.5pt]
 {\small
 \begin{verbatim}
-Câu hỏi: "Những cử chỉ tay nào xuất hiện trong trích đoạn
-          Thị Màu lên chùa?"
+Câu hỏi: "Trang phục nào được dùng cho các vai Đào-Chín?"
 
-Đồ thị cơ sở:    duyệt toàn bộ :Appearance trong trích đoạn
+Đồ thị cơ sở:    duyệt toàn bộ :Appearance
                  → lọc theo thuộc tính chuỗi mô tả
-Đồ thị mở rộng:  truy xuất trực tiếp các nút :Hand_Gesture
-                 trong trích đoạn
+Đồ thị mở rộng:  truy xuất trực tiếp các nút :Costume
+                 liên kết tới nhân vật vai Đào-Chín
 \end{verbatim}
 }
 \end{tcolorbox}
 
-Đồ thị tri thức cuối cùng vì vậy bao quát đầy đủ tri thức của ontology gốc, đồng thời bổ sung tám phân lớp con phục vụ hai loại truy vấn đặc thù nêu ở đầu mục (Bảng~\ref{tab:schema_extension}, Hình~\ref{fig:kg_schema}).
+Bên cạnh các lớp con đã có instance, hệ thống cũng giữ sẵn một số lớp cha mở rộng cho hướng phát triển tương lai - \texttt{PhysicalGesture} (gồm \texttt{HandGesture}, \texttt{LegGesture}), \texttt{Artifact}, \texttt{CostumeArtifact} - để mã hoá cử chỉ tay/chân và đạo cụ khi dữ liệu chú thích từ video được bổ sung. Đồ thị tri thức cuối cùng vì vậy bao quát đầy đủ tri thức của ontology gốc và bổ sung phân lớp con phục vụ hai loại truy vấn đặc thù nêu ở đầu mục (Bảng~\ref{tab:schema_extension}, Hình~\ref{fig:kg_schema}).
 
 \begin{table}[ht!]
   \centering
-  \caption{Tám lớp con bổ sung trong đồ thị tri thức Chèo.}
+  \caption{Các lớp con bổ sung trong đồ thị tri thức Chèo.}
   \label{tab:schema_extension}
   \renewcommand{\arraystretch}{1.3}
   \footnotesize
-  \begin{tabular}{p{4.0cm} p{3.2cm} p{7.59cm}}
+  \begin{tabular}{p{3.6cm} p{2.8cm} p{8.39cm}}
     \toprule
     \textbf{Lớp con} & \textbf{Lớp cha} & \textbf{Ngữ nghĩa và vai trò thiết kế} \\
     \midrule
-    \texttt{Main\_Character}
+    \texttt{DaoCharacter}
       & \texttt{Character}
-      & Nhân vật Đào/Kép; truy vấn phân loại vai chính qua nhãn nút. \\[2pt]
-    \texttt{Supporting\_Character}
+      & Vai Đào - nữ chính diện; truy vấn phân loại qua nhãn nút. \\[2pt]
+    \texttt{KepCharacter}
       & \texttt{Character}
-      & Nhân vật Hề/Lão/Mụ; phân biệt ngữ nghĩa với nhân vật chính ở lớp
-        nhãn đồ thị. \\[2pt]
-    \texttt{Antagonist}
+      & Vai Kép - nam chính diện. \\[2pt]
+    \texttt{HeCharacter}
       & \texttt{Character}
-      & Nhân vật phản diện; hỗ trợ truy vấn phân tích tuyến xung đột
-        kịch tính. \\[4pt]
-    \texttt{Physical\_Gesture}
+      & Vai Hề - nhân vật hài, phản biện. \\[2pt]
+    \texttt{MuCharacter}
+      & \texttt{Character}
+      & Vai Mụ - nhân vật nữ lớn tuổi. \\[2pt]
+    \texttt{LaoCharacter}
+      & \texttt{Character}
+      & Vai Lão - nhân vật nam lớn tuổi. \\[4pt]
+    \texttt{Mood}
       & \texttt{Appearance}
-      & Lớp cha trung gian cho chuyển động thân thể; nhóm \texttt{Hand\_Gesture}
-        và \texttt{Leg\_Movement}. \\[2pt]
-    \texttt{Hand\_Gesture}
-      & \texttt{Physical\_Gesture}
-      & Cử chỉ tay - yếu tố múa đặc trưng theo từng loại vai Chèo. \\[2pt]
-    \texttt{Leg\_Movement}
-      & \texttt{Physical\_Gesture}
-      & Bộ chân - kỹ thuật di chuyển sân khấu theo phong cách từng nhân vật. \\[2pt]
-    \texttt{Costume\_Artifact}
+      & Trạng thái cảm xúc của nhân vật tại một lần xuất hiện; gắn với
+        thời gian \texttt{start}/\texttt{end} và giá trị
+        \texttt{emotion} thừa kế từ \texttt{Appearance}. \\[2pt]
+    \texttt{Costume}
       & \texttt{Appearance}
-      & Trang phục và đạo cụ sân khấu; phân biệt với biểu đạt thân thể và
-        thanh nhạc. \\[2pt]
-    \texttt{Vocal\_Expression}
+      & Trang phục đặc trưng theo loại vai (Đào-Chín, Hề-Áo ngắn\ldots);
+        liên kết tới các diễn viên thông qua quan hệ \texttt{IS\_WEAR\_BY}. \\[2pt]
+    \texttt{FaceGesture}
       & \texttt{Appearance}
-      & Biểu đạt thanh nhạc; hỗ trợ phân tích phong cách diễn xướng theo
-        loại vai. \\
+      & Cử chỉ khuôn mặt đại diện cho từng loại cảm xúc theo quy ước
+        biểu cảm trong nghệ thuật Chèo. \\[2pt]
+    \texttt{MoodType}
+      & \texttt{Appearance}
+      & Loại cảm xúc canonical (\texttt{moodType\_Sad},
+        \texttt{moodType\_Happy}\ldots), đóng vai trò neo ngữ nghĩa cho
+        quan hệ \texttt{REPRESENT}. \\
     \bottomrule
   \end{tabular}
 \end{table}
@@ -274,6 +284,42 @@ Câu hỏi: "Những cử chỉ tay nào xuất hiện trong trích đoạn
   \label{fig:kg_schema}
 \end{figure}
 
+\textbf{Mở rộng quan hệ.}
+Bên cạnh phân lớp con, đồ thị tri thức cũng được làm giàu bằng các quan hệ mới (Bảng~\ref{tab:relation_extension}) phục vụ truy vấn theo trục biểu diễn (cảm xúc, trang phục) và truy vấn suy diễn xuyên thực thể (cộng tác diễn viên, nguyên mẫu xuyên vở). Ngoài hai quan hệ \texttt{EXPRESS} và \texttt{IS\_WEAR\_BY} được thiết lập ngay tại pha mở rộng schema, bốn quan hệ còn lại được sinh ra qua bộ luật suy diễn (Phụ lục~B) trình bày ở Mục~\ref{sec:retrieval_optimization}.
+
+\begin{table}[ht!]
+  \centering
+  \caption{Các quan hệ bổ sung trong đồ thị tri thức Chèo.}
+  \label{tab:relation_extension}
+  \renewcommand{\arraystretch}{1.3}
+  \footnotesize
+  \begin{tabular}{p{3.6cm} p{4.4cm} p{6.79cm}}
+    \toprule
+    \textbf{Quan hệ} & \textbf{Domain $\to$ Range} & \textbf{Vai trò ngữ nghĩa} \\
+    \midrule
+    \texttt{EXPRESS}
+      & \texttt{Actor} $\to$ \texttt{Mood}
+      & Diễn viên biểu lộ cảm xúc qua một lần xuất hiện cụ thể. \\[2pt]
+    \texttt{IS\_WEAR\_BY}
+      & \texttt{Costume} $\to$ \texttt{Actor}
+      & Trang phục được mặc bởi diễn viên đảm nhận vai. \\[2pt]
+    \texttt{PERFORMS}
+      & \texttt{Actor} $\to$ \texttt{Character}
+      & Quan hệ trực tiếp diễn viên - nhân vật, rút gọn từ chuỗi qua
+        \texttt{RoleAssignment}. \\[2pt]
+    \texttt{COLLABORATES\_WITH}
+      & \texttt{Actor} $\leftrightarrow$ \texttt{Actor}
+      & Hai diễn viên cùng tham gia một phiên bản trình diễn (đối xứng). \\[2pt]
+    \texttt{REPRESENT}
+      & \texttt{Costume} $\to$ \texttt{MoodType}
+      & Trang phục thể hiện một loại cảm xúc khi co-occur thường xuyên. \\[2pt]
+    \texttt{ARCHETYPE\_SIMILAR}
+      & \texttt{Character} $\leftrightarrow$ \texttt{Character}
+      & Hai nhân vật ở hai vở khác nhau có cùng kiểu hình kịch (đối xứng). \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
 % ============================================================
 
 \subsection{Cơ chế hỗ trợ truy xuất}
@@ -282,23 +328,18 @@ Câu hỏi: "Những cử chỉ tay nào xuất hiện trong trích đoạn
 Hiệu năng truy xuất trên đồ thị tri thức không chỉ phụ thuộc vào lược đồ mà còn vào hai cơ chế bổ trợ: cách xử lý các quan hệ gián tiếp - những quan hệ không tồn tại dưới dạng cạnh trực tiếp - và cách lập chỉ mục để truy cập thực thể nhanh chóng.
 
 \textbf{Bổ sung luật suy luận quan hệ gián tiếp.}
-Đồ thị mở rộng chứa toàn bộ tri thức tường minh của miền, nhưng nhiều câu hỏi thực tế đòi hỏi khai thác \textit{tri thức ngầm} - các quan hệ phải suy ra qua chuỗi liên kết nhiều bước. Tuỳ theo tần suất và chi phí, hệ thống áp dụng song song hai chiến lược: (i) \textit{vật chất hoá} trước các quan hệ tần suất cao thành cạnh tường minh để truy vấn hằng số, và (ii) \textit{duyệt động} qua đường đi nhiều bước cho các quan hệ còn lại. Cách kết hợp này cân bằng giữa chi phí lưu trữ và độ trễ truy vấn.
+Đồ thị mở rộng chứa toàn bộ tri thức tường minh của miền, nhưng nhiều câu hỏi thực tế đòi hỏi khai thác \textit{tri thức ngầm} - các quan hệ chỉ tồn tại dưới dạng chuỗi liên kết nhiều bước hoặc dưới dạng quy ước nghệ thuật chưa được mã hoá tường minh. Để bù đắp khoảng cách giữa cấu trúc dữ liệu và ngữ nghĩa câu hỏi, hệ thống định nghĩa một bộ luật suy diễn được áp dụng \textit{vật chất hoá} trên đồ thị tại thời điểm xây dựng. Toàn bộ luật được phát biểu hình thức bằng SWRL hoặc SPARQL CONSTRUCT và liệt kê đầy đủ ở Phụ lục~B. Phần này chỉ trình bày \textit{động cơ thiết kế} của ba nhóm luật, lý giải vì sao mỗi nhóm cần thiết với hệ thống GraphRAG.
 
-Phân tích tập câu hỏi thường gặp cho thấy mẫu ``diễn viên~$x$ tham gia vở nào?'' có tần suất cao nhất; trong đồ thị gốc, mỗi truy vấn loại này phải duyệt chuỗi bốn bước qua các nút trung gian:
+\textit{(i) Nhóm luật sinh tri thức -- vật chất hoá quan hệ gián tiếp.}
+Một số câu hỏi tần suất cao đòi hỏi truy xuất quan hệ chỉ tồn tại dưới dạng chuỗi nhiều bước trong ontology gốc. Tiêu biểu là quan hệ giữa diễn viên và nhân vật (``x đóng những vai nào?''): trong đồ thị cơ sở, truy vấn này phải duyệt qua nút trung gian \texttt{RoleAssignment} - một thực thể \textit{reify} dùng để biểu diễn quan hệ ba ngôi giữa diễn viên, nhân vật và phiên bản trình diễn. Cùng dạng đó, các quan hệ \textit{cộng tác giữa diễn viên} (tồn tại ngầm khi hai diễn viên cùng tham gia một phiên bản trình diễn) và \textit{tương đồng nguyên mẫu xuyên vở} (hai nhân vật cùng phân loại vai diễn ở các vở khác nhau) cũng yêu cầu duyệt qua nhiều cạnh để xác định. Việc giữ các quan hệ này ở dạng \textit{ngầm} buộc tầng truy xuất phải thực hiện đường đi nhiều bước cho mỗi câu hỏi, làm tăng độ trễ và phức tạp hoá Cypher sinh tự động. Bộ luật vật chất hoá những quan hệ này thành cạnh tường minh, giúp các câu hỏi tương ứng được giải quyết bằng truy vấn 1-bước thay vì 3-5 bước.
 
-\begin{multline}
-  \texttt{Actor} \xrightarrow{\texttt{PERFORMED\_BY}^{-1}}
-  \texttt{RoleAssignment} \xrightarrow{\texttt{IN\_VERSION}}
-  \texttt{Version} \\
-  \xrightarrow{\texttt{HAS\_VERSION}^{-1}}
-  \texttt{Scene} \xrightarrow{\texttt{HAS\_SCENE}^{-1}}
-  \texttt{Play}
-  \label{eq:chain_actor_play}
-\end{multline}
+\textit{(ii) Nhóm luật xác thực dữ liệu.}
+Khác với nhóm trên, nhóm luật này không sinh tri thức mới mà nhằm \textit{phát hiện} các vi phạm mẫu mong đợi trong dữ liệu - ví dụ vai diễn có giới tính diễn viên không khớp giới tính nhân vật, hay nhân vật chưa được phân lớp con loại vai. Trong bối cảnh ontology được xây dựng thủ công với hàng trăm cá thể, các vi phạm dạng này khó phát hiện nếu chỉ duyệt thủ công; bộ luật xác thực hoạt động như một lớp kiểm tra chất lượng tự động, gắn nhãn cá thể vi phạm để truy xuất hoặc xử lý sau. Một kết quả đáng chú ý là luật phát hiện \textit{Appearance mồ côi} đã chỉ ra 17 lượt xuất hiện tồn tại trong ontology gốc nhưng không được tham chiếu bởi bất kỳ \texttt{RoleAssignment} nào - một vấn đề chất lượng dữ liệu mà ngay cả người soạn ontology cũng không nhận ra trong quá trình xây dựng.
 
-Quan hệ \texttt{IS\_PERFORMED\_IN}~(Actor\,$\to$\,Play) được vật chất hoá bằng cách thực thi chuỗi~\eqref{eq:chain_actor_play} một lần tại thời điểm xây dựng đồ thị và lưu kết quả như cạnh tường minh. Đổi lại chi phí lưu trữ tối đa $O(|A| \cdot |P|)$ - tỉ lệ với tích số diễn viên và số vở chèo - mỗi truy vấn tần suất cao được đưa về chi phí hằng số $O(1)$.
+\textit{(iii) Nhóm luật tri thức nghệ thuật chèo.}
+Một số tri thức nghệ thuật không thể biểu diễn trực tiếp bằng các thuộc tính phẳng - chẳng hạn quy ước giới tính theo loại vai (vai Đào và Mụ luôn là nữ, vai Kép và Lão luôn là nam) hay khái niệm \textit{nguyên mẫu nhân vật} (hai nhân vật ở hai vở khác nhau có thể chia sẻ cùng kiểu hình kịch). Bộ luật ở nhóm này mã hoá các quy ước nghệ thuật vào schema dưới dạng OWL Restriction hoặc cạnh suy diễn, cho phép truy vấn so sánh xuyên vở (vd: ``so sánh số phận các nhân vật vai Đào-Chín'') và đảm bảo tính nhất quán ngữ nghĩa khi mở rộng dữ liệu sang các vở mới.
 
-Các quan hệ gián tiếp khác - như nhân vật tới các diễn viên đảm nhận, vở tới tập diễn viên đầy đủ kèm thông tin phiên bản hoặc vai diễn cụ thể, hay phép giao tập diễn viên giữa hai vở - không được vật chất hoá do phụ thuộc vào tham số đầu vào hoặc đòi hỏi thông tin trung gian. Các trường hợp này được xử lý bằng phép duyệt đường đi với độ sâu biến đổi đi qua các nút trung gian (RoleAssignment, Version, Scene), cho phép kho lưu trữ tự tối ưu theo cấu trúc thực tế của đồ thị mà không cần cố định số bước duyệt ở mã ứng dụng. Toàn bộ logic suy luận được điều khiển ở tầng ứng dụng, không phụ thuộc vào bộ suy luận ontology toàn cục, nhờ đó duy trì độ trễ thấp và kiểm soát được phạm vi suy luận theo từng loại câu hỏi.
+Toàn bộ logic suy luận được điều khiển ở tầng ứng dụng, không phụ thuộc vào bộ suy luận ontology toàn cục, nhờ đó duy trì độ trễ thấp và kiểm soát được phạm vi suy luận theo từng loại câu hỏi. Việc tách bạch ba nhóm luật theo \textit{động cơ thiết kế} - sinh tri thức, xác thực và mã hoá tri thức nghệ thuật - cũng giúp dễ dàng mở rộng bộ luật trong tương lai khi miền tri thức được làm giàu thêm.
 
 \textbf{Chỉ mục đa mức.}
 Lược đồ xác định \textit{cái gì} có trong đồ thị; chỉ mục xác định \textit{tốc độ} truy cập vào từng loại thông tin đó. Hệ thống tổ chức chỉ mục theo ba mức phục vụ ba nhóm truy vấn khác nhau (Bảng~\ref{tab:index_strategy}).
@@ -359,7 +400,7 @@ Phân hệ G-Retrieval được tổ chức thành ba giai đoạn xử lý tu�
 
 \subsubsection{Tiền xử lý và trích xuất thực thể}
 
-Giai đoạn đầu tiên của phân hệ G-Retrieval làm giàu truy vấn gốc, sau đó dựa trên tập truy vấn đã làm giàu để xác định các thực thể liên quan trong đồ thị tri thức. Thiết kế theo hai bước tuần tự nhằm đảm bảo trích xuất thực thể được thực hiện trên ngữ cảnh đầy đủ nhất, bao gồm cả truy vấn gốc lẫn các biểu diễn bổ sung.
+Giai đoạn đầu tiên của phân hệ G-Retrieval làm giàu truy vấn gốc và xác định các thực thể liên quan trong đồ thị tri thức. Để giảm độ trễ, hai tác vụ LLM được thực hiện \textit{song song} (Hình~\ref{fig:entity_extraction}), đưa độ trễ tổng về mức $\max(t_A, t_B)$ thay vì $t_A + t_B$.
 
 \textbf{Đầu vào.} Câu hỏi ngôn ngữ tự nhiên $q$ từ người dùng. Ví dụ:
 
@@ -371,21 +412,21 @@ q = "Ai đóng vai Thị Màu trong vở Quan Âm Thị Kính?"
 }
 \end{tcolorbox}
 
-\textbf{Bước 1 - Mở rộng và phân rã truy vấn.} Hai tác vụ LLM được thực hiện song song (Hình~\ref{fig:entity_extraction}) để giảm độ trễ xuống còn $\max(t_A, t_B)$ thay vì $t_A + t_B$:
+\textbf{Tác vụ A - Mở rộng truy vấn, trích xuất thực thể và phân loại.} Một lượt gọi LLM thực hiện đồng thời ba việc trong cùng một prompt: (i) mở rộng câu hỏi gốc bằng các thuật ngữ và ngữ cảnh nghệ thuật Chèo để tạo truy vấn mở rộng $q'$, (ii) trích xuất các thực thể có trong câu hỏi và phân loại theo bốn nhóm \textit{characters}, \textit{actors}, \textit{plays}, \textit{scenes}, (iii) phân loại câu hỏi vào một trong ba mức \textit{Local} / \textit{Community} / \textit{Global} theo phạm vi tri thức cần thiết. Đầu vào của LLM gồm $q$ kèm \textbf{Danh mục thực thể} (xem Mục~\ref{sec:entity_catalog}) được tiêm trực tiếp vào prompt, cùng ràng buộc ``chỉ chọn thực thể có trong Danh mục thực thể''. Đầu ra là một đối tượng JSON gồm $q'$, tập thực thể $E$ đã chuẩn hoá về tên định danh, và nhãn loại truy vấn $t \in \{\textit{Local},\, \textit{Community},\, \textit{Global}\}$.
 
+Cơ chế gộp này có ba lợi ích. Thứ nhất, việc tiêm Danh mục thực thể vào prompt biến quá trình trích xuất thành \textit{ràng buộc định danh}: LLM không thể tạo ra tên không tồn tại trong đồ thị tri thức, qua đó loại bỏ một dạng ảo giác cốt lõi ngay từ bước đầu tiên. Thứ hai, gộp ba tác vụ vào cùng một lượt gọi giúp tiết kiệm số lượt gọi LLM so với việc tách rời. Thứ ba, nhãn $t$ được dùng làm tín hiệu \textit{định tuyến} cho hai giai đoạn sau: chọn tập mức truy xuất (Mục~\ref{sec:multi_granularity}) và chọn chiến lược tạo sinh (Mục~\ref{sec:g_generation}); nhờ đó hệ thống tự thích ứng theo độ phức tạp câu hỏi mà không phát sinh thêm độ trễ.
+
+Prompt của Tác vụ A còn chứa một quy tắc dành riêng cho \textit{truy vấn toàn cục}: nếu câu hỏi yêu cầu tổng hợp, so sánh hay liệt kê trên toàn bộ tri thức (ví dụ ``So sánh các nhân vật nữ chính trong các vở''), LLM được hướng dẫn đưa toàn bộ tên vở chèo vào nhóm \textit{plays} để giai đoạn truy xuất tiếp theo có đủ điểm neo. Trong trường hợp LLM vẫn trả về tập thực thể rỗng, hệ thống có thêm cơ chế dự phòng — đưa toàn bộ vở chèo trong đồ thị tri thức vào tập thực thể.
+
+\textbf{Tác vụ B - Phân rã truy vấn.} Một lượt gọi LLM khác phân rã câu hỏi gốc thành tập câu hỏi con $\{q_1, q_2, \ldots, q_n\}$ phục vụ suy luận đa bước. Các câu hỏi con không tham gia vào quá trình trích xuất thực thể; chúng được lưu trong đối tượng \textit{ProcessedQuery} để hiển thị ở giao diện người dùng và phục vụ đối chiếu khi gỡ lỗi.
+
+Hệ thống đồng thời hỗ trợ một \textit{chế độ đơn giản hoá} dành cho tình huống cần giảm chi phí gọi LLM - ví dụ khi câu hỏi ngắn gọn, rõ ràng. Trong chế độ này, hai tác vụ song song được bỏ qua; thực thể được trích xuất trực tiếp từ $q$ bằng kết hợp biểu thức chính quy với một lượt gọi LLM duy nhất.
+
+\textbf{Đầu ra.} Giai đoạn tiền xử lý sản sinh ba đối tượng:
 \begin{itemize}
-  \item \textit{Mở rộng truy vấn.} LLM bổ sung thuật ngữ và ngữ cảnh nghệ thuật Chèo cho $q$, sản sinh truy vấn đã mở rộng $q'$ với từ khóa phong phú hơn.
-  \item \textit{Phân rã truy vấn.} LLM phân rã câu hỏi gốc thành tập câu hỏi con $\{q_1, q_2, \ldots, q_n\}$ phục vụ suy luận đa bước ở các giai đoạn sau.
-\end{itemize}
-
-\textbf{Bước 2 - Trích xuất thực thể.} LLM được cung cấp tập truy vấn đã làm giàu $\{q, q', q_1, \ldots, q_n\}$ cùng \textbf{Danh mục thực thể} (xem Mục~\ref{sec:entity_catalog}) và trích xuất các thực thể xuất hiện trong tập truy vấn, phân loại theo bốn nhóm \textit{characters}, \textit{actors}, \textit{plays}, \textit{scenes}. Ràng buộc ``chỉ chọn thực thể có trong Danh mục thực thể'' trong prompt đảm bảo mọi thực thể đầu ra đều có định danh trong đồ thị. Việc trích xuất trên tập truy vấn đã mở rộng và phân rã (thay vì chỉ trên $q$) tăng khả năng bắt được các thực thể được gọi bằng biến thể tên hoặc chỉ xuất hiện sau khi câu hỏi được diễn giải rộng hơn.
-
-Hệ thống đồng thời hỗ trợ một chế độ đơn giản hoá dành cho tình huống cần giảm chi phí gọi LLM - ví dụ khi câu hỏi ngắn gọn, rõ ràng hoặc đã có bản mở rộng thủ công; trong chế độ này, bước 1 được bỏ qua và thực thể được trích xuất trực tiếp từ $q$ bằng kết hợp biểu thức chính quy với một lượt gọi LLM duy nhất.
-
-\textbf{Đầu ra.} Giai đoạn tiền xử lý sản sinh hai đối tượng:
-\begin{itemize}
-  \item Truy vấn đã xử lý $Q = (q,\ q',\ \{q_1, \ldots, q_n\})$, gồm truy vấn gốc, truy vấn mở rộng và tập câu hỏi con.
-  \item Tập thực thể $E$ phân loại theo bốn nhóm \textit{characters}, \textit{actors}, \textit{plays}, \textit{scenes}, mỗi thực thể được chuẩn hoá về tên định danh trong Danh mục thực thể.
+  \item Đối tượng \textit{ProcessedQuery} $Q = (q,\ q',\ \{q_1, \ldots, q_n\})$, gồm truy vấn gốc, truy vấn mở rộng và tập câu hỏi con.
+  \item Tập thực thể $E$ phân loại theo bốn nhóm \textit{characters}, \textit{actors}, \textit{plays}, \textit{scenes}, mỗi thực thể đã được chuẩn hoá về tên định danh trong Danh mục thực thể. Đây là đầu vào trực tiếp cho giai đoạn truy xuất đồ thị tiếp theo.
+  \item Nhãn loại truy vấn $t \in \{\textit{Local}, \textit{Community}, \textit{Global}\}$, đóng vai trò tín hiệu định tuyến để chọn tập mức truy xuất ở Mục~\ref{sec:multi_granularity} và chọn chiến lược tạo sinh ở Mục~\ref{sec:g_generation}.
 \end{itemize}
 
 \begin{tcolorbox}[colback=gray!5, colframe=black!50, arc=4pt, boxrule=0.5pt]
@@ -409,6 +450,8 @@ E = {
   plays: ["Quan Âm Thị Kính"],
   scenes: []
 }
+
+t = "Local"
 \end{verbatim}
 }
 \end{tcolorbox}
@@ -424,15 +467,13 @@ E = {
 \subsubsection{Truy vấn đa mức độ}
 \label{sec:multi_granularity}
 
-Giai đoạn thứ hai thực hiện truy xuất tri thức từ đồ thị tri thức dựa trên tập thực thể đã trích xuất $E$. Một câu hỏi tra cứu đơn về nhân vật đòi hỏi loại thông tin hoàn toàn khác so với câu hỏi so sánh xuyên suốt nhiều vở diễn. Nếu hệ thống dùng cùng một chiến lược truy xuất cho mọi loại truy vấn, câu trả lời dễ rơi vào một trong hai tình huống: thiếu thông tin khi chiến lược quá nông, hoặc nhiễu tràn lan khi chiến lược quá rộng. Phân hệ G-Retrieval vì vậy tổ chức \textbf{bốn mức độ truy xuất} (\textit{retrieval granularities}) (Bảng~\ref{tab:retrieval_levels}), mỗi mức khai thác một khía cạnh khác nhau của cấu trúc đồ thị.
+Giai đoạn thứ hai thực hiện truy xuất tri thức từ đồ thị tri thức dựa trên tập thực thể đã trích xuất $E$. Một câu hỏi tra cứu đơn về nhân vật đòi hỏi loại thông tin hoàn toàn khác so với câu hỏi so sánh xuyên suốt nhiều vở diễn. Nếu hệ thống chỉ dùng một cách truy xuất duy nhất, câu trả lời dễ rơi vào một trong hai tình huống: thiếu thông tin khi cách truy xuất quá nông, hoặc nhiễu tràn lan khi truy xuất quá rộng. Phân hệ G-Retrieval vì vậy tổ chức \textbf{bốn mức độ truy xuất} (Bảng~\ref{tab:retrieval_levels}), mỗi mức khai thác một khía cạnh khác nhau của cấu trúc đồ thị.
 
-Việc chọn tập mức truy xuất được kích hoạt dựa trên \textit{loại truy vấn}, phân vào ba nhóm Local/Community/Global theo phạm vi tri thức cần thiết (chi tiết tiêu chí phân loại trình bày ở Mục~\ref{sec:query_classification}). Trong vận hành tự động, loại truy vấn được ước lượng bởi LLM dựa trên câu hỏi và tập thực thể trích xuất được; trong các kịch bản thực nghiệm có kiểm soát (Chương 4), loại truy vấn được cấu hình trước theo nhãn có sẵn trong bộ dữ liệu đánh giá để tách biệt hiệu năng của cơ chế truy xuất khỏi hiệu năng của cơ chế phân loại.
-
-\textbf{Đầu vào.} Tập thực thể $E$ từ giai đoạn tiền xử lý và loại truy vấn $t \in \{\textit{Local}, \textit{Community}, \textit{Global}\}$.
+\textbf{Đầu vào.} Tập thực thể $E$ và nhãn loại truy vấn $t$ từ giai đoạn tiền xử lý.
 
 \begin{table}[ht]
   \centering
-  \caption{Bốn mức độ truy vấn trong phân hệ G-Retrieval.}
+  \caption{Bốn mức độ truy xuất trong phân hệ G-Retrieval.}
   \label{tab:retrieval_levels}
   \resizebox{\textwidth}{!}{%
   \begin{tabular}{c p{5.6cm} l p{4.2cm}}
@@ -448,7 +489,7 @@ Việc chọn tập mức truy xuất được kích hoạt dựa trên \textit{
   }
 \end{table}
 
-\textbf{Ánh xạ mức truy xuất theo loại truy vấn.} Mỗi loại truy vấn chỉ kích hoạt tập con các mức phù hợp, thay vì chạy đồng loạt tất cả gây tốn tài nguyên (Bảng~\ref{tab:level_mapping}).
+\textbf{Định tuyến mức truy xuất theo loại truy vấn.} Tập mức được kích hoạt phụ thuộc vào nhãn $t$ do Tác vụ A trả về (Bảng~\ref{tab:level_mapping}). Cách định tuyến này tránh chạy mọi mức cho mọi câu hỏi — câu tra cứu đơn không cần Subgraph, câu so sánh xuyên vở thì cần đủ cả bốn — qua đó kiểm soát kích thước ngữ cảnh và chi phí truy vấn.
 
 \begin{table}[ht]
   \centering
@@ -459,29 +500,25 @@ Việc chọn tập mức truy xuất được kích hoạt dựa trên \textit{
     \hline
     \textbf{Loại truy vấn} & \textbf{Mức kích hoạt} & \textbf{Ví dụ} \\
     \hline
-    Local & Node, Triplet & ``Ai đóng vai Thị Màu?'' \\
-    Community & Node, Triplet, Path & ``Diễn viên nào đóng cả QATK lẫn Kim Nham?'' \\
-    Global & Node, Triplet, Path, Subgraph & ``So sánh số phận Súy Vân và Thị Kính'' \\
+    Local      & Node, Triplet                 & ``Ai đóng vai Thị Màu?'' \\
+    Community  & Node, Triplet, Path           & ``Diễn viên nào đóng cả Quan Âm Thị Kính lẫn Kim Nham?'' \\
+    Global     & Node, Triplet, Path, Subgraph & ``So sánh số phận Súy Vân và Thị Kính'' \\
     \hline
   \end{tabular}%
   }
 \end{table}
 
-Với truy vấn \textbf{Local}, mức Node cung cấp thuộc tính thực thể (tên, giới tính, mô tả) và mức Triplet xác lập quan hệ trực tiếp (nhân vật-diễn viên, vở-nhân vật). Hai mức này đủ để trả lời các câu hỏi tra cứu đơn giản mà không sinh thêm ngữ cảnh dư thừa ảnh hưởng đến chất lượng prompt. Khi truy vấn thuộc cấp \textbf{Community}, hệ thống bổ sung mức Path để duyệt chuỗi quan hệ trung gian (ví dụ: Play $\rightarrow$ Character $\rightarrow$ RoleAssignment $\rightarrow$ Actor), cho phép LLM khai thác các đường liên kết nhiều bước phục vụ phép giao tập hợp hoặc so sánh nội hàm giữa các cụm thực thể. Đối với truy vấn \textbf{Global}, cả bốn mức được kích hoạt: mức Subgraph mở rộng vùng lân cận xung quanh mỗi thực thể trung tâm với cấu trúc quan hệ đầy đủ, cung cấp nền tảng cho quá trình tổng hợp và phân tích xuyên suốt đồ thị tri thức.
+Trong vận hành tự động, $t$ được tính sẵn ở Tác vụ A nên không phát sinh thêm độ trễ. Trong các kịch bản thực nghiệm có kiểm soát (Chương~4), tập mức truy xuất được cấu hình thủ công để đo riêng đóng góp của từng mức, tách biệt hiệu năng truy xuất khỏi hiệu năng phân loại của LLM. Mỗi mức cũng tự áp giới hạn số kết quả trả về để tổng kích thước ngữ cảnh không vượt quá khả năng tiếp nhận của mô hình ngôn ngữ; các ngưỡng cụ thể là tham số cấu hình ở tầng cài đặt.
 
 Mức \textbf{Node} truy xuất thuộc tính của thực thể theo bốn nhãn gốc của ontology - Character, Actor, Play, Scene - sử dụng so khớp chuỗi không phân biệt hoa-thường trên các trường tên. Các nhãn con của Character (Mục~\ref{sec:schema_extension}) được bao phủ gián tiếp do chúng kế thừa từ nhãn gốc. Tên thực thể được gộp truy xuất theo lô để hạn chế số lượt gọi cơ sở dữ liệu. Khi không có kết quả khớp trực tiếp, hệ thống kích hoạt cơ chế dự phòng tìm kiếm mờ trên các trường tên.
 
 Mức \textbf{Triplet} khai thác ba mẫu quan hệ chính của ontology: (i) Character $\leftrightarrow$ Actor thông qua RoleAssignment - mẫu quan trọng nhất, liên kết nhân vật với diễn viên; (ii) Play $\rightarrow$ Character qua quan hệ \texttt{HAS\_CHARACTER}; và (iii) Play $\rightarrow$ Scene qua quan hệ \texttt{HAS\_SCENE}. Mỗi mẫu trả về các bộ ba $(S, P, O)$ kèm thông tin định danh hai thực thể đầu cuối; khi không có kết quả, mức này trả về một mẫu quan hệ diễn viên-nhân vật tiêu biểu làm dự phòng.
 
-Mức \textbf{Path} duyệt đường dẫn với độ dài biến đổi 1-3 bước, xuất phát từ các thực thể thuộc nhóm Character, Actor hoặc Play trong $E$. Tên hiển thị của tất cả nút trên đường dẫn được trích xuất, tạo ra chuỗi dạng ``Thị Màu $\rightarrow$ RoleAssignment $\rightarrow$ Version $\rightarrow$ Trích đoạn: \ldots'' giúp LLM nhận diện chuỗi suy luận trung gian. Mức này đặc biệt hữu ích cho truy vấn Community, nơi câu trả lời nằm cách thực thể gốc nhiều bước nhảy.
+Mức \textbf{Path} duyệt đường dẫn với độ dài biến đổi 1-3 bước, xuất phát từ các thực thể thuộc nhóm Character, Actor hoặc Play trong $E$. Tên hiển thị của tất cả nút trên đường dẫn được trích xuất, tạo ra chuỗi dạng ``Thị Màu $\rightarrow$ RoleAssignment $\rightarrow$ Version $\rightarrow$ Trích đoạn: \ldots'' giúp LLM nhận diện chuỗi suy luận trung gian. Mức này được kích hoạt cho truy vấn Community và Global, khi câu trả lời nằm cách thực thể gốc nhiều bước nhảy.
 
-Mức \textbf{Subgraph} mở rộng vùng lân cận xung quanh mỗi thực thể trung tâm trong phạm vi 1-2 bước, thu thập đồng thời cả nút lẫn quan hệ trên các đường dẫn. Khác với mức Path chỉ trả về chuỗi tên, mức Subgraph trả về cấu trúc đồ thị đầy đủ gồm thuộc tính nút và kiểu quan hệ. Mức này cung cấp ngữ cảnh phong phú nhất cho truy vấn Global, nơi LLM cần hiểu cấu trúc quan hệ tổng thể xung quanh thực thể để tổng hợp và so sánh.
+Mức \textbf{Subgraph} mở rộng vùng lân cận xung quanh mỗi thực thể trung tâm trong phạm vi 1-2 bước, thu thập đồng thời cả nút lẫn quan hệ trên các đường dẫn. Khác với mức Path chỉ trả về chuỗi tên, mức Subgraph trả về cấu trúc đồ thị đầy đủ gồm thuộc tính nút và kiểu quan hệ. Mức này được kích hoạt cho truy vấn Global, cung cấp ngữ cảnh phong phú nhất khi LLM cần hiểu cấu trúc quan hệ tổng thể để tổng hợp hoặc so sánh xuyên nhiều thực thể.
 
-Mỗi mức truy xuất đều áp dụng giới hạn về số kết quả trả về nhằm đảm bảo tổng kích thước ngữ cảnh sau khi tổ hợp với câu hỏi và chỉ dẫn không vượt quá khả năng tiếp nhận của mô hình ngôn ngữ. Các ngưỡng cụ thể là tham số cấu hình ở tầng cài đặt và được hiệu chỉnh theo phổ truy vấn thực tế.
-
-\textbf{Tối ưu cho truy vấn toàn cục.} Truy vấn cấp Global thường yêu cầu duyệt nhiều vở cùng lúc; nếu mỗi câu hỏi đều chạy lại các truy vấn nhóm theo vở thì độ trễ tăng đáng kể. Hệ thống vì vậy tiền tính toán một bản chỉ mục theo vở vào bộ nhớ tại thời điểm khởi tạo, lưu sẵn các bộ ba quan hệ thường gặp như \textit{(Play, HAS\_CHARACTER, Character)}, \textit{(Play, HAS\_SCENE, Scene)} và \textit{(Character, PERFORMED\_BY, Actor)}. Khi giai đoạn trích xuất thực thể không trả về thực thể nào - đặc trưng của truy vấn toàn cục - chỉ mục này còn được dùng để đưa toàn bộ vở chèo vào làm điểm neo cho bốn mức truy xuất nêu trên. Đây là chi tiết tối ưu hiệu năng ở tầng cài đặt và không tạo ra mức truy xuất riêng biệt thứ năm.
-
-\textbf{Đầu ra.} Đối tượng dữ liệu đồ thị $G$ (Hình~\ref{fig:multi_granularity}) chứa kết quả từ các mức được kích hoạt:
+\textbf{Đầu ra.} Đối tượng dữ liệu đồ thị $G$ (Hình~\ref{fig:multi_granularity}) hợp nhất kết quả từ các mức được kích hoạt:
 
 \begin{tcolorbox}[colback=gray!5, colframe=black!50, arc=4pt, boxrule=0.5pt]
 {\small
@@ -496,12 +533,12 @@ G = {
 }
 \end{tcolorbox}
 
-Tùy loại truy vấn, một số trường trong $G$ có thể rỗng: truy vấn Local thường chỉ có \texttt{nodes} và \texttt{triplets} chứa dữ liệu, trong khi \texttt{paths} và \texttt{subgraph} trống. Điều này giúp kiểm soát kích thước ngữ cảnh gửi đến LLM, tránh pha loãng thông tin quan trọng bởi dữ liệu không liên quan.
+Tuỳ loại truy vấn $t$, một số trường trong $G$ có thể rỗng: truy vấn Local chỉ điền \texttt{nodes} và \texttt{triplets}, trong khi \texttt{paths} và \texttt{subgraph} trống. Cách này giúp kiểm soát kích thước ngữ cảnh gửi đến LLM và tránh pha loãng thông tin quan trọng bằng dữ liệu không liên quan.
 
 \begin{figure}[!ht]
   \centering
   \includegraphics[width=\textwidth]{figures/c3/multi_granularity.jpg}
-  \caption{Bốn mức truy vấn đa mức độ.}
+  \caption{Bốn mức truy xuất trong G-Retrieval.}
   \label{fig:multi_granularity}
 \end{figure}
 
@@ -633,7 +670,7 @@ Việc lựa chọn tập con định dạng nào trong $C$ để đưa vào pro
   \item \texttt{node\_sequence} hữu ích khi câu hỏi mang tính truy vết nhiều bước (multi-hop), cung cấp sẵn lộ trình suy diễn tuyến tính cho LLM.
 \end{itemize}
 
-Việc kiểm soát độ dài ngữ cảnh tổng thể được đảm bảo ngay từ nguồn nhờ các giới hạn số lượng kết quả trong từng mức truy xuất (Mục~\ref{sec:multi_granularity}). Số định dạng được kích hoạt trong prompt cũng ảnh hưởng trực tiếp đến độ dài: Pre-Generation dùng hai định dạng để tối ưu tốc độ, trong khi Mid-Generation và Post-Generation cùng dùng ba định dạng - chấp nhận chi phí prompt cao hơn để đổi lại suy luận có cấu trúc và cơ sở đối chiếu hai lượt.
+Việc kiểm soát độ dài ngữ cảnh tổng thể được đảm bảo ngay từ nguồn nhờ các giới hạn số lượng kết quả trong từng mức truy xuất (Mục~\ref{sec:multi_granularity}). Số định dạng được kích hoạt trong prompt cũng ảnh hưởng trực tiếp đến độ dài: Pre-Generation và Mid-Generation cùng dùng hai định dạng để tối ưu tốc độ, trong khi Post-Generation dùng ba định dạng - chấp nhận chi phí prompt cao hơn để có thêm cơ sở đối chiếu khi kiểm định ở lượt thứ hai.
 
 Ví dụ một prompt $\mathcal{P}$ hoàn chỉnh (chiến lược Pre) cho câu hỏi ``Ai đóng vai Thị Màu?'':
 
@@ -685,7 +722,26 @@ Chiến lược \textbf{Mid-Generation} kiểm soát quá trình suy luận bằ
 
 Chiến lược \textbf{Post-Generation} bổ sung một bước kiểm định hậu kỳ nhằm phát hiện sai lệch trong câu trả lời. Mô hình trước tiên sinh câu trả lời sơ bộ $a_0$ chỉ dựa trên tri thức tham số hoá (parametric knowledge) - không được cung cấp ngữ cảnh từ đồ thị tri thức. Câu trả lời $a_0$ sau đó được đối chiếu với ngữ cảnh từ đồ thị tri thức trong lượt gọi thứ hai để phát hiện và hiệu chỉnh sai sót. Tách biệt giữa sinh và kiểm chứng cho phép phát hiện sự không nhất quán giữa tri thức nội tại của mô hình và dữ liệu thực tế, đổi lại chi phí tính toán và độ trễ lớn hơn hai chiến lược còn lại.
 
-\textbf{Lựa chọn chiến lược.} Chiến lược tạo sinh được ánh xạ theo loại truy vấn tương tự cơ chế ở G-Retrieval: Local $\to$ Pre-Generation (độ trễ thấp đủ cho tra cứu trực tiếp), Community $\to$ Mid-Generation (cấu trúc suy luận phù hợp với tổng hợp cụm quan hệ), Global $\to$ Post-Generation (kiểm định hậu kỳ hạn chế sai sót khi tổng hợp xuyên vở). Trong các kịch bản thực nghiệm ở Chương 4, chiến lược được cấu hình trước để đo đóng góp riêng của từng chiến lược; trong vận hành tự động, chiến lược được suy từ loại truy vấn do giai đoạn tiền xử lý xác định.
+\textbf{Lựa chọn chiến lược theo loại truy vấn.} Ba chiến lược thể hiện sự đánh đổi rõ rệt giữa chi phí tính toán và mức độ kiểm soát suy luận, do đó được ánh xạ trực tiếp theo nhãn loại truy vấn $t$ đã sinh ở giai đoạn tiền xử lý (Bảng~\ref{tab:strategy_mapping}). Cùng cơ chế định tuyến với việc chọn mức truy xuất, ánh xạ này không phát sinh thêm độ trễ vì nhãn $t$ đã có sẵn.
+
+\begin{table}[ht]
+  \centering
+  \caption{Ánh xạ chiến lược tạo sinh theo loại truy vấn.}
+  \label{tab:strategy_mapping}
+  \resizebox{\textwidth}{!}{%
+  \begin{tabular}{l l p{8cm}}
+    \hline
+    \textbf{Loại truy vấn} & \textbf{Chiến lược} & \textbf{Lý do lựa chọn} \\
+    \hline
+    Local      & Pre-Generation  & Tra cứu trực tiếp; quan hệ đã rõ trong ngữ cảnh, ưu tiên độ trễ thấp. \\
+    Community  & Mid-Generation  & Cần suy luận nhiều bước hoặc tổng hợp cụm quan hệ; khuôn mẫu cấu trúc giúp mô hình bám bằng chứng. \\
+    Global     & Post-Generation & Tổng hợp xuyên vở, sai sót khó phát hiện; kiểm định hậu kỳ hạn chế ảo giác. \\
+    \hline
+  \end{tabular}%
+  }
+\end{table}
+
+Trong các kịch bản thực nghiệm ở Chương~4, mỗi chiến lược được cấu hình thủ công để đo riêng đóng góp của nó, tách biệt khỏi cơ chế định tuyến tự động. Trong triển khai vận hành, chiến lược được chuyển đổi tự động theo nhãn $t$ ngay tại thời điểm chạy mà không cần khởi động lại pipeline.
 
 \textbf{Đầu vào.} Prompt $\mathcal{P}$ đã tổ hợp ở giai đoạn xây dựng prompt.
 
@@ -744,7 +800,7 @@ Ba chiến lược tạo thành một phổ liên tục về mức độ kiểm 
     \textbf{Chiến lược} & \textbf{Lượt gọi LLM} & \textbf{Định dạng phù hợp} & \textbf{Ưu điểm} & \textbf{Hạn chế} \\
     \hline
     Pre & 1 & NL, Adjacency Table & Tốc độ cao, chi phí thấp & Không có kiểm tra nội bộ \\
-    Mid & 1 & NL, Code-like, Node Sequence & Suy luận có cấu trúc, cân bằng chất lượng/chi phí & Phụ thuộc mức tuân thủ template \\
+    Mid & 1 & NL, Code-like & Suy luận có cấu trúc, cân bằng chất lượng/chi phí & Phụ thuộc mức tuân thủ template \\
     Post & 2 & NL, Adjacency Table, Code-like & Chính xác nhất, đối chiếu tường minh & Chi phí gấp đôi, độ trễ cao \\
     \hline
   \end{tabular}%
