@@ -320,6 +320,59 @@ class GraphRetriever:
                 seen.add(t)
                 triplets.append(t)
 
+        # ── v3 — Actor → Mood (EXPRESS) ──────────────────────────────────────
+        # Distinct emotions an actor has expressed across performances. Skip
+        # placeholder/Other values.
+        cypher = f"""
+            MATCH (a:{NodeType.ACTOR})-[:{RelType.EXPRESS}]->(m:{NodeType.MOOD})
+            WHERE any(n IN $names WHERE toLower(a.{NodeProp.ACTOR_NAME}) CONTAINS toLower(n))
+              AND m.{NodeProp.EMOTION} IS NOT NULL
+              AND m.{NodeProp.EMOTION} <> '...'
+              AND m.{NodeProp.EMOTION} <> 'Other'
+            RETURN DISTINCT a.{NodeProp.ACTOR_NAME} AS subj,
+                            '{RelType.EXPRESS}' AS rel,
+                            m.{NodeProp.EMOTION} AS obj
+            LIMIT $lim
+        """
+        for r in self._client.read(cypher, {"names": names, "lim": Limit.TRIPLET_QUERY}):
+            t = (r["subj"] or "", r["rel"], r["obj"] or "")
+            if t not in seen and t[0] and t[2]:
+                seen.add(t)
+                triplets.append(t)
+
+        # ── v3 — Costume ←-IS_WEAR_BY-→ Actor (canonical wearership) ─────────
+        cypher = f"""
+            MATCH (co:{NodeType.COSTUME})-[:{RelType.IS_WEAR_BY}]->(a:{NodeType.ACTOR})
+            WHERE any(n IN $names WHERE toLower(a.{NodeProp.ACTOR_NAME}) CONTAINS toLower(n))
+            RETURN DISTINCT co.{NodeProp.LABEL} AS subj,
+                            '{RelType.IS_WEAR_BY}' AS rel,
+                            a.{NodeProp.ACTOR_NAME} AS obj
+            LIMIT $lim
+        """
+        for r in self._client.read(cypher, {"names": names, "lim": Limit.TRIPLET_QUERY}):
+            t = (r["subj"] or "", r["rel"], r["obj"] or "")
+            if t not in seen and t[0] and t[2]:
+                seen.add(t)
+                triplets.append(t)
+
+        # ── v3 — Character WEARS_COSTUME (derived via RA → hasAppearance) ────
+        # Surfaces "Vai Thị Kính mặc trang phục Đào-Chín" without forcing the
+        # LLM to walk the RA → Appearance → Costume chain itself.
+        cypher = f"""
+            MATCH (c:{NodeType.CHARACTER})<-[:{RelType.FOR_CHARACTER}]-(ra:{NodeType.ROLE_ASSIGNMENT})
+            MATCH (ra)-[:{RelType.HAS_APPEARANCE}]->(co:{NodeType.COSTUME})
+            WHERE any(n IN $names WHERE toLower(c.{NodeProp.CHAR_NAME}) CONTAINS toLower(n))
+            RETURN DISTINCT c.{NodeProp.CHAR_NAME} AS subj,
+                            'WEARS_COSTUME' AS rel,
+                            co.{NodeProp.LABEL} AS obj
+            LIMIT $lim
+        """
+        for r in self._client.read(cypher, {"names": names, "lim": Limit.TRIPLET_QUERY}):
+            t = (r["subj"] or "", r["rel"], r["obj"] or "")
+            if t not in seen and t[0] and t[2]:
+                seen.add(t)
+                triplets.append(t)
+
         # Fallback: return a sample of character–actor relationships
         if not triplets and names:
             cypher = f"""

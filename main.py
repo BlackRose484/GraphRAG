@@ -17,7 +17,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import streamlit as st
 import streamlit.components.v1 as _components
 
-from ui import page_home, page_chat, page_neo4j, page_graphrag, page_rag, page_benchmark, page_compare, page_experiment, page_preference, page_intro
+from ui import page_home, page_chat, page_neo4j, page_graphrag, page_rag, page_benchmark, page_compare, page_experiment, page_preference, page_intro, page_analytics
 from ui.model_selector import render_global_model_selector
 
 # ── Page config (must be first Streamlit call) ────────────────────────────────
@@ -98,7 +98,7 @@ _components.html("""
 
 # ── Navigation pages ──────────────────────────────────────────────────────────
 
-_ALL_PAGES   = ["🏠 Giới thiệu", "👋 Chào mừng", "⚖️ So sánh", "🔍 GraphRAG", "📚 RAG", "💬 Chat", "🔗 Neo4j", "📊 Benchmark", "🧪 Thử nghiệm", "📋 Đánh giá ưu tiên"]
+_ALL_PAGES   = ["🏠 Giới thiệu", "👋 Chào mừng", "⚖️ So sánh", "🔍 GraphRAG", "📚 RAG", "💬 Chat", "🔗 Neo4j", "📊 Benchmark", "🧪 Thử nghiệm", "📋 Đánh giá ưu tiên", "📈 Thống kê"]
 _GUEST_PAGES = ["👋 Chào mừng", "🧪 Thử nghiệm", "📋 Đánh giá ưu tiên"]
 
 # ── Guest mode + admin unlock ────────────────────────────────────────────────
@@ -203,3 +203,5 @@ elif page == "🧪 Thử nghiệm":
     page_experiment.render()
 elif page == "📋 Đánh giá ưu tiên":
     page_preference.render()
+elif page == "📈 Thống kê":
+    page_analytics.render()

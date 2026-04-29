@@ -13,7 +13,12 @@ from __future__ import annotations
 
 QUERY_EXPAND = """\
 Bạn là chuyên gia về Chèo Việt Nam.
-Mở rộng câu hỏi sau bằng cách thêm các thuật ngữ liên quan, ngữ cảnh:
+Mở rộng câu hỏi sau bằng cách thêm các thuật ngữ liên quan, ngữ cảnh.
+
+Lưu ý: hệ thống có dữ liệu về vở chèo, trích đoạn, phiên bản trình diễn, nhân vật
+(loại Đào / Hề / Kép / Mụ / Lão), diễn viên, trang phục theo loại vai, và cảm xúc
+(emotion) của nhân vật trong từng lần xuất hiện — nên bạn có thể bổ sung từ khóa
+liên quan tới trang phục hoặc cảm xúc nếu phù hợp.
 
 Câu hỏi: {query}
 
@@ -30,9 +35,24 @@ QUERY_EXPAND_AND_EXTRACT = """\
 Bạn là chuyên gia về Chèo Việt Nam. Với câu hỏi:
 "{query}"
 
-Thực hiện đồng thời 2 nhiệm vụ:
+Đồ thị tri thức hiện có các loại thông tin sau:
+- Vở chèo (Play), trích đoạn (Scene), phiên bản trình diễn (Version)
+- Nhân vật (Character) phân loại theo Đào / Hề / Kép / Mụ / Lão (property roleType) và subType (Chín / Pha / Áo dài / ...)
+- Diễn viên (Actor) và ai đóng vai gì trong phiên bản nào
+- Trang phục (Costume) theo loại vai, biết diễn viên nào mặc trang phục nào
+- Cảm xúc (Mood/emotion) nhân vật biểu lộ trong từng lần xuất hiện
+- Cử chỉ khuôn mặt (FaceGesture) tương ứng từng cảm xúc
+
+Thực hiện đồng thời 3 nhiệm vụ:
 1. Mở rộng câu hỏi bằng cách thêm các thuật ngữ Chèo liên quan, ngữ cảnh nghệ thuật
 2. Trích xuất thực thể từ câu hỏi — CHỈ sử dụng danh sách hợp lệ dưới đây
+3. Phân loại câu hỏi vào MỘT trong ba mức:
+   - "Local"     : tra cứu trực tiếp 1-2 thực thể, ít bước suy luận
+                   (VD: "Ai đóng vai Thị Màu?", "Vở Quan Âm Thị Kính có những trích đoạn nào?")
+   - "Community" : tổng hợp/giao tập trên cụm thực thể có liên kết chặt
+                   (VD: "Diễn viên nào đóng cả 2 vở Quan Âm Thị Kính và Kim Nham?")
+   - "Global"    : so sánh/tổng hợp xuyên nhiều vở hoặc trên toàn bộ KG
+                   (VD: "So sánh số phận Súy Vân và Thị Kính", "Liệt kê tất cả vở chèo")
 
 === DANH SÁCH THỰC THỂ HỢP LỆ ===
 
@@ -45,11 +65,11 @@ Thực hiện đồng thời 2 nhiệm vụ:
 
 === QUY TẮC ĐẶC BIỆT: CÂU HỎI TOÀN CỤC ===
 - Nếu câu hỏi yêu cầu tổng hợp, so sánh, liệt kê, hoặc thống kê trên TOÀN BỘ KG (ví dụ: "diễn viên nào xuất hiện nhiều nhất", "so sánh nhân vật nữ chính các vở", "có bao nhiêu vở", "tổng kết toàn bộ")
-- → Hãy liệt kê TẤT CẢ tên vở chèo vào mảng "plays" để hệ thống truy xuất đầy đủ dữ liệu
-- Nếu không có thực thể cụ thể nào khớp VÀ câu hỏi không phải dạng toàn cục → trả về mảng rỗng []
+- → query_type = "Global", liệt kê TẤT CẢ tên vở chèo vào "plays"
+- Nếu không có thực thể cụ thể nào khớp VÀ câu hỏi không phải dạng toàn cục → trả về mảng rỗng [] và query_type phù hợp
 
 CHỈ trả về JSON duy nhất (không giải thích, không markdown):
-{{"expanded": "câu hỏi mở rộng đặt ở đây", "entities": {{"characters": [], "actors": [], "plays": [], "scenes": []}}}}"""
+{{"expanded": "câu hỏi mở rộng đặt ở đây", "entities": {{"characters": [], "actors": [], "plays": [], "scenes": []}}, "query_type": "Local"}}"""
 
 
 # ── G-Retrieval: Entity Extraction ────────────────────────────────────────────
@@ -70,7 +90,7 @@ PRE_GENERATION = """\
 {query}
 
 # Yêu cầu
-Trả lời dựa trên thông tin graph ở trên. Nhớ cite cụ thể tên từ graph:"""
+Trả lời dựa trên thông tin đồ thị ở trên. Nhớ trích dẫn cụ thể tên từ đồ thị:"""
 
 
 # ── G-Generation: Mid-generation ─────────────────────────────────────────────
@@ -84,7 +104,7 @@ Câu hỏi: {query}
 
 Yêu cầu trả lời theo format:
 
-1. **Thông tin từ graph**: (trích dẫn facts quan trọng từ dữ liệu)
+1. **Thông tin từ đồ thị**: (trích dẫn dữ kiện quan trọng từ dữ liệu)
 {key_facts}
 
 2. **Phân tích**: (giải thích dựa trên facts trên)
@@ -112,12 +132,12 @@ POST_REFINE = """\
 ## Câu trả lời ban đầu (có thể chưa chính xác)
 {initial_answer}
 
-## Dữ liệu chính xác từ Knowledge Graph
+## Dữ liệu chính xác từ đồ thị tri thức
 {verification_data}
 
 ## Hướng dẫn cải thiện
 1. Kiểm tra câu trả lời ban đầu với dữ liệu thực tế
-2. Sửa lỗi nếu có, thêm chi tiết cụ thể từ graph
+2. Sửa lỗi nếu có, thêm chi tiết cụ thể từ đồ thị
 3. Cite tên riêng chính xác từ dữ liệu
 
 Ví dụ cải thiện:
@@ -130,6 +150,6 @@ Ví dụ cải thiện:
 
 # ── Context builder header ────────────────────────────────────────────────────
 
-CONTEXT_HEADER = "# Thông tin từ Knowledge Graph về Chèo\n"
+CONTEXT_HEADER = "# Thông tin từ đồ thị tri thức về Chèo\n"
 CONTEXT_KEY_FACTS_HEADER = "## Tóm tắt quan trọng:\n{key_facts}\n"
 CONTEXT_SECTION = "## {title}:\n{content}\n"

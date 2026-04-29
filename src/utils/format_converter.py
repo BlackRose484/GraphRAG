@@ -28,34 +28,77 @@ logger = get_logger(__name__)
 
 # ── Relationship → Vietnamese verb phrase ─────────────────────────────────────
 
+# Synthetic relation names used by the retriever for derived edges. Kept here
+# instead of constants because they are display-only strings, not Neo4j types.
+_DERIVED_PERFORMS_IN  = "PERFORMS_IN"
+_DERIVED_WEARS_COSTUME = "WEARS_COSTUME"
+_DERIVED_EXPRESSES_MOOD = "EXPRESSES_MOOD"
+
 _REL_VERB: Dict[str, str] = {
-    RelType.PERFORMED_BY:   "được thể hiện bởi diễn viên",
-    RelType.HAS_CHARACTER:  "có nhân vật",
-    RelType.HAS_SCENE:      "có cảnh",
-    RelType.FOR_CHARACTER:  "là vai diễn cho nhân vật",
-    RelType.IN_VERSION:     "thuộc phiên bản",
-    RelType.HAS_VERSION:    "có phiên bản",
-    RelType.HAS_APPEARANCE: "có lượt xuất hiện",
+    # v1
+    RelType.PERFORMED_BY:        "được thể hiện bởi diễn viên",
+    RelType.HAS_CHARACTER:       "có nhân vật",
+    RelType.HAS_SCENE:           "có cảnh",
+    RelType.FOR_CHARACTER:       "là vai diễn cho nhân vật",
+    RelType.IN_VERSION:          "thuộc phiên bản",
+    RelType.HAS_VERSION:         "có phiên bản",
+    RelType.HAS_APPEARANCE:      "có lượt xuất hiện",
+    # v3
+    RelType.EXPRESS:             "biểu lộ trạng thái cảm xúc",
+    RelType.IS_WEAR_BY:          "được mặc bởi diễn viên",
+    RelType.IS_ACCOMPANIED_BY:   "đi kèm với diễn viên",
+    RelType.REPRESENT:           "thể hiện cảm xúc",
+    RelType.FOLLOW:              "nối tiếp sau trích đoạn",
+    RelType.HAS_RELATION:        "có quan hệ với",
+    RelType.IS_OPPONENT_OF:      "là đối thủ / xung đột với",
+    RelType.TRAINED_BY:          "được truyền nghề bởi",
+    RelType.COLLABORATES_WITH:   "cộng tác với",
+    # synthetic / derived
+    _DERIVED_PERFORMS_IN:        "tham gia trình diễn vở",
+    _DERIVED_WEARS_COSTUME:      "mặc",
+    _DERIVED_EXPRESSES_MOOD:     "biểu lộ cảm xúc",
 }
 
 _REL_SUBJ_PREFIX: Dict[str, str] = {
-    RelType.PERFORMED_BY:   "Nhân vật",
-    RelType.HAS_CHARACTER:  "Vở chèo",
-    RelType.HAS_SCENE:      "Vở chèo",
-    RelType.FOR_CHARACTER:  "Vai diễn này",
-    RelType.IN_VERSION:     "Vai diễn này",
-    RelType.HAS_VERSION:    "Trích đoạn",
-    RelType.HAS_APPEARANCE: "Vai diễn này",
+    # v1
+    RelType.PERFORMED_BY:        "Nhân vật",
+    RelType.HAS_CHARACTER:       "Vở chèo",
+    RelType.HAS_SCENE:           "Vở chèo",
+    RelType.FOR_CHARACTER:       "Vai diễn này",
+    RelType.IN_VERSION:          "Vai diễn này",
+    RelType.HAS_VERSION:         "Trích đoạn",
+    RelType.HAS_APPEARANCE:      "Vai diễn này",
+    # v3
+    RelType.EXPRESS:             "Diễn viên",
+    RelType.IS_WEAR_BY:          "Trang phục",
+    RelType.IS_ACCOMPANIED_BY:   "Đạo cụ",
+    RelType.REPRESENT:           "Trang phục/đạo cụ",
+    RelType.FOLLOW:              "Trích đoạn",
+    RelType.HAS_RELATION:        "Nhân vật",
+    RelType.IS_OPPONENT_OF:      "Nhân vật",
+    RelType.TRAINED_BY:          "Diễn viên",
+    RelType.COLLABORATES_WITH:   "Diễn viên",
+    # synthetic
+    _DERIVED_PERFORMS_IN:        "Diễn viên",
+    _DERIVED_WEARS_COSTUME:      "Nhân vật",
+    _DERIVED_EXPRESSES_MOOD:     "Nhân vật",
 }
 
 
 def _primary_name(node: Dict[str, Any]) -> str:
-    """Return the most human-readable display name from a node dict."""
+    """Return the most human-readable display name from a node dict.
+
+    Falls back through the property hierarchy:
+        charName → actorName → title → sceneName → label → id
+    so v3 nodes (Costume/FaceGesture without the v1 name fields) display
+    via their ``rdfs:label`` instead of a raw URI fragment.
+    """
     return (
         node.get(NodeProp.CHAR_NAME)
         or node.get(NodeProp.ACTOR_NAME)
         or node.get(NodeProp.TITLE)
         or node.get(NodeProp.SCENE_NAME)
+        or node.get(NodeProp.LABEL)
         or node.get(NodeProp.ID)
         or "Unknown"
     )
@@ -106,12 +149,20 @@ class GraphFormatConverter:
         # ── Node descriptions ─────────────────────────────────────────────────
         for node in nodes:
             if NodeProp.CHAR_NAME in node:
-                name   = node[NodeProp.CHAR_NAME]
-                gender = node.get(NodeProp.CHAR_GENDER, "")
-                sentences.append(
-                    f"Nhân vật {name} (giới tính: {gender})."
-                    if gender else f"Nhân vật {name}."
-                )
+                name      = node[NodeProp.CHAR_NAME]
+                gender    = node.get(NodeProp.CHAR_GENDER, "")
+                role_type = node.get(NodeProp.ROLE_TYPE, "")
+                sub_type  = node.get(NodeProp.SUB_TYPE, "")
+                attrs: list[str] = []
+                if role_type:
+                    attrs.append(
+                        f"loại {role_type}"
+                        + (f" - {sub_type}" if sub_type else "")
+                    )
+                if gender:
+                    attrs.append(f"giới tính {gender}")
+                detail = f" ({', '.join(attrs)})" if attrs else ""
+                sentences.append(f"Nhân vật {name}{detail}.")
             elif NodeProp.ACTOR_NAME in node:
                 sentences.append(f"Diễn viên {node[NodeProp.ACTOR_NAME]}.")
             elif NodeProp.TITLE in node:
@@ -128,6 +179,36 @@ class GraphFormatConverter:
                     sentences.append(f"Trích đoạn '{name}': {short}")
                 else:
                     sentences.append(f"Trích đoạn '{name}'.")
+            # ── v3 nodes — detected via id prefix or distinguishing property ─
+            elif str(node.get(NodeProp.ID, "")).startswith("costume_"):
+                label   = node.get(NodeProp.LABEL, node.get(NodeProp.ID, ""))
+                comment = node.get(NodeProp.COMMENT, "")
+                if comment:
+                    short = (
+                        comment[: Limit.SCENE_SUMMARY_MAX_LEN] + "..."
+                        if len(comment) > Limit.SCENE_SUMMARY_MAX_LEN
+                        else comment
+                    )
+                    sentences.append(f"{label}: {short}")
+                else:
+                    sentences.append(f"{label}.")
+            elif str(node.get(NodeProp.ID, "")).startswith("face_"):
+                label   = node.get(NodeProp.LABEL, node.get(NodeProp.ID, ""))
+                comment = node.get(NodeProp.COMMENT, "")
+                if comment:
+                    sentences.append(f"{label}: {comment}")
+                else:
+                    sentences.append(f"{label}.")
+            elif NodeProp.EMOTION in node:
+                emo = node.get(NodeProp.EMOTION, "")
+                sub = node.get(NodeProp.SUBTITLE, "")
+                if emo and emo not in ("...", "Other"):
+                    if sub:
+                        sentences.append(
+                            f"Lượt xuất hiện với cảm xúc '{emo}', lời thoại: \"{sub}\"."
+                        )
+                    else:
+                        sentences.append(f"Lượt xuất hiện với cảm xúc '{emo}'.")
 
         # ── Triplet relationships ─────────────────────────────────────────────
         for subj, rel, obj in triplets:
@@ -288,5 +369,25 @@ class GraphFormatConverter:
             facts.append("Trích đoạn trong vở:")
             for play, scene in has_scene[:cap]:
                 facts.append(f"  - {play} → {scene}")
+
+        # v3: emotion expressed by actor
+        express = [(s, o) for s, r, o in triplets if r == RelType.EXPRESS]
+        if express:
+            facts.append("Cảm xúc diễn viên biểu lộ:")
+            for actor, emo in express[:cap]:
+                facts.append(f"  - {actor} → {emo}")
+
+        # v3: derived costume info (synthetic relations from retriever)
+        wears = [(s, o) for s, r, o in triplets if r == _DERIVED_WEARS_COSTUME]
+        if wears:
+            facts.append("Trang phục nhân vật:")
+            for char, costume in wears[:cap]:
+                facts.append(f"  - {char} mặc {costume}")
+
+        is_wear_by = [(s, o) for s, r, o in triplets if r == RelType.IS_WEAR_BY]
+        if is_wear_by:
+            facts.append("Trang phục — diễn viên:")
+            for costume, actor in is_wear_by[:cap]:
+                facts.append(f"  - {costume} ← {actor}")
 
         return "\n".join(facts) if facts else "Không có thông tin quan trọng."

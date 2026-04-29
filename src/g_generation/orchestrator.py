@@ -72,6 +72,16 @@ class GenerationOrchestrator:
     def strategy_name(self) -> str:
         return self._strategy_name
 
+    @property
+    def default_formats(self) -> list[str]:
+        """Format keys preferred by the currently active strategy.
+
+        Used by the pipeline when ``auto_routing`` is enabled and the user
+        did not pin an explicit format list — each strategy has different
+        format affinities (Pre/Mid: 2 formats, Post: 3 formats).
+        """
+        return list(self._strategy.DEFAULT_FORMATS)
+
     def generate(
         self,
         query: str,

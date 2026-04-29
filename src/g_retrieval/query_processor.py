@@ -19,7 +19,7 @@ import json
 import re
 from typing import Any, TypedDict
 
-from src.constants.constant import EntityType
+from src.constants.constant import EntityType, QueryType
 from src.constants.promt_engineer import (
     QUERY_DECOMPOSE,
     QUERY_EXPAND,
@@ -45,8 +45,9 @@ class ProcessedQuery(TypedDict):
 
 
 class ExpandAndExtractResult(TypedDict):
-    expanded: str
-    entities: dict[str, list[str]]   # keys: characters, actors, plays, scenes
+    expanded:   str
+    entities:   dict[str, list[str]]   # keys: characters, actors, plays, scenes
+    query_type: str                    # one of QueryType.ALL ("Local"/"Community"/"Global")
 
 
 class QueryProcessor(BaseModel):
@@ -164,11 +165,29 @@ class QueryProcessor(BaseModel):
                 for key in EntityType.ALL
             }
 
+            # Parse query_type with case-insensitive normalisation and safe fallback
+            raw_qt = str(parsed.get("query_type", "")).strip()
+            query_type = next(
+                (qt for qt in QueryType.ALL if qt.lower() == raw_qt.lower()),
+                "",
+            )
+            if not query_type:
+                _logger.warning(
+                    "expand_and_extract: invalid query_type %r — fallback to %s",
+                    raw_qt, QueryType.DEFAULT,
+                )
+                query_type = QueryType.DEFAULT
+
             total = sum(len(v) for v in entities.values())
             _logger.info(
-                "expand_and_extract: expanded OK, %d entities extracted", total
+                "expand_and_extract: expanded OK, %d entities extracted, query_type=%s",
+                total, query_type,
             )
-            return ExpandAndExtractResult(expanded=expanded, entities=entities)
+            return ExpandAndExtractResult(
+                expanded=expanded,
+                entities=entities,
+                query_type=query_type,
+            )
 
         except (json.JSONDecodeError, Exception) as exc:  # noqa: BLE001
             _logger.warning(
@@ -180,6 +199,7 @@ class QueryProcessor(BaseModel):
             return ExpandAndExtractResult(
                 expanded=expanded_fallback,
                 entities=dict(_EMPTY_ENTITIES),
+                query_type=QueryType.DEFAULT,
             )
 
     # ── Private / thread-pool helpers ──────────────────────────────────────────

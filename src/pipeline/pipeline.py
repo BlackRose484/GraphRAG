@@ -13,6 +13,7 @@ from typing import Any
 from src.constants.constant import (
     FormatKey,
     GenerationStrategy,
+    QueryType,
     RetrievalMethod,
 )
 from src.core.settings import settings
@@ -55,12 +56,29 @@ class PipelineResult:
 class GraphRAGPipeline:
     """Full GraphRAG pipeline: retrieval + generation.
 
+    Auto-routing
+    ------------
+    When ``auto_routing=True`` (default) and the corresponding parameter is
+    left as ``None``, the pipeline lets the LLM-classified ``query_type``
+    drive both the retrieval method set and the generation strategy:
+
+        Local     → [nodes, triplets]                 + Pre-Generation
+        Community → [nodes, triplets, paths]          + Mid-Generation
+        Global    → [nodes, triplets, paths, subgraph] + Post-Generation
+
+    Any explicitly-passed argument overrides auto-routing for that slot —
+    benchmark runs use this to measure each configuration in isolation.
+
     Args:
         client: Connected :class:`~src.graph_loader.neo4j_client.Neo4jClient`.
-        retrieval_methods: Subset of ``RetrievalMethod.ALL``.
-        format_keys: Subset of :class:`~src.constants.constant.FormatKey` values.
-        generation_strategy: One of ``'pre'``, ``'mid'``, ``'post'``.
+        retrieval_methods: Subset of ``RetrievalMethod.ALL``; ``None`` = let
+                           auto-routing decide per query.
+        format_keys: Subset of :class:`~src.constants.constant.FormatKey` values;
+                     ``None`` = use the active strategy's default formats.
+        generation_strategy: ``'pre'``/``'mid'``/``'post'`` or ``None`` for
+                             auto-routing per query.
         enable_query_enhancement: Expand/decompose the query before retrieval.
+        auto_routing: Use LLM query classification to pick methods/strategy.
     """
 
     def __init__(
@@ -69,21 +87,28 @@ class GraphRAGPipeline:
         *,
         retrieval_methods: list[str] | None = None,
         format_keys: list[str] | None = None,
-        generation_strategy: str = GenerationStrategy.DEFAULT,
+        generation_strategy: str | None = None,
         enable_query_enhancement: bool = True,
+        auto_routing: bool = True,
     ) -> None:
-        self._retrieval_methods = retrieval_methods or _DEFAULT_RETRIEVAL_METHODS
-        self._format_keys = format_keys or _DEFAULT_FORMATS
+        # Distinguish "user pinned" from "let auto-routing decide".
+        self._user_methods   = retrieval_methods
+        self._user_formats   = format_keys
+        self._user_strategy  = generation_strategy
         self._enable_enhancement = enable_query_enhancement
+        self._auto_routing   = auto_routing
 
-        self._retrieval = RetrievalOrchestrator(client)
-        self._generation = GenerationOrchestrator(generation_strategy)
+        self._retrieval  = RetrievalOrchestrator(client)
+        self._generation = GenerationOrchestrator(
+            generation_strategy or GenerationStrategy.DEFAULT
+        )
 
         _logger.info(
-            "GraphRAGPipeline ready — strategy=%s  methods=%s  formats=%s",
-            generation_strategy,
-            self._retrieval_methods,
-            self._format_keys,
+            "GraphRAGPipeline ready — auto_routing=%s  strategy=%s  methods=%s  formats=%s",
+            auto_routing,
+            generation_strategy or "(auto)",
+            retrieval_methods or "(auto)",
+            format_keys or "(strategy default)",
         )
 
     # ── Public API ────────────────────────────────────────────────────────────
@@ -95,6 +120,7 @@ class GraphRAGPipeline:
     def switch_strategy(self, strategy: str) -> None:
         """Hot-swap the generation strategy without creating a new pipeline."""
         self._generation.switch_strategy(strategy)
+        self._user_strategy = strategy  # pin: subsequent runs respect this
 
     def run(self, query: str) -> PipelineResult:
         """Execute the full retrieval → generation pipeline.
@@ -112,9 +138,10 @@ class GraphRAGPipeline:
         _logger.info("Pipeline stage 1: retrieval  query=%r", query[:60])
         retrieval_result = self._retrieval.retrieve(
             query,
-            retrieval_methods=self._retrieval_methods,
-            format_keys=self._format_keys,
+            retrieval_methods=self._user_methods,
+            format_keys=self._user_formats or _DEFAULT_FORMATS,
             enable_enhancement=self._enable_enhancement,
+            auto_routing=self._auto_routing,
         )
 
         if retrieval_result.error:
@@ -138,12 +165,31 @@ class GraphRAGPipeline:
                 success=False,
             )
 
+        # ── Auto-route generation strategy (only if user didn't pin one) ────
+        if (
+            self._auto_routing
+            and self._user_strategy is None
+            and retrieval_result.query_type
+        ):
+            target_strategy = QueryType.STRATEGY.get(
+                retrieval_result.query_type, GenerationStrategy.DEFAULT
+            )
+            if target_strategy != self._generation.strategy_name:
+                _logger.info(
+                    "Auto-routing: query_type=%s → strategy=%s",
+                    retrieval_result.query_type, target_strategy,
+                )
+                self._generation.switch_strategy(target_strategy)
+
+        # Pick formats: explicit user choice > strategy's default > pipeline default
+        formats = self._user_formats or self._generation.default_formats
+
         # ── Stage 2: Generation ─────────────────────────────────────────────
         _logger.info("Pipeline stage 2: generation  strategy=%s", self.strategy)
         generation_result = self._generation.generate(
             query=query,
             graph_data=retrieval_result.graph_data,
-            selected_formats=self._format_keys,
+            selected_formats=formats,
             key_facts=retrieval_result.key_facts,
         )
 

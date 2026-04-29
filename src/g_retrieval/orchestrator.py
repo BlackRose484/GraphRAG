@@ -29,7 +29,7 @@ from concurrent.futures import ThreadPoolExecutor, Future
 from dataclasses import dataclass
 from typing import Any
 
-from src.constants.constant import EntityType, FormatKey, RetrievalMethod
+from src.constants.constant import EntityType, FormatKey, QueryType, RetrievalMethod
 from src.g_retrieval.entity_catalog import EntityCatalog
 from src.g_retrieval.community_index import CommunityIndex
 from src.g_retrieval.entity_extractor import EntityExtractor
@@ -90,6 +90,9 @@ class RetrievalResult:
     # Extracted entities (for UI display)
     entities: dict[str, list[str]]
 
+    # Query classification (used by auto-routing)
+    query_type: str
+
     # Statistics
     num_nodes: int
     num_triplets: int
@@ -103,6 +106,7 @@ class RetrievalResult:
         """Compact summary dict suitable for logging / display."""
         return {
             "query":            self.query,
+            "query_type":       self.query_type,
             "retrieval_methods": self.retrieval_methods,
             "format_keys":      self.format_keys,
             "num_nodes":        self.num_nodes,
@@ -140,39 +144,63 @@ class RetrievalOrchestrator:
         retrieval_methods: list[str] | None = None,
         format_keys: list[str] | None = None,
         enable_enhancement: bool = True,
+        auto_routing: bool = True,
     ) -> RetrievalResult:
         """Execute the full retrieval pipeline.
 
         When *enable_enhancement* is ``True`` two LLM calls run **in parallel**:
 
-        * ``expand_and_extract(query)`` — enriched query + named entities
+        * ``expand_and_extract(query)`` — enriched query + named entities + query_type
         * ``_decompose(query)``         — focused sub-questions
 
-        A cheap regex pass over the sub-questions supplements the LLM entities
-        at zero extra LLM cost. All entity sets are merged before graph retrieval.
-
         When *enable_enhancement* is ``False`` the query is used as-is with a
-        single EntityExtractor LLM call (no expansion/decomposition overhead).
+        single EntityExtractor LLM call (no expansion/decomposition overhead);
+        in that mode ``query_type`` defaults to :attr:`QueryType.DEFAULT`.
+
+        Auto-routing
+        ------------
+        When ``auto_routing=True`` AND the caller did not pass an explicit
+        ``retrieval_methods`` list, the activated methods are derived from the
+        query type via :data:`QueryType.METHODS`:
+
+            Local     → [nodes, triplets]
+            Community → [nodes, triplets, paths]
+            Global    → [nodes, triplets, paths, subgraph]
+
+        When ``auto_routing=False`` (or an explicit list is supplied) the
+        caller's choice is respected — used by benchmark runs that need to
+        measure each retrieval configuration in isolation.
 
         Args:
-            query:             Raw user query.
-            retrieval_methods: Which of nodes/triplets/paths/subgraph to use.
-            format_keys:       Which :class:`~src.constants.constant.FormatKey` values to produce.
-            enable_enhancement: Toggle parallel expand+extract+decompose pipeline.
+            query:              Raw user query.
+            retrieval_methods:  Explicit method list; overrides auto-routing.
+            format_keys:        Which :class:`~src.constants.constant.FormatKey` values to produce.
+            enable_enhancement: Toggle parallel expand+extract ║ decompose pipeline.
+            auto_routing:       Let the LLM-classified query_type pick methods.
 
         Returns:
             A populated :class:`RetrievalResult`.  On error *error* field is set
             and graph containers are empty.
         """
-        retrieval_methods = retrieval_methods or _DEFAULT_METHODS
-        format_keys       = format_keys       or _DEFAULT_FORMATS
+        explicit_methods = retrieval_methods is not None
+        format_keys      = format_keys or _DEFAULT_FORMATS
         start = time.perf_counter()
 
         try:
             if enable_enhancement:
-                processed, entities = self._enhanced_pipeline(query)
+                processed, entities, query_type = self._enhanced_pipeline(query)
             else:
-                processed, entities = self._basic_pipeline(query)
+                processed, entities, query_type = self._basic_pipeline(query)
+
+            # Auto-route: pick methods from query_type when caller didn't override
+            if not explicit_methods and auto_routing:
+                retrieval_methods = list(QueryType.METHODS[query_type])
+                _logger.info(
+                    "Auto-routing: query_type=%s → methods=%s",
+                    query_type, retrieval_methods,
+                )
+            elif retrieval_methods is None:
+                retrieval_methods = list(_DEFAULT_METHODS)
 
             total_entities = sum(len(v) for v in entities.values())
             _logger.info("Retrieval: %d entities total after merge", total_entities)
@@ -213,6 +241,7 @@ class RetrievalOrchestrator:
                 formatted_contexts=formatted_contexts,
                 key_facts=key_facts,
                 entities=entities,
+                query_type=query_type,
                 num_nodes=len(graph_data.get("nodes", [])),
                 num_triplets=len(graph_data.get("triplets", [])),
                 num_paths=len(graph_data.get("paths", [])),
@@ -234,11 +263,12 @@ class RetrievalOrchestrator:
                 query=query,
                 processed_query={"original": query, "expanded": query, "decomposed": [query]},
                 graph_data=empty_graph,
-                retrieval_methods=retrieval_methods,
+                retrieval_methods=retrieval_methods or list(_DEFAULT_METHODS),
                 format_keys=format_keys,
                 formatted_contexts={},
                 key_facts="",
                 entities={},
+                query_type=QueryType.DEFAULT,
                 num_nodes=0,
                 num_triplets=0,
                 num_paths=0,
@@ -250,13 +280,15 @@ class RetrievalOrchestrator:
 
     def _enhanced_pipeline(
         self, query: str
-    ) -> tuple[ProcessedQuery, dict[str, list[str]]]:
+    ) -> tuple[ProcessedQuery, dict[str, list[str]], str]:
         """Parallel: expand+extract ║ decompose  (2 LLM calls, ~max latency).
 
         Entity extraction is fully LLM-grounded: the prompt provides the complete
-        list of known Cheo entities so no regex fallback is needed.
+        list of known Cheo entities so no regex fallback is needed. The same
+        prompt also classifies the query into Local/Community/Global at no extra
+        LLM cost.
 
-        Returns (ProcessedQuery, entities_dict).
+        Returns (ProcessedQuery, entities_dict, query_type).
         """
         _logger.info("Retrieval: launching parallel expand+extract ║ decompose")
 
@@ -273,15 +305,17 @@ class RetrievalOrchestrator:
             combined   = future_combined.result()
             decomposed = future_decompose.result()
 
-        entities: dict[str, list[str]] = dict(combined["entities"])
+        entities: dict[str, list[str]]   = dict(combined["entities"])
+        query_type: str                  = combined["query_type"]
 
         _logger.info(
-            "Retrieval: expand+extract done — %d entities (characters=%d, actors=%d, plays=%d, scenes=%d)",
+            "Retrieval: expand+extract done — %d entities (characters=%d, actors=%d, plays=%d, scenes=%d), query_type=%s",
             sum(len(v) for v in entities.values()),
             len(entities.get("characters", [])),
             len(entities.get("actors", [])),
             len(entities.get("plays", [])),
             len(entities.get("scenes", [])),
+            query_type,
         )
         _logger.info("Retrieval: decomposed into %d sub-queries", len(decomposed))
 
@@ -291,13 +325,17 @@ class RetrievalOrchestrator:
             "decomposed": decomposed,
         }
 
-        return processed, entities
+        return processed, entities, query_type
 
     def _basic_pipeline(
         self, query: str
-    ) -> tuple[ProcessedQuery, dict[str, list[str]]]:
-        """No enhancement: pass-through query + 1 entity-extract LLM call."""
+    ) -> tuple[ProcessedQuery, dict[str, list[str]], str]:
+        """No enhancement: pass-through query + 1 entity-extract LLM call.
+
+        The basic mode does not classify the query — falls back to
+        :attr:`QueryType.DEFAULT` so auto-routing still has a valid value.
+        """
         _logger.info("Retrieval: enhancement disabled — processing query as-is")
         processed = self._query_processor.process(query, enable_enhancement=False)
         entities  = self._entity_extractor.extract(processed["expanded"])
-        return processed, entities
+        return processed, entities, QueryType.DEFAULT

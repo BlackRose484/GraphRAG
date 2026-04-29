@@ -15,11 +15,14 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Dict, Optional
 
+from collections import defaultdict
+
 from rdflib import Graph, Namespace, RDF, RDFS
 
 from src.core.base import BaseLoader, ProcessingResult
 from src.core.settings import settings
 from src.constants import NodeType, RelType, NodeProp, ONTOLOGY_NAMESPACE
+from src.constants.constant import CHARACTER_SUBCLASS_TO_ROLE
 from src.graph_loader.neo4j_client import Neo4jClient
 from src.utils.logger import get_logger
 
@@ -150,8 +153,34 @@ class Neo4jLoader(BaseLoader):
 
     # ── Individuals → nodes ───────────────────────────────────────────────────
 
+    # Predicates excluded from the data-property pass — they are either
+    # rdf/rdfs meta or object properties materialised as Neo4j relationships.
+    _SKIP_DATATYPE_PREDICATES = frozenset({
+        # rdf / rdfs / owl meta
+        "type", "label", "subClassOf",
+        # Existing object properties (v1)
+        "hasCharacter", "hasScene", "hasVersion",
+        "performedBy", "forCharacter", "inVersion", "hasAppearance",
+        # New object properties (v3)
+        "express", "isWearBy", "isAccompaniedBy", "represent",
+        "follow", "hasRelation", "isOpponentOf",
+        "trainedBy", "collaboratesWith",
+    })
+
     def _load_individuals(self, g: Graph) -> tuple[int, int]:
-        """Return (created_count, skipped_count)."""
+        """Return (created_count, skipped_count).
+
+        Strategy: collect *all* rdf:types per individual first, then decide
+        a primary Neo4j label and any secondary labels / property-encoded
+        subclass info. Each individual is MERGEd exactly once.
+        """
+        # individual_uri -> set of type local names
+        types_by_ind: dict = defaultdict(set)
+        # individual_uri -> rdfs:label (last one wins; usually unique)
+        label_by_ind: dict = {}
+        # individual_uri -> the rdflib subject node (needed for property extraction)
+        subject_by_ind: dict = {}
+
         sparql = """
         SELECT ?individual ?type ?label
         WHERE {
@@ -160,53 +189,112 @@ class Neo4jLoader(BaseLoader):
             FILTER(?type != owl:NamedIndividual)
         }
         """
-        created = skipped = 0
-
         for row in g.query(sparql):
-            individual_id = str(row.individual).split("#")[-1]
-            node_type     = str(row.type).split("#")[-1]
-            label         = str(row.label) if row.label else individual_id
+            ind = row.individual
+            type_name = str(row.type).split("#")[-1]
+            types_by_ind[ind].add(type_name)
+            subject_by_ind[ind] = ind
+            if row.label is not None:
+                label_by_ind[ind] = str(row.label)
 
-            if node_type not in NodeType.ALL:
+        created = skipped = 0
+        for ind, types in types_by_ind.items():
+            primary, secondaries, role_type = self._classify_types(types)
+            if primary is None:
                 skipped += 1
-                logger.debug("Skipped unknown node type: %s (%s)", node_type, individual_id)
+                logger.debug(
+                    "Skipped individual with no primary type: %s (types=%s)",
+                    str(ind).split("#")[-1], sorted(types),
+                )
                 continue
 
-            props = self._extract_data_properties(g, row.individual)
+            individual_id = str(ind).split("#")[-1]
+            label = label_by_ind.get(ind, individual_id)
+
+            props = self._extract_data_properties(g, subject_by_ind[ind])
             props[NodeProp.ID]    = individual_id
             props[NodeProp.LABEL] = label
+            if role_type:
+                props[NodeProp.ROLE_TYPE] = role_type
 
-            self._merge_node(node_type, props)
+            self._merge_node(primary, secondaries, props)
             created += 1
 
         logger.info("Nodes: %d created, %d skipped", created, skipped)
         return created, skipped
 
-    def _extract_data_properties(self, g: Graph, subject) -> Dict[str, str]:
-        """Return datatype properties (non-object-properties) for a subject."""
-        props: Dict[str, str] = {}
-        skip_predicates = {"type", "label"}
+    @staticmethod
+    def _classify_types(
+        types: set,
+    ) -> tuple[str | None, list[str], str | None]:
+        """Pick (primary_label, secondary_labels, role_type) from rdf:types.
 
+        - primary  = the matching `NodeType.PRIMARY` label.
+        - secondaries = matching `NodeType.APPEARANCE_SUBTYPES` (only when
+          primary is Appearance) PLUS any matching `NodeType.VALIDATION_TAGS`
+          (regardless of primary).
+        - role_type = Vietnamese mainType when one of the Character subclasses
+          is present.
+        """
+        primary: str | None = None
+        for t in types:
+            if t in NodeType.PRIMARY:
+                primary = t
+                break
+
+        secondaries: list[str] = []
+        if primary == NodeType.APPEARANCE:
+            secondaries.extend(
+                t for t in types if t in NodeType.APPEARANCE_SUBTYPES
+            )
+        # Validation tags from inference rules apply to any primary type.
+        secondaries.extend(
+            t for t in types if t in NodeType.VALIDATION_TAGS
+        )
+        secondaries = sorted(set(secondaries))
+
+        role_type: str | None = None
+        if primary == NodeType.CHARACTER:
+            for t in types:
+                if t in CHARACTER_SUBCLASS_TO_ROLE:
+                    role_type = CHARACTER_SUBCLASS_TO_ROLE[t]
+                    break
+
+        return primary, secondaries, role_type
+
+    def _extract_data_properties(self, g: Graph, subject) -> Dict[str, str]:
+        """Return datatype properties (non-object-properties) for a subject.
+
+        Skips predicates listed in :attr:`_SKIP_DATATYPE_PREDICATES` so that
+        object properties (turned into Neo4j relationships elsewhere) and
+        meta predicates do not leak into node properties.
+        """
+        props: Dict[str, str] = {}
         for predicate, obj in g.predicate_objects(subject):
             pred_name = str(predicate).split("#")[-1]
-            # Skip object properties (they become relationships) and meta predicates
-            if pred_name in skip_predicates or pred_name.startswith("has") or pred_name in {
-                "performedBy", "forCharacter", "inVersion", "hasAppearance",
-            }:
+            if pred_name in self._SKIP_DATATYPE_PREDICATES:
                 continue
             props[pred_name] = str(obj)
-
         return props
 
-    def _merge_node(self, node_type: str, props: Dict[str, str]) -> None:
-        """MERGE node by id — idempotent, safe to re-run."""
-        set_clause = ", ".join(
-            f"n.{k} = ${k}" for k in props if k != NodeProp.ID
-        )
-        cypher = (
-            f"MERGE (n:{node_type} {{id: $id}})"
-            + (f" SET {set_clause}" if set_clause else "")
-        )
+    def _merge_node(
+        self,
+        primary: str,
+        secondaries: list[str],
+        props: Dict[str, str],
+    ) -> None:
+        """MERGE node by id with primary + optional secondary labels.
+
+        Idempotent — safe to re-run. The Cypher MERGE is on `(n:Primary {id})`,
+        then secondary labels (if any) are added via SET because labels are
+        not allowed in the MERGE pattern beyond the matched one without
+        risking creating duplicates.
+        """
+        set_assignments = [f"n.{k} = ${k}" for k in props if k != NodeProp.ID]
+        for sec in secondaries:
+            set_assignments.append(f"n:{sec}")
+        set_clause = ("SET " + ", ".join(set_assignments)) if set_assignments else ""
+        cypher = f"MERGE (n:{primary} {{id: $id}}) {set_clause}".strip()
         self._client.write(cypher, props)
 
     # ── Object properties → relationships ─────────────────────────────────────

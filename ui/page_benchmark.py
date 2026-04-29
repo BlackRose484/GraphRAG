@@ -371,11 +371,10 @@ def _render_graphrag_config() -> Dict:
 
     # ── Mức độ truy xuất ──────────────────────────────────────────────────────
     retrieval_labels = {
-        RetrievalMethod.NODES:     "Node (thuộc tính đơn lẻ)",
-        RetrievalMethod.TRIPLETS:  "Triplet (bộ ba quan hệ)",
-        RetrievalMethod.PATHS:     "Path (đường dẫn)",
-        RetrievalMethod.SUBGRAPH:  "Subgraph (tiểu đồ thị)",
-        RetrievalMethod.COMMUNITY: "Community (cụm cộng đồng)",
+        RetrievalMethod.NODES:    "Node (thuộc tính đơn lẻ)",
+        RetrievalMethod.TRIPLETS: "Triplet (bộ ba quan hệ)",
+        RetrievalMethod.PATHS:    "Path (đường dẫn)",
+        RetrievalMethod.SUBGRAPH: "Subgraph (tiểu đồ thị)",
     }
     if varying == "retrieval_methods":
         st.sidebar.info(
