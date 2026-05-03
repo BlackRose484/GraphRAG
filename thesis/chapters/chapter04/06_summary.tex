@@ -1,0 +1,14 @@
+% =============================================================================
+%  Tiểu kết chương 4
+% =============================================================================
+
+\section*{Tiểu kết}
+\addcontentsline{toc}{section}{Tiểu kết}
+
+Chương này đã trình bày quá trình thực nghiệm và đánh giá hệ thống GraphRAG đề xuất ở Chương 3, qua hai loại thực nghiệm bổ trợ: thực nghiệm benchmark trên môi trường cục bộ và thực nghiệm với người dùng trên hạ tầng đám mây.
+
+Thực nghiệm benchmark trên 100 ca của bộ dữ liệu CheoBench cho thấy GraphRAG đạt điểm tổng hợp $0,835$ so với $0,595$ của RAG truyền thống. Hai hệ thống tương đương ở các độ đo IR thuần (MAP, NDCG@10), nhưng GraphRAG vượt rõ ở khối Context (Context Recall $0,964$ so với $0,418$) và khối Generation (Faithfulness $0,986$ so với $0,734$) - cho thấy cấu trúc đồ thị đóng góp vào chất lượng cuối cùng thông qua việc đảm bảo ngữ cảnh có liên kết và đầy đủ chứ không phải qua xếp hạng ứng viên truy xuất. Hai thí nghiệm phân tích thành phần trên tập con 20 ca cho thấy kết hợp đa mức độ truy xuất đạt $0,811$ điểm, vượt mức tốt nhất đơn lẻ $+0,139$, còn JSON là định dạng biểu diễn ngữ cảnh hiệu quả nhất ở $0,806$ điểm.
+
+Thực nghiệm với người dùng thu thập phản hồi từ 103 người dùng độc lập qua hai hình thức. Trên 1.701 phiếu Preference, GraphRAG nhận $49,4\%$, vượt LLM-only $37,2\%$ và RAG truyền thống $13,4\%$. Trên 268 lượt chấm Experiment, GraphRAG được chọn tốt nhất $89,6\%$, đạt điểm trung bình $3,62/5$ ở Chính xác và $3,54/5$ ở Đầy đủ. Khảo sát hậu nghiệm xác nhận $64,4\%$ người dùng coi GraphRAG là hệ thống đáng tin cậy nhất. Vị trí thứ hai trong xếp hạng người dùng thuộc về LLM-only chứ không phải RAG truyền thống - người dùng phổ thông ưu tiên câu trả lời tự nhiên từ tri thức nội tại của mô hình ngôn ngữ hơn câu trả lời rời rạc dựa trên truy xuất văn bản đơn thuần, khẳng định vai trò của giai đoạn tổ chức ngữ cảnh trong kiến trúc GraphRAG.
+
+Kiến trúc GraphRAG đề xuất do đó phù hợp với miền tri thức có cấu trúc quan hệ phức tạp như nghệ thuật Chèo, được xác nhận bởi cả độ đo tự động trên CheoBench và phản hồi của người dùng thực tế. Hạn chế còn lại nằm ở chi phí thời gian phản hồi (trung vị khoảng $135$ giây so với $70$ giây của hai hệ thống tham chiếu), việc chưa có thí nghiệm định lượng so sánh ba chiến lược tạo sinh đã thiết kế ở Chương 3, và việc kiểm chứng chuyên môn bởi chuyên gia về Chèo chưa được thực hiện. Các hạn chế này tạo cơ sở cho những hướng phát triển trong chương tiếp theo.

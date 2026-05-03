@@ -1,27 +1,17 @@
 % =============================================================================
-%  Section 4.3 — Triển khai và kiểm nghiệm với người dùng
-%  Subsections:
-%    4.3.1  Triển khai và vận hành
-%    4.3.2  Giao diện người dùng
-%    4.3.3  Thiết kế kiểm nghiệm với người dùng
-%    4.3.4  Kết quả kiểm nghiệm với người dùng
-%    4.3.5  Thảo luận trải nghiệm thực tế
+%  Section 4.2 — Thực nghiệm với người dùng
 % =============================================================================
 
-\section{Triển khai và kiểm nghiệm với người dùng}
+\section{Thực nghiệm với người dùng}
 \label{sec:user_deployment}
 
-Song song với các thí nghiệm định lượng ở Mục~\ref{sec:experiments}, hệ thống được triển khai lên hạ tầng đám mây và đưa vào kiểm nghiệm qua hai hình thức thực nghiệm: chấm điểm đa tiêu chí và đánh giá so sánh.
+Song song với thực nghiệm benchmark, hệ thống được triển khai lên hạ tầng đám mây và đưa vào kiểm nghiệm với người dùng thực nhằm đáp ứng \textbf{mục tiêu thứ tư (MT4)}: đánh giá mức độ ưu tiên của người dùng cuối đối với từng hệ thống khi sử dụng thực tế trên các tiêu chí chính xác, đầy đủ và tự nhiên. Phần thực nghiệm này bổ sung góc nhìn chủ quan cho ba mục tiêu định lượng ở Mục~\ref{sec:benchmark_experiments}, đồng thời kiểm chứng việc các kết quả ở môi trường nội bộ có chuyển hoá được thành cảm nhận chất lượng cho người dùng cuối hay không.
 
-\subsection{Triển khai và vận hành}
+\subsection{Triển khai hệ thống trên đám mây}
 
-Hệ thống được triển khai dưới dạng ứng dụng web đám mây. Người dùng truy cập thông qua trình duyệt trên máy tính hoặc điện thoại mà không cần cài đặt phần mềm; máy chủ được đặt tại khu vực Đông Nam Á để đảm bảo độ trễ thấp cho người dùng tại Việt Nam. Cơ chế tự động mở rộng tài nguyên theo lưu lượng truy cập giúp hệ thống đáp ứng ổn định khi nhiều người tham gia khảo sát đồng thời.
+Hệ thống được triển khai dưới dạng ứng dụng web trên Google Cloud Run, đặt tại khu vực Đông Nam Á để giảm độ trễ kết nối cho người dùng tại Việt Nam. Người dùng truy cập qua trình duyệt mà không cần cài đặt phần mềm. Cơ chế tự động mở rộng tài nguyên giúp hệ thống đáp ứng ổn định khi nhiều người tham gia khảo sát đồng thời.
 
-Hệ thống vận hành theo hai chế độ tương ứng với hai hình thức kiểm nghiệm (Mục~\ref{sec:user_study}). Ở chế độ trực tiếp, ba pipeline GraphRAG, RAG truyền thống và LLM-only chạy đồng thời ngay khi người dùng đặt câu hỏi và trả kết quả trong vài chục giây. Ở chế độ so sánh, câu trả lời của ba hệ thống cho các câu hỏi chuẩn bị sẵn đã được sinh trước và lưu trữ; người dùng chỉ đọc kết quả đã cache, vừa giảm thời gian chờ, vừa đảm bảo mọi người tham gia đánh giá trên cùng một tập câu trả lời.
-
-\subsection{Giao diện người dùng}
-
-Giao diện là ứng dụng web đa trang. Hai trang chính phục vụ kiểm nghiệm được đặt tên tương ứng hai hình thức: trang \textbf{Experiment} cho phép người dùng tự đặt câu hỏi và đánh giá trực tiếp; trang \textbf{Preference} hiển thị câu trả lời đã chuẩn bị sẵn để người dùng chọn phương án tốt nhất. Giao diện tổng quan được trình bày ở Hình~\ref{fig:UI}.
+Hệ thống vận hành theo hai chế độ tương ứng với hai hình thức kiểm nghiệm. Ở \textbf{chế độ trực tiếp}, ba pipeline GraphRAG, RAG truyền thống và LLM-only chạy đồng thời ngay khi người dùng đặt câu hỏi và trả về câu trả lời. Ở \textbf{chế độ so sánh}, câu trả lời cho các câu hỏi chuẩn bị sẵn được sinh trước và lưu trữ; người dùng chỉ đọc kết quả và chọn câu trả lời họ thấy tốt hơn. Cách thiết kế này vừa giảm thời gian chờ trong phiên đánh giá so sánh, vừa đảm bảo mọi người tham gia đánh giá trên cùng một tập câu trả lời, loại trừ biến động giữa các lần gọi mô hình. Giao diện gồm hai trang chính (Hình~\ref{fig:UI}): trang \textbf{Experiment} cho phép tự đặt câu hỏi và đánh giá trực tiếp, trang \textbf{Preference} hiển thị câu trả lời đã chuẩn bị sẵn để chọn phương án tốt nhất.
 
 \begin{figure}[!ht]
     \centering
@@ -30,53 +20,134 @@ Giao diện là ứng dụng web đa trang. Hai trang chính phục vụ kiểm 
     \label{fig:UI}
 \end{figure}
 
-\subsection{Thiết kế kiểm nghiệm với người dùng}
-\label{sec:user_study}
+\subsection{Thiết kế hai hình thức thu thập}
+\label{sec:user_study_design}
+
+Hai hình thức thu thập phản hồi được triển khai song song để khai thác hai khía cạnh khác nhau của cảm nhận người dùng. \textit{Chấm điểm đa tiêu chí} khai thác chiều sâu thông qua thang điểm chi tiết theo từng tiêu chí trên một số ít câu hỏi. \textit{Đánh giá so sánh} khai thác chiều rộng thông qua so sánh trực tiếp trên tập câu hỏi cố định lớn hơn. Hai hình thức bổ trợ lẫn nhau nhằm đưa ra kết luận tổng thể về chất lượng từng hệ thống.
 
 \subsubsection{Chấm điểm đa tiêu chí}
 \label{sec:experiment_study}
 
-Hình thức thực nghiệm đầu tiên sử dụng trang Experiment (\textbf{Hình \ref{fig:experiment}}), cho phép người tham gia tự đặt câu hỏi và chấm điểm câu trả lời của ba hệ thống trong thời gian thực. Thử nghiệm tổ chức theo bốn bước: ba bước đầu yêu cầu chọn một câu hỏi trong số bảy câu chuẩn bị sẵn tại mỗi mức độ Dễ, Trung bình và Khó; bước cuối cho phép đặt một câu hỏi tự do. Thiết kế này vừa đảm bảo có câu hỏi có ground truth để so sánh giữa các người tham gia, vừa khảo sát được các câu hỏi tự phát phản ánh nhu cầu thực.
+Hình thức thứ nhất sử dụng trang Experiment (Hình~\ref{fig:experiment}), cho phép người tham gia tự đặt câu hỏi và chấm điểm câu trả lời của ba hệ thống trong thời gian thực. Phiên đánh giá tổ chức theo bốn bước. Ba bước đầu chọn một câu hỏi trong số bảy câu chuẩn bị sẵn tại mỗi mức độ Dễ, Trung bình và Khó. Bước cuối cho phép đặt một câu hỏi tự do. Thiết kế này vừa đảm bảo có câu hỏi có ground truth để so sánh giữa các người tham gia, vừa khảo sát được các câu hỏi tự phát phản ánh nhu cầu thực.
 
-\begin{figure}
+\begin{figure}[!ht]
     \centering
     \includegraphics[width=0.9\linewidth]{figures//c4/Experiment.png}
-    \caption{Giao diện thực nghiệm hỏi đáp}
+    \caption{Giao diện chấm điểm đa tiêu chí.}
     \label{fig:experiment}
 \end{figure}
 
-Với mỗi câu, hệ thống chạy đồng thời ba pipeline và hiển thị câu trả lời song song trong ba cột ẩn danh. Người tham gia chấm điểm từng hệ thống theo ba tiêu chí trên thang 1--5: \textit{Chính xác} (thông tin có đúng không), \textit{Đầy đủ} (bao quát nội dung câu hỏi) và \textit{Tự nhiên} (dễ đọc, mạch lạc); đồng thời chọn hệ thống tổng thể tốt nhất. Sau bốn bước, người tham gia trả lời khảo sát hậu nghiệm về mức độ hiểu biết Chèo, tần suất sử dụng công cụ AI, tiêu chí đặt nặng nhất khi lựa chọn và các loại lỗi thường gặp.
-
-Đối tượng tham gia hình thức này là sinh viên, đại diện cho người dùng phổ thông không có kiến thức chuyên sâu về Chèo. Cách chọn đối tượng này nhằm phản ánh trải nghiệm cảm nhận của đông đảo người dùng cuối trong bối cảnh không có điều kiện thẩm định từng chi tiết tri thức. Thông tin hậu nghiệm cho phép phân tích kết quả theo các phân nhóm --- chẳng hạn nhóm có hiểu biết Chèo so với nhóm không có, hoặc nhóm sử dụng AI thường xuyên so với nhóm ít sử dụng.
+Với mỗi câu, hệ thống chạy đồng thời ba pipeline và hiển thị câu trả lời ẩn danh trong ba cột. Người tham gia chấm từng hệ thống theo ba tiêu chí trên thang $1$-$5$: \textit{Chính xác}, \textit{Đầy đủ} và \textit{Tự nhiên}, đồng thời chọn hệ thống tổng thể tốt nhất. Sau bốn bước, người tham gia trả lời khảo sát hậu nghiệm về mức độ hiểu biết Chèo, tần suất sử dụng AI, tiêu chí đặt nặng nhất khi lựa chọn và các loại lỗi thường gặp.
 
 \subsubsection{Đánh giá so sánh}
 \label{sec:preference_study}
 
-Hình thức thực nghiệm thứ hai sử dụng trang Preference (\textbf{Hình \ref{fig:preference}}). Hai mươi mốt câu hỏi tiêu biểu được chọn từ CheoBench v2, bao phủ cả ba nhóm độ khó và nhiều dạng truy vấn từ tra cứu trực tiếp đến phân tích liên vở. Câu trả lời của ba hệ thống đã được sinh sẵn và lưu trữ; người tham gia đọc đồng thời ba câu trả lời hiển thị ẩn danh trong ba cột, chọn câu trả lời tốt nhất và có thể ghi chú nhận xét cho từng câu.
+Hình thức thứ hai sử dụng trang Preference (Hình~\ref{fig:preference}), gồm 21 câu hỏi tiêu biểu được chọn từ CheoBench bao phủ cả ba nhóm độ khó. Câu trả lời của ba hệ thống đã được sinh sẵn và lưu trữ. Người tham gia đọc đồng thời ba câu trả lời ẩn danh trong ba cột, chọn câu trả lời tốt nhất và có thể ghi chú nhận xét cho từng câu.
 
-\begin{figure}
+\begin{figure}[!ht]
     \centering
     \includegraphics[width=0.9\linewidth]{figures//c4/preference.png}
-    \caption{Giao diện thực nghiệm so sánh}
+    \caption{Giao diện đánh giá so sánh.}
     \label{fig:preference}
 \end{figure}
 
-Khác với hình thức trước, Preference không yêu cầu chấm điểm theo thang nhiều mức mà chỉ yêu cầu phán xét tổng thể ``câu trả lời nào là hay nhất''. Định dạng so sánh ba cột trực tiếp giúp người tham gia dễ phát hiện các lỗi tinh tế như chi tiết sai lệch, thiếu sót về nhân vật hoặc mâu thuẫn nội dung --- những lỗi mà các độ đo tự động thường bỏ qua. Việc sử dụng câu trả lời sinh sẵn đảm bảo công bằng: mọi người tham gia đánh giá trên cùng một tập câu trả lời, loại trừ biến động giữa các lần gọi mô hình.
+Khác với hình thức trước, đánh giá so sánh không yêu cầu chấm điểm chi tiết mà chỉ yêu cầu phán xét tổng thể ``câu trả lời nào là tốt nhất''. Định dạng so sánh ba cột trực tiếp giúp người tham gia dễ phát hiện các lỗi nhỏ như chi tiết sai lệch, thiếu sót về nhân vật hoặc mâu thuẫn nội dung - những lỗi mà các độ đo tự động thường bỏ qua.
 
-Đối tượng tham gia hình thức này là các chuyên gia có hiểu biết sâu về nghệ thuật Chèo. Kiến thức chuyên môn cho phép họ thẩm định các chi tiết đặc thù của miền --- như tính chính xác của tên nhân vật, mối quan hệ giữa vở diễn, hay sự tinh tế trong cách diễn đạt --- mà người dùng phổ thông khó nắm bắt. Đánh giá của chuyên gia do đó có độ tin cậy cao hơn khi so sánh trực tiếp chất lượng nội dung giữa các hệ thống.
+\subsection{Kết quả thực nghiệm}
+\label{sec:user_results}
 
-\subsection{Kết quả kiểm nghiệm với người dùng}
+Khảo sát thu được phản hồi từ 103 người dùng độc lập, gồm 67 lượt tham gia trang Experiment với 268 lượt chấm, 81 lượt tham gia trang Preference với 1.701 phiếu vote, và 59 phiếu khảo sát hậu nghiệm. Hồ sơ người tham gia (Hình~\ref{fig:profile}) cho thấy đa số là người dùng phổ thông không có chuyên môn về Chèo: $31,0\%$ hoàn toàn không biết về nghệ thuật Chèo và $43,1\%$ chỉ biết rất ít, trong khi $63,8\%$ là người dùng AI hàng ngày và $29,3\%$ sử dụng vài lần mỗi tuần. Phần này lần lượt báo cáo kết quả theo ba khía cạnh: đánh giá so sánh tổng thể trên Preference, chấm điểm chi tiết trên Experiment, và khảo sát hậu nghiệm cùng hiệu năng vận hành.
 
-\textit{Phần này tổng hợp kết quả của cả hai hình thức kiểm nghiệm. Do quá trình thu thập dữ liệu người dùng vẫn đang tiếp tục tại thời điểm viết báo cáo, các số liệu chi tiết sẽ được bổ sung trong phiên bản hoàn chỉnh.}
+\begin{figure}[!ht]
+    \centering
+    \includegraphics[width=0.85\linewidth]{figures//c4/profile.jpg}
+    \caption{Hồ sơ người tham gia khảo sát: tần suất sử dụng công cụ AI (trên) và mức độ hiểu biết Chèo trước thử nghiệm (dưới).}
+    \label{fig:profile}
+\end{figure}
 
-% [Placeholder — cập nhật khi có dữ liệu thu thập đầy đủ]
-% - Kết quả hình thức 1 (sinh viên): phân bổ phiếu hệ thống tốt nhất, điểm trung bình ba tiêu chí theo từng hệ thống, phân tích theo phân nhóm hiểu biết Chèo.
-% - Kết quả hình thức 2 (chuyên gia): phân bổ phiếu chọn, phân tích định tính từ ghi chú.
-% - Đối sánh giữa đánh giá sinh viên và đánh giá chuyên gia.
-% - Đối sánh giữa đánh giá chủ quan và đánh giá khách quan từ các độ đo ở Mục~\ref{sec:experiments}.
+\subsubsection{Kết quả đánh giá so sánh}
 
-\subsection{Thảo luận trải nghiệm thực tế}
+Trên 1.701 phiếu Preference, GraphRAG nhận $49,4\%$ số phiếu, vượt LLM-only $37,2\%$ và RAG truyền thống $13,4\%$ (Bảng~\ref{tab:preference_total}). Khoảng cách giữa GraphRAG và hệ thống đứng thứ hai là $+12,2$ \%.Việc LLM-only đứng thứ hai vượt RAG - cho thấy với người dùng phổ thông, một câu trả lời được trình bày tự nhiên và mạch lạc từ tri thức nội tại của mô hình ngôn ngữ vẫn được ưa chuộng hơn câu trả lời rời rạc dựa trên truy xuất văn bản đơn thuần.
 
-\textit{Phần thảo luận chi tiết sẽ được hoàn thiện khi có đầy đủ dữ liệu kiểm nghiệm người dùng. Dự kiến các điểm thảo luận bao gồm: sự tương đồng và khác biệt giữa đánh giá chủ quan và đánh giá khách quan bằng các độ đo tự động; khác biệt trong cách đánh giá giữa nhóm sinh viên và nhóm chuyên gia; các hạn chế còn lại của hệ thống được bộc lộ qua phản hồi thực tế; và ý nghĩa ứng dụng của hệ thống trong bảo tồn và truyền bá di sản nghệ thuật Chèo.}
+\begin{table}[h]
+\centering
+\caption{Phân bổ phiếu chọn câu trả lời tốt nhất trên trang Preference (n=1.701 phiếu).}
+\label{tab:preference_total}
+\begin{tabular}{lrr}
+\hline
+\textbf{Hệ thống} & \textbf{Số phiếu} & \textbf{Tỷ lệ} \\
+\hline
+GraphRAG   & 841 & \textbf{49,4\%} \\
+LLM-only   & 632 & 37,2\% \\
+RAG        & 228 & 13,4\% \\
+\hline
+\end{tabular}
+\end{table}
 
+Phân bổ phiếu nhất quán qua các dạng câu hỏi khác nhau (Hình~\ref{fig:preference_per_difficulty}). GraphRAG dẫn đầu ở cả ba dạng - tra cứu trực tiếp (Dạng 1), tổng hợp quan hệ (Dạng 2) và phân tích so sánh (Dạng 3) - với khoảng cách rộng nhất ở Dạng 2 ($295$ so với $179$ và $93$). Khoảng cách thu hẹp ở Dạng 3 nơi LLM-only đạt $229$ phiếu so với $256$ của GraphRAG, gợi ý rằng câu hỏi yêu cầu phân tích so sánh có thể được mô hình ngôn ngữ trả lời đủ tốt từ tri thức nội tại mà không cần truy xuất tri thức chi tiết.
 
+\begin{figure}[!ht]
+    \centering
+    \includegraphics[width=1\linewidth]{figures//c4/best_2.jpg}
+    \caption{Phân bổ phiếu chọn câu trả lời tốt nhất theo dạng câu hỏi trên trang Preference.}
+    \label{fig:preference_per_difficulty}
+\end{figure}
+
+\subsubsection{Kết quả chấm điểm đa tiêu chí}
+
+Trên 268 lượt chấm, GraphRAG đạt điểm cao nhất ở cả ba tiêu chí với điểm trung bình tổng $3,47/5$, vượt LLM-only $3,15/5$ và RAG $3,04/5$ (Bảng~\ref{tab:scoring_average} và Hình~\ref{fig:multi_criteria} (panel trên)). Khoảng cách lớn nhất nằm ở tiêu chí Đầy đủ ($3,54$ so với $3,11$ và $2,94$), phản ánh đúng thế mạnh của truy xuất theo đồ thị: GraphRAG cung cấp được nhiều thông tin liên quan hơn cho từng câu hỏi. Khoảng cách nhỏ nhất ở tiêu chí Tự nhiên cho thấy ba hệ thống đều dùng cùng mô hình ngôn ngữ để sinh câu trả lời nên văn phong chênh lệch không nhiều.
+
+\begin{table}[h]
+\centering
+\caption{Điểm trung bình theo từng tiêu chí trên thang $1$-$5$ (n=268 lượt chấm).}
+\label{tab:scoring_average}
+\begin{tabular}{lcccc}
+\hline
+\textbf{Hệ thống} & \textbf{Chính xác} & \textbf{Đầy đủ} & \textbf{Tự nhiên} & \textbf{Trung bình} \\
+\hline
+GraphRAG   & \textbf{3,62} & \textbf{3,54} & \textbf{3,24} & \textbf{3,47} \\
+LLM-only   & 3,18 & 3,11 & 3,16 & 3,15 \\
+RAG        & 3,15 & 2,94 & 3,03 & 3,04 \\
+\hline
+\end{tabular}
+\end{table}
+
+\begin{figure}[!ht]
+    \centering
+    \includegraphics[width=1\linewidth]{figures//c4/multi_citer.jpg}
+    \caption{Kết quả thực nghiệm chấm điểm đa tiêu chí: điểm trung bình theo từng tiêu chí (trên), phân bổ best-system theo dạng câu hỏi (dưới-trái) và phân phối thời gian phản hồi (dưới-phải).}
+    \label{fig:multi_criteria}
+\end{figure}
+
+Khi yêu cầu chọn hệ thống tổng thể tốt nhất sau mỗi câu, người dùng dồn phiếu cho GraphRAG ở mức $89,6\%$, so với $6,3\%$ chọn LLM-only và $4,1\%$ chọn RAG. Sự ưu tiên này ổn định qua cả bốn dạng câu hỏi (Hình~\ref{fig:multi_criteria}, panel dưới-trái): GraphRAG được chọn $59$-$61$ lần trên mỗi dạng trên tổng $67$ người tham gia, tương đương $88$-$91\%$ - khẳng định ưu thế của kiến trúc đồ thị không bị giới hạn bởi loại câu hỏi cụ thể nào.
+
+Khoảng cách giữa hai hình thức ($49,4\%$ trên Preference so với $89,6\%$ trên Experiment) phản ánh khác biệt thiết kế. Ở Preference, mỗi người vote 21 câu nên có nhiều cơ hội chọn câu trả lời ngắn gọn của LLM-only ở những câu mà GraphRAG sinh dài dòng. Ở Experiment, người dùng chấm sau khi đọc kỹ ba cột đặt cạnh nhau và tham chiếu đến độ chính xác chi tiết - chiều mà GraphRAG vượt rõ.
+
+\subsubsection{Khảo sát hậu nghiệm và hiệu năng vận hành}
+
+Khảo sát hậu nghiệm với 59 người trả lời cho thấy GraphRAG được đánh giá là hệ thống đáng tin cậy nhất với $64,4\%$ phiếu, vượt LLM-only $20,3\%$ và RAG $6,8\%$ (Hình~\ref{fig:post_survey}, panel dưới). Khi được hỏi về tiêu chí đặt nặng nhất khi chấm ``tốt nhất'', người dùng ưu tiên Chính xác ($69,5\%$) và Đầy đủ ($55,9\%$) - đúng hai tiêu chí mà GraphRAG vượt xa nhất ở Bảng~\ref{tab:scoring_average}. Về lỗi quan sát, $16,9\%$ phát hiện ảo giác, $40,7\%$ báo lỗi văn phong lủng củng và $35,6\%$ không nhận thấy lỗi đáng kể. Tỷ lệ phát hiện ảo giác thấp đáng kể so với mức thường gặp ở các hệ thống thuần LLM trong miền tri thức chuyên biệt, phù hợp với điểm Faithfulness $0,986$ của GraphRAG ở thực nghiệm benchmark (Bảng~\ref{tab:baseline_results}).
+
+\begin{figure}[!ht]
+    \centering
+    \includegraphics[width=1\linewidth]{figures//c4/after.jpg}
+    \caption{Kết quả khảo sát hậu nghiệm: tiêu chí ưu tiên khi chấm điểm (trên-trái), các loại lỗi quan sát được (trên-phải) và đánh giá tin cậy chủ quan (dưới).}
+    \label{fig:post_survey}
+\end{figure}
+
+Về hiệu năng vận hành, phân phối thời gian phản hồi (Hình~\ref{fig:multi_criteria}, panel dưới-phải) cho thấy GraphRAG có thời gian xử lý cao hơn đáng kể so với hai hệ thống tham chiếu. Trung vị của GraphRAG khoảng $135$ giây, gấp gần hai lần trung vị của LLM-only và RAG truyền thống (cả hai khoảng $70$ giây). Khoảng tứ phân vị của GraphRAG cũng rộng hơn rõ rệt - từ $65$ đến $200$ giây so với $30$-$105$ giây của hai hệ thống còn lại - cho thấy thời gian xử lý phụ thuộc nhiều vào độ phức tạp của câu hỏi. Chi phí thời gian nằm ở giai đoạn truy xuất đa mức độ và tổ chức ngữ cảnh trước khi gọi mô hình ngôn ngữ. Tuy nhiên, đa số người dùng vẫn đánh giá tốc độ ở mức chấp nhận được (Hình~\ref{fig:operation}, panel trên): $32,8\%$ cho rằng ``rất nhanh, hoàn toàn thoải mái'', $63,8\%$ ``hơi chậm nhưng chấp nhận được'' và chỉ $2,4\%$ cho rằng ``quá chậm''. Đánh giá UI trung bình đạt $3,71/5$ với $62,7\%$ người dùng chấm 4-5 điểm (Hình~\ref{fig:operation}, panel dưới), cho thấy chi phí thời gian này chưa thực sự ảnh hưởng đến trải nghiệm trong phạm vi khảo sát.
+
+\begin{figure}[!ht]
+    \centering
+    \includegraphics[width=0.85\linewidth]{figures//c4/time.jpg}
+    \caption{Đánh giá trải nghiệm vận hành: cảm nhận tốc độ phản hồi (trên) và đánh giá độ thân thiện của giao diện (dưới).}
+    \label{fig:operation}
+\end{figure}
+
+\subsection{Phân tích và thảo luận}
+\label{sec:user_discussion}
+
+Sự ưu tiên dành cho GraphRAG xuất hiện đồng nhất qua ba phương thức đo độc lập - vote so sánh, chấm điểm chi tiết và đánh giá tin cậy chủ quan - cho thấy lợi ích của cấu trúc đồ thị tri thức không chỉ tồn tại như con số benchmark mà còn được người dùng cuối cảm nhận trong điều kiện sử dụng thực tế. Khoảng cách giữa GraphRAG và hai hệ thống tham chiếu lớn nhất ở các tiêu chí Chính xác và Đầy đủ - đúng hai tiêu chí được người dùng đặt nặng nhất khi chấm ``tốt nhất'' ($69,5\%$ và $55,9\%$ trong khảo sát hậu nghiệm). Cấu trúc đồ thị được thiết kế để đảm bảo ngữ cảnh đầy đủ và đúng nguồn, và đó cũng chính là những gì người dùng cuối quan tâm nhất khi đánh giá chất lượng câu trả lời.
+
+Vị trí thứ hai trong xếp hạng người dùng đi ngược với trật tự thường thấy ở các độ đo IR: LLM-only - hệ thống không có cơ chế truy xuất tri thức - vượt RAG truyền thống ở cả Preference ($37,2\%$ so với $13,4\%$) và đánh giá tin cậy chủ quan ($20,3\%$ so với $6,8\%$). Khi truy xuất chỉ cấp cho mô hình ngôn ngữ những đoạn văn bản rời rạc thiếu cấu trúc, lợi ích của việc có ngữ cảnh không bù được chi phí gây nhiễu cho quá trình suy luận; tri thức nội tại của mô hình ngôn ngữ - dù tiềm ẩn nguy cơ ảo giác - vẫn đủ để cho ra câu trả lời mạch lạc trên các câu hỏi miền hẹp. Nguyên tắc thiết kế cốt lõi rút ra từ kết quả này là: ngữ cảnh tốt phải vừa chứa đủ thông tin, vừa được tổ chức đủ liền mạch để mô hình ngôn ngữ sinh ra câu trả lời tự nhiên, chứ không chỉ đơn thuần là đưa nhiều thông tin vào prompt.
+
+Đánh đổi để có chất lượng câu trả lời cao hơn là chi phí thời gian phản hồi - trung vị khoảng $135$ giây, gấp gần hai lần hai hệ thống tham chiếu. Trong phạm vi khảo sát, $96,6\%$ người dùng vẫn đánh giá tốc độ ở mức chấp nhận được trở lên, cho thấy với tác vụ tra cứu tri thức không yêu cầu phản hồi tức thời, người dùng sẵn sàng chờ lâu hơn để đổi lấy câu trả lời chất lượng. Ngưỡng chấp nhận này sẽ thấp hơn ở các kịch bản tương tác liên tục, do đó rút gọn pipeline truy xuất theo loại câu hỏi (Mục~\ref{sec:multi_granularity}) và song song hoá bốn mức truy xuất là hai hướng tối ưu để mở rộng phạm vi sử dụng.

@@ -4,8 +4,11 @@
 
 \section*{Tiểu kết}
 \addcontentsline{toc}{section}{Tiểu kết}
-Chương này đã trình bày quá trình phân tích và thiết kế kiến trúc GraphRAG cho miền nghệ thuật Chèo, với trọng tâm tập trung vào hai tầng cốt lõi là tầng tri thức và tầng xử lý GraphRAG. Cách phân tầng này đảm bảo khả năng kiểm soát tri thức thông qua đồ thị tri thức và duy trì tính minh bạch của quá trình suy luận.
 
-Ở tầng tri thức, ontology Chèo được kế thừa và chuẩn hoá thành đồ thị tri thức dạng property graph, kèm các cơ chế suy luận quan hệ gián tiếp ở mức ứng dụng và chiến lược lập chỉ mục chuyên biệt nhằm khắc phục hạn chế của bộ suy luận ontology thuần tuý, đáp ứng yêu cầu truy vấn thời gian thực. Ở tầng xử lý GraphRAG, phân hệ G-Retrieval được xây dựng theo hướng đa mức độ để xử lý linh hoạt nhiều dạng truy vấn, còn phân hệ G-Generation tích hợp tri thức có kiểm soát với prompt đóng vai trò trung tâm điều hướng quá trình sinh và hạn chế hiện tượng ảo giác.
+Chương này đã trình bày kiến trúc GraphRAG đề xuất cho miền nghệ thuật Chèo theo mô hình bốn tầng (giao diện, xử lý GraphRAG, tri thức và mô hình ngôn ngữ), với trọng tâm thiết kế đặt vào hai tầng cốt lõi là tầng tri thức và tầng xử lý GraphRAG.
 
-Bên cạnh phần thiết kế kiến trúc, chương cũng xây dựng bộ dữ liệu đánh giá CheoBench v2 với cách phân tầng truy vấn Local, Community, Global tương ứng với đặc trưng của GraphRAG - làm công cụ đi kèm phục vụ cho việc triển khai và đánh giá thực nghiệm ở chương tiếp theo.
+Ở tầng tri thức, ontology Chèo được chuẩn hoá thành đồ thị tri thức dạng property graph, mô hình hoá các thực thể chính gồm vở chèo, trích đoạn, phiên bản trình diễn, nhân vật, diễn viên cùng các quan hệ liên kết giữa chúng. Để khắc phục hạn chế của bộ suy luận ontology thuần tuý đối với yêu cầu truy vấn thời gian thực, hệ thống bổ sung các luật suy diễn được vật chất hoá ngay tại thời điểm xây dựng đồ thị, kèm chiến lược lập chỉ mục đa mức và Danh mục thực thể nạp một lần khi khởi tạo - làm cơ sở cho việc ràng buộc trích xuất thực thể ở giai đoạn truy vấn.
+
+Ở tầng xử lý GraphRAG, phân hệ G-Retrieval được tổ chức thành ba giai đoạn tuần tự: tiền xử lý song song với hai tiến trình LLM (mở rộng + trích xuất thực thể, phân rã + trích xuất bổ sung), truy vấn đa mức theo bốn mức Node, Triplet, Path, Subgraph với cơ chế định tuyến tự động theo nhãn loại truy vấn $t$, và tổ chức ngữ cảnh thành bốn định dạng biểu diễn cùng tập dữ kiện chính. Phân hệ G-Generation triển khai ba chiến lược tạo sinh Pre, Mid, Post được ánh xạ trực tiếp với ba mức truy vấn Local, Community, Global, đi cùng prompt có cấu trúc cố định và ràng buộc danh mục thực thể để hạn chế hiện tượng ảo giác.
+
+Cuối cùng, chương cũng đề xuất bộ dữ liệu đánh giá CheoBench v2 gồm 100 câu hỏi được biên soạn dưới sự cố vấn của chuyên gia về nghệ thuật Chèo, phân loại theo ba mức Local, Community, Global tương ứng với đặc trưng của kiến trúc.
