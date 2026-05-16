@@ -15,9 +15,10 @@ from .constant import (
     FormatKey,
     GenerationStrategy,
     Limit,
+    CHARACTER_SUBCLASS_TO_ROLE,
 )
 
-from .promt_engineer import (
+from .prompt_engineer import (
     QUERY_EXPAND,
     QUERY_DECOMPOSE,
     ENTITY_EXTRACT,
@@ -41,7 +42,8 @@ __all__ = [
     "FormatKey",
     "GenerationStrategy",
     "Limit",
-    # promt_engineer.py
+    "CHARACTER_SUBCLASS_TO_ROLE",
+    # prompt_engineer.py
     "QUERY_EXPAND",
     "QUERY_DECOMPOSE",
     "ENTITY_EXTRACT",

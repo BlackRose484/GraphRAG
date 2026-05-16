@@ -279,14 +279,13 @@ class QueryType:
 
 class Limit:
     # Cypher query result caps
-    NODE_SEARCH_PER_NAME  = 50   # max nodes returned per entity name
     FALLBACK_NODES        = 10   # fallback broad search limit
     FALLBACK_TRIPLETS     = 50   # fallback triplet limit
     PATH_HOPS_MAX         = 3    # max relationship hops for path queries
     SUBGRAPH_HOPS_MAX     = 2    # max hops for subgraph neighborhood
 
     # Per-method retrieval result caps (used in graph_retriever)
-    NODE_QUERY     = 50  # max nodes returned per name per label (mirrors NODE_SEARCH_PER_NAME)
+    NODE_QUERY     = 50   # max nodes returned per name per label
     TRIPLET_QUERY  = 50   # max triplets per name per relationship pattern
     PATH_QUERY     = 30   # max paths per name
     SUBGRAPH_QUERY = 10   # max subgraph expansions per name

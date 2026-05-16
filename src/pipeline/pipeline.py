@@ -78,6 +78,10 @@ class GraphRAGPipeline:
         generation_strategy: ``'pre'``/``'mid'``/``'post'`` or ``None`` for
                              auto-routing per query.
         enable_query_enhancement: Expand/decompose the query before retrieval.
+                                  Set to ``False`` ONLY for user-study fair
+                                  comparison against vector RAG (which has no
+                                  query rewriting). See orchestrator module
+                                  docstring for the BASIC vs ENHANCED paths.
         auto_routing: Use LLM query classification to pick methods/strategy.
     """
 

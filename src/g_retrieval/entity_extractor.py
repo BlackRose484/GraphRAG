@@ -1,11 +1,20 @@
 """
-Entity extraction from user queries.
+Entity extraction from user queries — BASIC pipeline only.
 
-Uses a two-stage approach:
+Used by :class:`~src.g_retrieval.orchestrator.RetrievalOrchestrator._basic_pipeline`
+when ``enable_enhancement=False`` (i.e. the user-study Experiment page).
+The enhanced pipeline does extraction inline via
+:meth:`~src.g_retrieval.query_processor.QueryProcessor.expand_and_extract`
+with the entity catalog injected into the prompt, so this class is NOT used
+in the production hot path.
+
+Two-stage approach:
   1. Regex pattern matching for capitalised Vietnamese proper nouns (fast, no LLM).
   2. LLM extraction using the ENTITY_EXTRACT prompt for structured JSON results.
 
 Results from both stages are merged and de-duplicated before returning.
+Note: stage 2 here does NOT inject the entity catalog, so the LLM may emit
+names that don't exist in Neo4j (those will simply match nothing downstream).
 """
 from __future__ import annotations
 
@@ -14,7 +23,7 @@ import re
 from typing import TypedDict
 
 from src.constants.constant import EntityType
-from src.constants.promt_engineer import ENTITY_EXTRACT
+from src.constants.prompt_engineer import ENTITY_EXTRACT
 from src.core.base import BaseModel
 from src.utils.logger import get_logger
 

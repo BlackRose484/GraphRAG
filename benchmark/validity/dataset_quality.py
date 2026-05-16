@@ -1,4 +1,4 @@
-"""Validate CheoBench v2 — produce quantitative evidence for thesis §3.4.
+"""Validate CheoBench v2 — quantitative evidence for thesis §3.4 / §4.1.
 
 Runs five experiments on existing data (no extra benchmark runs):
   E1  Coverage analysis              — entity-type + instance + subcategory coverage
@@ -10,25 +10,26 @@ Runs five experiments on existing data (no extra benchmark runs):
 Outputs LaTeX tables and summary statistics to stdout.
 
 Usage:
-    python benchmark/validate_dataset.py
+    python -m benchmark.validity.dataset_quality
 """
 from __future__ import annotations
 
-import json
 import math
 import statistics
 import sys
 from collections import Counter, defaultdict
-from pathlib import Path
 
 if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8")
 
-ROOT = Path(__file__).resolve().parents[1]
-BENCH_PATH = ROOT / "benchmark" / "datasets" / "CheoBench_v2.json"
-RESULT_DIR = ROOT / "benchmark" / "results" / "auto_benchmark" / "2026-04-19_11-48-08"
-FINAL_PATH = RESULT_DIR / "final.json"
-PARTIAL_PATH = RESULT_DIR / "partial.jsonl"
+from benchmark.validity._common import (
+    CATEGORY_LABEL,
+    CATEGORY_ORDER,
+    FINAL_PATH,
+    load_cheobench,
+    load_final,
+    load_partial,
+)
 
 
 # KG inventory — extracted from data/cheo_entities_summary.md
@@ -44,22 +45,19 @@ KG_PLAYS = {
 }
 
 KG_CHARACTERS = {
-    # Quan Âm Thị Kính
-    "Lý Trưởng", "Mãng Ông", "Mẹ Mõ", "Đốp", "Nô", "Phú Ông",
-    "Sùng Bà", "Sùng Ông", "Thị Kính", "Thị Màu", "Thiện Sỹ",
-    # Kim Nham
-    "Hỷ đồng", "Khoèo", "Mụ Quán", "Phù thủy", "Súy Vân", "Trần Phương",
-    "Kim Nham",  # also a character
-    # Lưu Bình - Dương Lễ
-    "Châu Long", "Dương Lễ", "Lưu Bình",
-    # Chu Mãi Thần
-    "Đào Huế", "Thiệt Thê", "Tuần Ty", "Chu Mãi Thần",
-    # Trương Viên
-    "Thị Phương", "Tiên Nữ", "Trương Mẫu", "Trương Viên",
-    # Trinh Nguyên
-    "Thầy Đồ", "Tôn Mạnh", "Tôn Trọng", "Trinh Nguyên",
-    # Từ Thức
-    "Từ Thức",
+    # Extracted directly from data/CheoOntology.ttl (charName values) — 38 individuals
+    "Châu Long", "Dương Lễ", "Hỷ đồng", "Khoèo", "Lý Trưởng", "Lưu Bình",
+    "Mãng Ông (bố Thị Kính)", "Mẹ Mõ (Đốp)", "Mụ Quán", "Nô", "Phù thủy",
+    "Phú Ông", "Sùng Bà", "Sùng Ông", "Súy Vân", "Thiện Sỹ", "Thiệt Thê",
+    "Thầy Đồ", "Thị Kính", "Thị Màu", "Thị Phương", "Tiên Nữ",
+    "Trinh Nguyên", "Trương Mẫu", "Trương Viên", "Trần Phương", "Tuần Ty",
+    "Tôn Mạnh", "Tôn Trọng", "Từ Thức", "Đào Huế",
+    # Hề characters (seven distinct individuals in the KG, each bound to a specific scene)
+    'Hề (Lớp "Tiên Nữ - Đoàn tụ")',
+    "Hề (Mụ Quán Trần Phương)", "Hề (Trần Phương vào chùa)",
+    "Hề (Đưa bạn đi thi)", "Hề gậy (Hề Theo Thầy)",
+    "Hề áo xanh (Dương Lễ tiễn Châu Long đi nuôi bạn)",
+    "Hề áo đỏ (Dương Lễ tiễn Châu Long đi nuôi bạn)",
 }
 
 KG_ACTORS = {
@@ -94,13 +92,6 @@ METRICS = [
     "ContextPrecision", "ContextRecall", "ContextEntitiesRecall",
 ]
 
-CATEGORIES = ["local_queries", "community_queries", "global_queries"]
-CAT_LABEL = {
-    "local_queries": "Local",
-    "community_queries": "Community",
-    "global_queries": "Global",
-}
-
 
 def _norm(s: str) -> str:
     """Normalise entity name for matching: lowercase, strip, drop parentheticals."""
@@ -121,34 +112,15 @@ def _match_entity(name: str, inventory: set[str]) -> bool:
     return False
 
 
-def load_bench() -> dict:
-    return json.loads(BENCH_PATH.read_text(encoding="utf-8"))
-
-
-def load_partial() -> list[dict]:
-    out = []
-    with PARTIAL_PATH.open(encoding="utf-8") as f:
-        for line in f:
-            line = line.strip()
-            if line:
-                out.append(json.loads(line))
-    return out
-
-
-def load_final() -> dict:
-    return json.loads(FINAL_PATH.read_text(encoding="utf-8"))
-
-
 # ────────────────────────────────────────────────────────────────────────────
 # E1  Coverage analysis
 # ────────────────────────────────────────────────────────────────────────────
 
-def experiment_1_coverage(bench: dict) -> None:
+def experiment_1_coverage(cases: list[dict]) -> None:
     print("=" * 78)
     print("E1  COVERAGE ANALYSIS")
     print("=" * 78)
 
-    cases = bench["test_cases"]
     all_entities: set[str] = set()
     for c in cases:
         for e in c["ground_truth"].get("related_entities", []):
@@ -202,14 +174,13 @@ def experiment_1_coverage(bench: dict) -> None:
 # E2  Integrity audit
 # ────────────────────────────────────────────────────────────────────────────
 
-def experiment_2_integrity(bench: dict) -> None:
+def experiment_2_integrity(cases: list[dict]) -> None:
     print("\n" + "=" * 78)
     print("E2  INTEGRITY AUDIT — related_entities → KG")
     print("=" * 78)
 
     all_kg = KG_PLAYS | KG_CHARACTERS | KG_ACTORS | KG_SCENES
 
-    cases = bench["test_cases"]
     total_entities = 0
     missing: list[tuple[str, str]] = []
     for c in cases:
@@ -240,37 +211,37 @@ def experiment_2_integrity(bench: dict) -> None:
 # E3  Difficulty gradient
 # ────────────────────────────────────────────────────────────────────────────
 
-def experiment_3_difficulty(bench: dict, final: dict) -> None:
+def experiment_3_difficulty(cases: list[dict], final: dict) -> None:
     print("\n" + "=" * 78)
     print("E3  DIFFICULTY GRADIENT")
     print("=" * 78)
 
     # (a) Intrinsic signal: #related_entities per category
     cases_by_cat: dict[str, list[int]] = defaultdict(list)
-    for c in bench["test_cases"]:
+    for c in cases:
         n = len(c["ground_truth"].get("related_entities", []))
         cases_by_cat[c["category"]].append(n)
 
     print("\n(a) Số thực thể liên quan trung bình trên câu hỏi:")
     print(f"{'Category':<12}{'N câu':>8}{'Avg ents':>12}{'Max':>6}")
     intrinsic = []
-    for cat in CATEGORIES:
+    for cat in CATEGORY_ORDER:
         xs = cases_by_cat[cat]
         avg = statistics.mean(xs) if xs else 0.0
         mx = max(xs) if xs else 0
-        intrinsic.append((CAT_LABEL[cat], len(xs), avg, mx))
-        print(f"{CAT_LABEL[cat]:<12}{len(xs):>8}{avg:>12.2f}{mx:>6}")
+        intrinsic.append((CATEGORY_LABEL[cat], len(xs), avg, mx))
+        print(f"{CATEGORY_LABEL[cat]:<12}{len(xs):>8}{avg:>12.2f}{mx:>6}")
 
     # (b) System signal: GraphRAG & RAG per category, and gap
     by_pipe = {r["pipeline"]: r for r in final["results"]}
     print("\n(b) Điểm hệ thống theo nhóm truy vấn và khoảng cách GraphRAG - RAG:")
     print(f"{'Category':<12}{'GraphRAG':>10}{'RAG':>10}{'Δ':>10}")
     sys_rows = []
-    for cat in CATEGORIES:
+    for cat in CATEGORY_ORDER:
         g = by_pipe["GraphRAG"]["by_category"][cat]["S_overall"]
         r = by_pipe["RAG"]["by_category"][cat]["S_overall"]
-        sys_rows.append((CAT_LABEL[cat], g, r, g - r))
-        print(f"{CAT_LABEL[cat]:<12}{g:>10.3f}{r:>10.3f}{g-r:>+10.3f}")
+        sys_rows.append((CATEGORY_LABEL[cat], g, r, g - r))
+        print(f"{CATEGORY_LABEL[cat]:<12}{g:>10.3f}{r:>10.3f}{g-r:>+10.3f}")
 
     print("\n--- LaTeX ---")
     print(r"\begin{table}[h]\centering")
@@ -423,17 +394,17 @@ def experiment_5_consistency(partial: list[dict]) -> None:
 # ────────────────────────────────────────────────────────────────────────────
 
 def main() -> None:
-    bench = load_bench()
+    cases = load_cheobench()
     final = load_final()
     partial = load_partial()
 
-    print(f"CheoBench v2: {len(bench['test_cases'])} câu hỏi")
+    print(f"CheoBench v2: {len(cases)} câu hỏi")
     print(f"Kết quả baseline: {FINAL_PATH}")
     print(f"Per-case records: {len(partial)} dòng\n")
 
-    experiment_1_coverage(bench)
-    experiment_2_integrity(bench)
-    experiment_3_difficulty(bench, final)
+    experiment_1_coverage(cases)
+    experiment_2_integrity(cases)
+    experiment_3_difficulty(cases, final)
     experiment_4_discrimination(partial)
     experiment_5_consistency(partial)
 

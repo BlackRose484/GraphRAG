@@ -2,7 +2,7 @@
 G-Generation strategies: Pre, Mid, and Post.
 
 Each strategy wraps a :class:`~src.core.base.BaseModel` instance and formats
-graph data using prompts from :mod:`src.constants.promt_engineer`.
+graph data using prompts from :mod:`src.constants.prompt_engineer`.
 
 Strategy overview
 -----------------
@@ -16,7 +16,7 @@ from abc import ABC, abstractmethod
 from typing import Any
 
 from src.constants.constant import FormatKey, GenerationStrategy
-from src.constants.promt_engineer import (
+from src.constants.prompt_engineer import (
     CONTEXT_HEADER,
     CONTEXT_KEY_FACTS_HEADER,
     CONTEXT_SECTION,

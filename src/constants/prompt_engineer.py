@@ -31,6 +31,33 @@ Câu hỏi: {query}
 
 Trả về MỖI câu hỏi con trên MỘT dòng (không đánh số, không giải thích):"""
 
+
+QUERY_DECOMPOSE_AND_EXTRACT = """\
+Bạn là chuyên gia về Chèo Việt Nam. Với câu hỏi:
+"{query}"
+
+Thực hiện đồng thời 2 nhiệm vụ:
+1. Phân rã câu hỏi gốc thành 2-4 câu hỏi con đơn lẻ, mỗi câu hỏi con tập trung vào một khía cạnh duy nhất của câu hỏi gốc.
+2. Với MỖI câu hỏi con, trích xuất các thực thể có trong câu hỏi đó — CHỈ sử dụng danh sách hợp lệ dưới đây.
+
+=== DANH SÁCH THỰC THỂ HỢP LỆ ===
+
+{entity_catalog}
+
+=== QUY TẮC TRÍCH XUẤT ===
+- CHỈ extract thực thể có trong danh sách trên
+- Map biến thể tên về tên chuẩn (VD: "Thị Mầu" → "Thị Màu", "Quan Âm" → "Quan Âm Thị Kính")
+- KHÔNG tự tạo thực thể không có trong danh sách
+- Nếu câu hỏi con không nhắc đến thực thể cụ thể nào, trả về mảng rỗng []
+
+CHỈ trả về JSON duy nhất (không giải thích, không markdown):
+{{"decomposed": [
+    {{"question": "câu hỏi con 1",
+      "entities": {{"characters": [], "actors": [], "plays": [], "scenes": []}}}},
+    {{"question": "câu hỏi con 2",
+      "entities": {{"characters": [], "actors": [], "plays": [], "scenes": []}}}}
+  ]}}"""
+
 QUERY_EXPAND_AND_EXTRACT = """\
 Bạn là chuyên gia về Chèo Việt Nam. Với câu hỏi:
 "{query}"

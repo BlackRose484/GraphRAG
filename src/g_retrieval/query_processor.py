@@ -20,8 +20,9 @@ import re
 from typing import Any, TypedDict
 
 from src.constants.constant import EntityType, QueryType
-from src.constants.promt_engineer import (
+from src.constants.prompt_engineer import (
     QUERY_DECOMPOSE,
+    QUERY_DECOMPOSE_AND_EXTRACT,
     QUERY_EXPAND,
     QUERY_EXPAND_AND_EXTRACT,
 )
@@ -48,6 +49,12 @@ class ExpandAndExtractResult(TypedDict):
     expanded:   str
     entities:   dict[str, list[str]]   # keys: characters, actors, plays, scenes
     query_type: str                    # one of QueryType.ALL ("Local"/"Community"/"Global")
+
+
+class DecomposeAndExtractResult(TypedDict):
+    """Output of Tác vụ B — phân rã + trích xuất bổ sung trên các sub-query."""
+    decomposed: list[str]              # the sub-query strings (for UI/debug)
+    entities:   dict[str, list[str]]   # union of entities across all sub-queries
 
 
 class QueryProcessor(BaseModel):
@@ -125,7 +132,7 @@ class QueryProcessor(BaseModel):
             entity_catalog: Formatted entity list string from
                             :class:`~src.g_retrieval.entity_catalog.EntityCatalog`.
                             Injected into the ``{entity_catalog}`` placeholder
-                            in :data:`~src.constants.promt_engineer.QUERY_EXPAND_AND_EXTRACT`.
+                            in :data:`~src.constants.prompt_engineer.QUERY_EXPAND_AND_EXTRACT`.
                             When empty the LLM falls back to its own Cheo knowledge.
 
         Returns:
@@ -213,11 +220,100 @@ class QueryProcessor(BaseModel):
     def _decompose(self, query: str) -> list[str]:
         """Break *query* into focused sub-questions (1 LLM call).
 
-        Made accessible (not name-mangled) so :class:`RetrievalOrchestrator`
-        can submit it to a ``ThreadPoolExecutor`` alongside
-        ``expand_and_extract``.
+        Legacy decomposition without entity extraction. Kept for the basic
+        pipeline mode; the enhanced pipeline uses
+        :meth:`decompose_and_extract` instead so Tác vụ B contributes entities
+        rather than just sub-question strings.
         """
         prompt = QUERY_DECOMPOSE.format(query=query)
         response = self.safe_generate(prompt).strip()
         subqueries = [q.strip() for q in response.splitlines() if q.strip()]
         return subqueries or [query]
+
+    def decompose_and_extract(
+        self, query: str, entity_catalog: str = ""
+    ) -> DecomposeAndExtractResult:
+        """Single LLM call: decompose *query* AND extract entities from each sub-query.
+
+        Tác vụ B của pipeline song song. Khác với :meth:`_decompose` legacy,
+        method này chạy entity extraction ngay trên từng sub-query — góc nhìn
+        bổ sung so với Tác vụ A (chỉ extract trên *query* gốc). Kết quả được
+        gộp với entities của Tác vụ A để cải thiện recall cho câu hỏi đa khía
+        cạnh.
+
+        Args:
+            query:          Raw user query.
+            entity_catalog: Formatted entity list, injected vào prompt để
+                            extraction được catalog-grounded — cùng cơ chế
+                            ràng buộc định danh với Tác vụ A.
+
+        Returns:
+            ``{decomposed: [...], entities: {...}}`` — danh sách sub-query
+            (cho UI/debug) và tập entities hợp nhất (union, dedup) trên các
+            sub-query.
+        """
+        prompt = QUERY_DECOMPOSE_AND_EXTRACT.format(
+            query=query,
+            entity_catalog=entity_catalog,
+        )
+        raw = self.safe_generate(prompt).strip()
+
+        # Strip ```json ... ``` fences if present
+        if "```" in raw:
+            m = re.search(r"```(?:json)?\s*(\{.*?\})\s*```", raw, re.DOTALL)
+            if m:
+                raw = m.group(1)
+        m2 = re.search(r"\{.*\}", raw, re.DOTALL)
+        if m2:
+            raw = m2.group(0)
+
+        try:
+            parsed: dict[str, Any] = json.loads(raw)
+            items = parsed.get("decomposed", [])
+            if not isinstance(items, list):
+                raise ValueError("decomposed must be a list")
+
+            decomposed: list[str] = []
+            merged: dict[str, list[str]] = {k: [] for k in EntityType.ALL}
+            seen_lower: dict[str, set[str]] = {k: set() for k in EntityType.ALL}
+
+            for item in items:
+                if not isinstance(item, dict):
+                    continue
+                q_text = str(item.get("question", "")).strip()
+                if q_text:
+                    decomposed.append(q_text)
+                ents = item.get("entities", {}) or {}
+                for key in EntityType.ALL:
+                    raw_list = ents.get(key, [])
+                    if not isinstance(raw_list, list):
+                        continue
+                    for v in raw_list:
+                        name = str(v).strip()
+                        low = name.lower()
+                        if name and low not in seen_lower[key]:
+                            seen_lower[key].add(low)
+                            merged[key].append(name)
+
+            if not decomposed:
+                decomposed = [query]
+
+            total = sum(len(v) for v in merged.values())
+            _logger.info(
+                "decompose_and_extract: %d sub-queries, %d entities (union)",
+                len(decomposed), total,
+            )
+            return DecomposeAndExtractResult(
+                decomposed=decomposed,
+                entities=merged,
+            )
+
+        except (json.JSONDecodeError, ValueError, Exception) as exc:  # noqa: BLE001
+            _logger.warning(
+                "decompose_and_extract: JSON parse failed (%s) — falling back to plain decompose",
+                exc,
+            )
+            return DecomposeAndExtractResult(
+                decomposed=self._decompose(query),
+                entities=dict(_EMPTY_ENTITIES),
+            )

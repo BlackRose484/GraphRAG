@@ -5,14 +5,12 @@ Public API::
 
     from src.core import settings
     from src.core import BaseModel, BaseRetriever, BaseGenerator, BaseLoader
-    from src.core import ProcessingResult
 """
 
 from src.core.settings import (
     Settings,
     LLMSettings,
     Neo4jSettings,
-    ChromaSettings,
     OntologySettings,
     settings,
 )
@@ -21,7 +19,6 @@ from src.core.base import (
     BaseRetriever,
     BaseGenerator,
     BaseLoader,
-    ProcessingResult,
 )
 
 __all__ = [
@@ -29,7 +26,6 @@ __all__ = [
     "Settings",
     "LLMSettings",
     "Neo4jSettings",
-    "ChromaSettings",
     "OntologySettings",
     "settings",
     # Base classes
@@ -37,5 +33,4 @@ __all__ = [
     "BaseRetriever",
     "BaseGenerator",
     "BaseLoader",
-    "ProcessingResult",
 ]

@@ -241,20 +241,6 @@ class Neo4jSettings:
 
 
 @dataclass
-class ChromaSettings:
-    """ChromaDB vector store configuration (optional — not used in main pipeline)."""
-
-    persist_dir: str = field(
-        default_factory=lambda: os.getenv(
-            "CHROMA_PERSIST_DIR", str(_PROJECT_ROOT / "chroma_db")
-        )
-    )
-
-    def __post_init__(self) -> None:
-        Path(self.persist_dir).mkdir(parents=True, exist_ok=True)
-
-
-@dataclass
 class GmailSettings:
     """Gmail SMTP configuration for sending experiment results."""
 
@@ -305,8 +291,10 @@ class OntologySettings:
     """Chèo domain ontology file configuration."""
 
     file_path: Path = field(
-        # GraphRAGv2/data/CheoOntology.ttl
-        default_factory=lambda: _PROJECT_ROOT / "data" / "CheoOntology.ttl"
+        # Canonical: v4 — v3 schema extensions + inference rules from Phụ lục B.
+        # CheoOntology.ttl (v1) is kept on disk only as the source for re-running
+        # the migration chain — see scripts/_archive/README.md.
+        default_factory=lambda: _PROJECT_ROOT / "data" / "CheoOntology_v4.ttl"
     )
     namespace: str = "http://www.semanticweb.org/asus/ontologies/2025/5/Cheo#"
 
@@ -343,7 +331,6 @@ class Settings:
             return
         self.llm = LLMSettings()
         self.neo4j = Neo4jSettings()
-        self.chroma = ChromaSettings()
         self.gmail = GmailSettings()
         self.ontology = OntologySettings()
         self.app = AppSettings()

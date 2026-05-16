@@ -11,13 +11,18 @@ Usage:
 
 from __future__ import annotations
 
+import argparse
 import json
+import sys
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Optional
+
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8")
 
 # ── Question bank (mirrored from ui/page_experiment.py) ─────────────────────
 
@@ -264,25 +269,69 @@ def _save_markdown(
 
 # ── Main ─────────────────────────────────────────────────────────────────────
 
+def _load_existing() -> dict[str, dict[str, Any]]:
+    """Load existing entries from pregenerated_answers.json as {id: entry}."""
+    path = _DATASETS_DIR / "pregenerated_answers.json"
+    if not path.exists():
+        return {}
+    data = json.loads(path.read_text(encoding="utf-8"))
+    return {entry["id"]: entry for entry in data.get("questions", [])}
+
+
 def main() -> None:
-    questions = _flat_questions()
-    total = len(questions)
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--ids",
+        default="",
+        help="Comma-separated CASE IDs to regenerate (e.g. CASE_063,CASE_078). "
+             "Others are preserved from the existing JSON. "
+             "Empty string means regenerate all.",
+    )
+    args = parser.parse_args()
+    requested_ids = {x.strip() for x in args.ids.split(",") if x.strip()}
+
+    all_questions = _flat_questions()
+    if requested_ids:
+        # Validate
+        known = {q["id"] for q in all_questions}
+        unknown = requested_ids - known
+        if unknown:
+            raise SystemExit(f"Unknown CASE IDs: {sorted(unknown)}")
+        to_run = [q for q in all_questions if q["id"] in requested_ids]
+        existing = _load_existing()
+    else:
+        to_run = all_questions
+        existing = {}
+
+    total_target = len(to_run)
+    total_reported = len(all_questions) if requested_ids else total_target
 
     print(f"=== Batch Generate Answers ===")
-    print(f"Questions: {total}")
+    if requested_ids:
+        print(f"Mode:      selective regeneration ({sorted(requested_ids)})")
+        print(f"Preserved: {len(existing) - total_target} existing entries")
+    else:
+        print(f"Mode:      full run")
+    print(f"To run:    {total_target}/{total_reported} questions")
     print(f"Systems:   {', '.join(SYSTEMS)}")
-    print(f"Total answers to generate: {total * len(SYSTEMS)}")
+    print(f"Total answers to (re)generate: {total_target * len(SYSTEMS)}")
     print()
 
+    # Seed results with preserved entries (kept in original order of QUESTIONS)
     all_results: list[dict[str, Any]] = []
+    if requested_ids:
+        for q in all_questions:
+            if q["id"] not in requested_ids and q["id"] in existing:
+                all_results.append(existing[q["id"]])
+
     errors = 0
 
-    for idx, q in enumerate(questions, 1):
+    for idx, q in enumerate(to_run, 1):
         qid = q["id"]
         question = q["question"]
         category = q["category"]
 
-        print(f"[{idx}/{total}] {qid}: {question[:60]}...", flush=True)
+        print(f"[{idx}/{total_target}] {qid}: {question[:60]}...", flush=True)
         t0 = time.time()
         results = _run_all(question)
         elapsed = time.time() - t0
@@ -300,12 +349,30 @@ def main() -> None:
             if r.error:
                 errors += 1
 
-        all_results.append({
+        new_entry = {
             "id": qid,
             "category": category,
             "question": question,
             "answers": answers_raw,
-        })
+        }
+
+        # Safety guard: if all 3 systems error out (likely env/config failure),
+        # preserve existing entry instead of overwriting with empty errors.
+        all_errored = all(answers_raw[s].get("error") for s in SYSTEMS)
+        if all_errored and qid in existing:
+            print(f"  ⚠ All systems errored — preserving existing entry for {qid}",
+                  flush=True)
+            new_entry = existing[qid]
+
+        # Replace the preserved copy if selective mode
+        if requested_ids and any(e["id"] == qid for e in all_results):
+            all_results = [new_entry if e["id"] == qid else e for e in all_results]
+        else:
+            all_results.append(new_entry)
+
+        # Restore original QUESTIONS order before saving
+        order = {q["id"]: i for i, q in enumerate(all_questions)}
+        all_results.sort(key=lambda e: order.get(e["id"], 999))
 
         # Progress
         err_str = ""
@@ -319,13 +386,13 @@ def main() -> None:
         print(status, flush=True)
 
         # Save incrementally after each question
-        json_path = _save_json(all_results, errors, total)
-        md_path = _save_markdown(all_results, errors, total)
-        print(f"  Saved ({idx}/{total})", flush=True)
+        json_path = _save_json(all_results, errors, total_reported)
+        md_path = _save_markdown(all_results, errors, total_reported)
+        print(f"  Saved ({idx}/{total_target})", flush=True)
 
     print(f"\nJSON:     {json_path}")
     print(f"Markdown: {md_path}")
-    print(f"\nDone! {total * len(SYSTEMS)} answers generated ({errors} errors).")
+    print(f"\nDone! {total_target * len(SYSTEMS)} answers (re)generated ({errors} errors).")
 
 
 if __name__ == "__main__":

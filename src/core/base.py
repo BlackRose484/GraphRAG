@@ -16,7 +16,6 @@ from __future__ import annotations
 
 import time
 from abc import ABC, abstractmethod
-from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional
 
 import litellm
@@ -231,32 +230,3 @@ class BaseLoader(ABC):
         Returns:
             True on success, False on partial failure (with logged details).
         """
-
-
-# ── Shared Data Transfer Object ───────────────────────────────────────────────
-
-@dataclass
-class ProcessingResult:
-    """
-    Generic result envelope passed between pipeline stages.
-
-    Attributes:
-        success:  Whether the operation completed without error.
-        data:     The primary result payload (type varies per stage).
-        error:    Human-readable error message when ``success`` is False.
-        metadata: Arbitrary key-value pairs (timings, counts, etc.).
-    """
-
-    success: bool
-    data: Any
-    error: Optional[str] = None
-    metadata: Dict[str, Any] = field(default_factory=dict)
-
-    def to_dict(self) -> Dict[str, Any]:
-        """Serialise to a plain dict (useful for JSON logging)."""
-        return {
-            "success": self.success,
-            "data": self.data,
-            "error": self.error,
-            "metadata": self.metadata,
-        }

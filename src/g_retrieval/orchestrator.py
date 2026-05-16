@@ -1,26 +1,37 @@
 """
-G-Retrieval orchestrator.
+G-Retrieval orchestrator — two retrieval paths sharing one final stage.
 
-Sequences:
-    [enhancement=True]
-        ThreadPoolExecutor: expand_and_extract(query) ║ _decompose(query)
-            ↓ (both running in parallel)
-        LLM-grounded entities (no regex) → GraphRetriever → GraphFormatConverter
+ENHANCED path (``enable_enhancement=True`` — default, used in production)
+    ThreadPoolExecutor: expand_and_extract(query) ║ decompose_and_extract(query)
+        ↓ 2 LLM calls running in parallel (~max(A,B) latency)
+    Union catalog-grounded entities → query_type → auto-route methods/strategy
+        ↓
+    GraphRetriever → GraphFormatConverter
 
-    [enhancement=False]
-        QueryProcessor.process(pass-through) → EntityExtractor.extract()
-            ↓
-        GraphRetriever → GraphFormatConverter
+    Used by:  pages 🔍 GraphRAG, ⚖️ Compare, 💬 Chat, 📊 Benchmark.
+    Why     : maximum recall + query-type classification enables auto-routing.
 
-Enhancement pipeline (enable_enhancement=True):
-    - expand_and_extract: 1 LLM call → expanded query + grounded entities
-      (LLM uses the known entity list from the prompt — no regex fallback needed)
-    - _decompose: 1 LLM call → focused sub-questions (runs PARALLEL)
-    - Entity lists deduplicated before graph retrieval
+BASIC path (``enable_enhancement=False`` — for user-study fair comparison)
+    QueryProcessor.process(pass-through, no LLM)
+        ↓
+    EntityExtractor.extract()  ← 1 LLM call, NO catalog grounding
+        ↓
+    query_type = "Community" (hard default, no LLM classification)
+        ↓
+    GraphRetriever → GraphFormatConverter
 
-Optimisation vs legacy:
-    Legacy : expand(LLM#1) → decompose(LLM#2) → entity_extract(LLM#3) = 3 sequential calls
-    New    : expand+extract(LLM#A) ║ decompose(LLM#B) = 2 parallel calls → ~max(A,B) latency
+    Used by:  page 🧪 Experiment (user study).
+    Why     : Vector RAG baseline has no query enhancement; disabling it on
+              GraphRAG too keeps the comparison strictly "graph retrieval vs
+              vector retrieval", not "graph + LLM rewrites vs vector".
+              This is a deliberate scientific choice, NOT deprecated.
+
+Both paths converge at GraphRetriever — the same Cypher methods + format
+converters are used regardless of which path produced the entity list.
+
+Latency contrast:
+    ENHANCED : expand+extract(LLM-A) ║ decompose+extract(LLM-B) → ~max(A,B)
+    BASIC    : entity_extract(LLM-C)                            → ~C
 """
 from __future__ import annotations
 
@@ -281,59 +292,89 @@ class RetrievalOrchestrator:
     def _enhanced_pipeline(
         self, query: str
     ) -> tuple[ProcessedQuery, dict[str, list[str]], str]:
-        """Parallel: expand+extract ║ decompose  (2 LLM calls, ~max latency).
+        """Parallel multi-query pipeline (2 LLM calls, ~max latency).
 
-        Entity extraction is fully LLM-grounded: the prompt provides the complete
-        list of known Cheo entities so no regex fallback is needed. The same
-        prompt also classifies the query into Local/Community/Global at no extra
-        LLM cost.
+        Two LLM tasks run concurrently:
 
-        Returns (ProcessedQuery, entities_dict, query_type).
+        * **Tác vụ A** — :meth:`expand_and_extract`: trên câu hỏi gốc *q* —
+          mở rộng, trích xuất entities và phân loại Local/Community/Global.
+        * **Tác vụ B** — :meth:`decompose_and_extract`: phân rã *q* thành
+          các sub-query và trích xuất entities trên từng sub-query.
+
+        Both tasks inject the entity catalog so extraction is catalog-grounded.
+        After both complete, entities from A and B are unioned (deduplicated)
+        — A provides precision (focused on the original phrasing), B provides
+        recall (catches entities surfaced by alternative framings of the
+        question).
+
+        Returns (ProcessedQuery, merged_entities, query_type).
         """
-        _logger.info("Retrieval: launching parallel expand+extract ║ decompose")
+        _logger.info("Retrieval: launching parallel Tác vụ A ║ Tác vụ B")
+
+        catalog_text = self._entity_catalog.as_text()
 
         with ThreadPoolExecutor(max_workers=2) as pool:
-            future_combined: Future = pool.submit(
+            future_a: Future = pool.submit(
                 self._query_processor.expand_and_extract,
-                query,
-                self._entity_catalog.as_text(),    # inject dynamic catalog
+                query, catalog_text,
             )
-            future_decompose: Future = pool.submit(
-                self._query_processor._decompose, query
+            future_b: Future = pool.submit(
+                self._query_processor.decompose_and_extract,
+                query, catalog_text,
             )
             # Both futures run concurrently; .result() blocks until done
-            combined   = future_combined.result()
-            decomposed = future_decompose.result()
+            result_a = future_a.result()
+            result_b = future_b.result()
 
-        entities: dict[str, list[str]]   = dict(combined["entities"])
-        query_type: str                  = combined["query_type"]
+        entities_a:  dict[str, list[str]] = dict(result_a["entities"])
+        entities_b:  dict[str, list[str]] = dict(result_b["entities"])
+        decomposed:  list[str]            = list(result_b["decomposed"])
+        query_type:  str                  = result_a["query_type"]
+
+        # Union entities from both tasks — A gives precision, B gives recall
+        merged_entities = _merge_entities(entities_a, entities_b)
 
         _logger.info(
-            "Retrieval: expand+extract done — %d entities (characters=%d, actors=%d, plays=%d, scenes=%d), query_type=%s",
-            sum(len(v) for v in entities.values()),
-            len(entities.get("characters", [])),
-            len(entities.get("actors", [])),
-            len(entities.get("plays", [])),
-            len(entities.get("scenes", [])),
-            query_type,
+            "Retrieval: Tác vụ A → %d entities, query_type=%s",
+            sum(len(v) for v in entities_a.values()), query_type,
         )
-        _logger.info("Retrieval: decomposed into %d sub-queries", len(decomposed))
+        _logger.info(
+            "Retrieval: Tác vụ B → %d sub-queries, %d supplementary entities",
+            len(decomposed), sum(len(v) for v in entities_b.values()),
+        )
+        _logger.info(
+            "Retrieval: merged → %d entities (characters=%d, actors=%d, plays=%d, scenes=%d)",
+            sum(len(v) for v in merged_entities.values()),
+            len(merged_entities.get("characters", [])),
+            len(merged_entities.get("actors", [])),
+            len(merged_entities.get("plays", [])),
+            len(merged_entities.get("scenes", [])),
+        )
 
         processed: ProcessedQuery = {
             "original":   query,
-            "expanded":   combined["expanded"],
+            "expanded":   result_a["expanded"],
             "decomposed": decomposed,
         }
 
-        return processed, entities, query_type
+        return processed, merged_entities, query_type
 
     def _basic_pipeline(
         self, query: str
     ) -> tuple[ProcessedQuery, dict[str, list[str]], str]:
-        """No enhancement: pass-through query + 1 entity-extract LLM call.
+        """Pass-through query + 1 LLM call for entity extraction.
 
-        The basic mode does not classify the query — falls back to
-        :attr:`QueryType.DEFAULT` so auto-routing still has a valid value.
+        Used by the 🧪 Experiment user-study page so GraphRAG and the vector
+        RAG baseline are compared on equal terms (RAG has no query rewriting,
+        so GraphRAG runs without it here too). NOT a deprecated fallback.
+
+        Trade-offs vs the enhanced pipeline:
+          - 1 LLM call (vs 2 parallel) → lower latency
+          - Entity extraction NOT catalog-grounded → may hallucinate names
+            that don't exist in the KG (those just yield 0 matches in Cypher)
+          - No query classification → ``query_type`` is hard-defaulted to
+            :attr:`QueryType.DEFAULT` ("Community") so auto-routing still
+            picks a sensible methods/strategy set
         """
         _logger.info("Retrieval: enhancement disabled — processing query as-is")
         processed = self._query_processor.process(query, enable_enhancement=False)

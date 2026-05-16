@@ -19,7 +19,7 @@ from collections import defaultdict
 
 from rdflib import Graph, Namespace, RDF, RDFS
 
-from src.core.base import BaseLoader, ProcessingResult
+from src.core.base import BaseLoader
 from src.core.settings import settings
 from src.constants import NodeType, RelType, NodeProp, ONTOLOGY_NAMESPACE
 from src.constants.constant import CHARACTER_SUBCLASS_TO_ROLE
