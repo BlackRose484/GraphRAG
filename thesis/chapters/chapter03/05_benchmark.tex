@@ -12,18 +12,18 @@
 
 \subsection{Nguyên tắc xây dựng bộ dữ liệu đánh giá}
 
-Để đánh giá hiệu quả của hệ thống một cách khách quan và có kiểm soát, một bộ dữ liệu đánh giá chuyên biệt được xây dựng dựa trên tri thức có trong đồ thị tri thức, có đối chiếu với tư liệu chuyên môn về nghệ thuật Chèo từ Trường Đại học Sân khấu – Điện ảnh Hà Nội để đảm bảo tính chính xác. Bộ dữ liệu được xây dựng ưu tiên (i) \textit{tính chính xác}, (ii) \textit{tính đại diện} và (iii) \textit{khả năng đo lường rõ ràng}, tương tự các nghiên cứu về benchmark cho hệ thống hỏi đáp dựa trên tri thức có cấu trúc \cite{peng2025m3gqa}.
+Để đánh giá hiệu quả của hệ thống một cách khách quan và có kiểm soát, một bộ dữ liệu đánh giá được xây dựng dựa đồ thị tri thức, có đối chiếu với tư liệu chuyên môn về nghệ thuật Chèo từ Trường Đại học Sân khấu – Điện ảnh Hà Nội để đảm bảo tính chính xác. Bộ dữ liệu được xây dựng ưu tiên (i) \textit{tính chính xác}, (ii) \textit{tính khái quá} và (iii) \textit{khả năng đo lường rõ ràng}, tương tự các nghiên cứu về benchmark cho hệ thống hỏi đáp dựa trên tri thức có cấu trúc \cite{peng2025m3gqa}.
 
-Bộ dữ liệu đánh giá được xây dựng theo 4 nguyên tắc chính. Thứ nhất là \textit{tính hiện thực} (realism), trong đó mọi thực thể và quan hệ xuất hiện trong câu hỏi đều tồn tại trong đồ thị tri thức, đảm bảo rằng hệ thống có đủ tri thức để trả lời. Thứ hai là \textit{tính toàn diện} (coverage), các câu hỏi được thiết kế để bao phủ nhiều loại truy vấn khác nhau, đặc biệt bao gồm các truy vấn yêu cầu suy luận đa bước, vốn được xem là thách thức cốt lõi trong các hệ thống KGQA hiện đại \cite{wang2023multihop}. Thứ ba là \textit{tính đo lường được} (measurability), mỗi câu hỏi đều có ground truth rõ ràng nhằm hỗ trợ đánh giá định lượng. Cuối cùng là \textit{tính cân bằng} (balance), đảm bảo phân bố hợp lý giữa các mức độ phức tạp của truy vấn.
+Bộ dữ liệu đánh giá được xây dựng theo 4 nguyên tắc chính. Thứ nhất là \textit{tính hiện thực} (realism), trong đó mọi thực thể và quan hệ xuất hiện trong câu hỏi đều tồn tại trong đồ thị tri thức, đảm bảo rằng hệ thống có đủ tri thức để trả lời. Thứ hai là \textit{tính phổ quát} (coverage), các câu hỏi được thiết kế để bao phủ nhiều loại truy vấn khác nhau, đặc biệt bao gồm các truy vấn yêu cầu suy luận đa bước, vốn được xem là thách thức cốt lõi trong các hệ thống KGQA hiện đại \cite{wang2023multihop}. Thứ ba là \textit{tính đo lường được} (measurability), mỗi câu hỏi đều có ground truth rõ ràng nhằm hỗ trợ đánh giá định lượng. Cuối cùng là \textit{tính cân bằng} (balance), đảm bảo phân bố hợp lý giữa các mức độ phức tạp của truy vấn.
 
-Bộ dữ liệu đánh giá gồm 100 câu hỏi được biên soạn và nhận cố vấn từ các chuyên gia về nghệ thuật Chèo nhằm đảm bảo tính chính xác. Mặc dù số lượng không lớn, thiết kế tập trung vào độ phức tạp quan hệ và khả năng suy luận, phù hợp với xu hướng benchmark hiện đại nhấn mạnh reasoning thay vì chỉ retrieval \cite{peng2025m3gqa}. Toàn bộ 100 câu hỏi cùng đáp án kỳ vọng được liệt kê đầy đủ tại Phụ lục~\ref{appendix:cheobench}.
+Bộ dữ liệu đánh giá gồm 100 câu hỏi được biên soạn và nhận cố vấn từ các chuyên gia về nghệ thuật Chèo nhằm đảm bảo tính chính xác. Mặc dù số lượng không lớn, thiết kế tập trung vào độ phức tạp quan hệ và khả năng suy luận, phù hợp với xu hướng benchmark hiện đại nhấn mạnh reasoning thay vì chỉ retrieval \cite{peng2025m3gqa}. Toàn bộ 100 câu hỏi cùng đáp án kỳ vọng được liệt kê đầy đủ tại Phụ lục A.
 
 \subsection{Phân loại truy vấn}
 \label{sec:query_classification}
 
-Các câu hỏi trong bộ dữ liệu đánh giá được phân loại thành ba nhóm: Local, Community và Global. Việc phân loại này được xây dựng dựa trên ba tiêu chí chính: (i) \textit{phạm vi truy xuất trong đồ thị}, (ii) \textit{độ phức tạp suy luận đa bước} và (iii) \textit{đặc trưng của kiến trúc GraphRAG}.
+Các câu hỏi trong bộ dữ liệu đánh giá được phân loại thành ba nhóm: Local, Community và Global. Việc phân loại này được xây dựng dựa trên ba tiêu chí chính: (i) \textit{phạm vi truy xuất trong đồ thị}, (ii) \textit{độ phức tạp suy luận } và (iii) \textit{đặc trưng kiến trúc GraphRAG}.
 
-Xét theo phạm vi truy xuất, các nghiên cứu về GraphRAG cho thấy sự khác biệt rõ rệt giữa truy vấn cục bộ và truy vấn toàn cục. Edge et al. \cite{edge2024graphrag} chỉ ra rằng các hệ thống Retrieval-Augmented Generation truyền thống chủ yếu phù hợp với các truy vấn cục bộ, trong đó thông tin cần thiết có thể được truy xuất từ một số lượng nhỏ các đoạn văn bản hoặc thực thể liên quan. Ngược lại, các truy vấn toàn cục yêu cầu tổng hợp thông tin từ toàn bộ tập dữ liệu, tương ứng với bài toán tóm tắt theo truy vấn (query-focused summarization), vượt ra ngoài khả năng của các phương pháp truy xuất cục bộ. Trên cơ sở đó, GraphRAG đề xuất các cơ chế truy xuất ở nhiều mức độ, bao gồm local search và global search. Từ góc nhìn này, có thể xác định thêm một mức trung gian là community-level, trong đó truy vấn yêu cầu khai thác thông tin trong một cụm thực thể có liên kết chặt chẽ trong đồ thị. Mức này phản ánh cấu trúc tự nhiên của đồ thị tri thức, nơi các thực thể thường được tổ chức thành các cộng đồng (communities) thông qua các quan hệ ngữ nghĩa.
+Xét theo phạm vi truy xuất, các nghiên cứu về GraphRAG cho thấy sự khác biệt rõ rệt giữa truy vấn cục bộ và truy vấn toàn cục. Edge et al. \cite{edge2024graphrag} chỉ ra rằng các hệ thống Retrieval-Augmented Generation truyền thống chủ yếu phù hợp với các truy vấn cục bộ, trong đó thông tin cần thiết có thể được truy xuất từ một số lượng nhỏ các đoạn văn bản hoặc thực thể liên quan. Ngược lại, các truy vấn toàn cục yêu cầu tổng hợp thông tin từ toàn bộ tập dữ liệu, tương ứng với bài toán tóm tắt theo truy vấn (query-focused summarization), vượt ra ngoài khả năng của các phương pháp truy xuất cục bộ. Trên cơ sở đó, GraphRAG đề xuất các cơ chế truy xuất ở nhiều mức độ, bao gồm local search và global search. Đồng thời, nhằm phân biệt rõ ràng hơn giữa các mức truy vấn và tăng sự đa dạng của các câu hỏi, bộ dữ liệu đánh giá xác định thêm một mức trung gian là community-level, trong đó truy vấn yêu cầu khai thác thông tin trong một cụm thực thể có liên kết chặt chẽ trong đồ thị. Mức này phản ánh cấu trúc tự nhiên của đồ thị tri thức, nơi các thực thể thường được tổ chức thành các cộng đồng (communities) thông qua các quan hệ ngữ nghĩa.
 
 Xét theo độ phức tạp suy luận, các truy vấn trong hệ thống hỏi đáp tri thức thường yêu cầu suy luận qua nhiều bước (multi-hop reasoning), trong đó câu trả lời được suy ra thông qua chuỗi các quan hệ trong đồ thị \cite{wang2023multihop}. Các nghiên cứu gần đây cho thấy hiệu năng của hệ thống phụ thuộc đáng kể vào khả năng xử lý các truy vấn multi-hop, đặc biệt khi số lượng bước suy luận tăng lên \cite{shah2024multihop}. Do đó, việc phân loại truy vấn theo số bước suy luận là cần thiết để đánh giá hệ thống một cách toàn diện.
 
@@ -93,24 +93,3 @@ Trong truy vấn này, hệ thống cần thực hiện hai quá trình truy xu�
 \end{tcolorbox}
 
 Khác với hai nhóm trước, truy vấn này không chỉ yêu cầu truy xuất thực thể và quan hệ, mà còn đòi hỏi tổng hợp và diễn giải thông tin từ nhiều phần khác nhau của đồ thị tri thức. Hệ thống cần khai thác các tiểu đồ thị liên quan đến từng nhân vật, bao gồm các mối quan hệ, sự kiện và bối cảnh, sau đó kết hợp các thông tin này để đưa ra một nhận định mang tính khái quát. Do đó, truy vấn thuộc loại toàn cục, trong đó truy xuất tri thức và tạo sinh ngôn ngữ đóng vai trò bổ trợ lẫn nhau, phù hợp với mô hình query-focused summarization trong GraphRAG \cite{edge2024graphrag}.
-
-\subsection{Mức độ bao phủ trên đồ thị tri thức}
-\label{sec:benchmark_coverage}
-
-Bên cạnh các nguyên tắc thiết kế và phân loại truy vấn, bộ dữ liệu đánh giá cần được kiểm tra mức độ bao phủ trên đồ thị tri thức để đảm bảo các câu hỏi không yêu cầu tri thức ngoài phạm vi hệ thống. Mức độ bao phủ được tính bằng cách gộp danh sách thực thể liên quan trong tất cả 100 câu hỏi rồi đối chiếu với đồ thị theo từng loại thực thể (Bảng~\ref{tab:coverage_entity}). Toàn bộ 225 thực thể được liệt kê trong các câu hỏi đều khớp với định danh trong đồ thị tri thức, không câu nào tham chiếu đến thực thể không tồn tại. Tỷ lệ phủ ở lớp vở chèo đạt $100\%$, ở các lớp con dao động từ $53\%$ đến $73\%$. Bộ câu hỏi tập trung vào các thực thể trung tâm có nhiều liên kết quan hệ thay vì cố phủ đều mọi thực thể, ưu tiên kiểm tra khả năng truy xuất ở các vùng đồ thị có cấu trúc phong phú nhất.
-
-\begin{table}[h]
-\centering
-\caption{Mức độ bao phủ của CheoBench trên đồ thị tri thức Chèo.}
-\label{tab:coverage_entity}
-\begin{tabular}{lrrr}
-\hline
-\textbf{Loại thực thể} & \textbf{Đã phủ} & \textbf{Tổng} & \textbf{Tỷ lệ} \\
-\hline
-Vở chèo       &  7 &  7 & $100,0\%$ \\
-Nhân vật      & 25 & 34 &  $73,5\%$ \\
-Diễn viên     & 23 & 41 &  $56,1\%$ \\
-Trích đoạn    &  8 & 15 &  $53,3\%$ \\
-\hline
-\end{tabular}
-\end{table}

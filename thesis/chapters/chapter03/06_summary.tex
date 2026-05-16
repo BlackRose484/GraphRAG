@@ -11,4 +11,4 @@ Chương này đã trình bày kiến trúc GraphRAG đề xuất cho miền ngh
 
 Ở tầng xử lý GraphRAG, phân hệ G-Retrieval được tổ chức thành ba giai đoạn tuần tự: tiền xử lý song song với hai tiến trình LLM (mở rộng + trích xuất thực thể, phân rã + trích xuất bổ sung), truy vấn đa mức theo bốn mức Node, Triplet, Path, Subgraph với cơ chế định tuyến tự động theo nhãn loại truy vấn $t$, và tổ chức ngữ cảnh thành bốn định dạng biểu diễn cùng tập dữ kiện chính. Phân hệ G-Generation triển khai ba chiến lược tạo sinh Pre, Mid, Post được ánh xạ trực tiếp với ba mức truy vấn Local, Community, Global, đi cùng prompt có cấu trúc cố định và ràng buộc danh mục thực thể để hạn chế hiện tượng ảo giác.
 
-Cuối cùng, chương cũng đề xuất bộ dữ liệu đánh giá CheoBench v2 gồm 100 câu hỏi được biên soạn dưới sự cố vấn của chuyên gia về nghệ thuật Chèo, phân loại theo ba mức Local, Community, Global tương ứng với đặc trưng của kiến trúc.
+Cuối cùng, chương cũng đề xuất bộ dữ liệu đánh giá CheoBench gồm 100 câu hỏi được biên soạn dưới sự cố vấn của chuyên gia về nghệ thuật Chèo, phân loại theo ba mức Local, Community, Global tương ứng với đặc trưng của kiến trúc.

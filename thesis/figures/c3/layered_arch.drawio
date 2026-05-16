@@ -13,19 +13,19 @@
         </mxCell>
 
         <mxCell id="ui_recv" value="Tiếp nhận truy vấn"
-                style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#6c8ebf;strokeWidth=1.5;fontSize=14;align=center;verticalAlign=middle;"
+                style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#6c8ebf;strokeWidth=1.5;fontSize=15;align=center;verticalAlign=middle;"
                 vertex="1" parent="1">
           <mxGeometry x="120" y="100" width="280" height="60" as="geometry"/>
         </mxCell>
 
         <mxCell id="ui_show" value="Hiển thị câu trả lời"
-                style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#6c8ebf;strokeWidth=1.5;fontSize=14;align=center;verticalAlign=middle;"
+                style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#6c8ebf;strokeWidth=1.5;fontSize=15;align=center;verticalAlign=middle;"
                 vertex="1" parent="1">
           <mxGeometry x="560" y="100" width="280" height="60" as="geometry"/>
         </mxCell>
 
         <mxCell id="ui_visual" value="Trực quan hoá Knowledge Graph"
-                style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#6c8ebf;strokeWidth=1.5;fontSize=14;align=center;verticalAlign=middle;"
+                style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#6c8ebf;strokeWidth=1.5;fontSize=15;align=center;verticalAlign=middle;"
                 vertex="1" parent="1">
           <mxGeometry x="1000" y="100" width="280" height="60" as="geometry"/>
         </mxCell>
@@ -45,22 +45,22 @@
         </mxCell>
 
         <mxCell id="gr_s1" value="① Tiền xử lý truy vấn"
-                style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#d79b00;strokeWidth=1.5;fontSize=14;align=center;verticalAlign=middle;"
+                style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#d79b00;strokeWidth=1.5;fontSize=15;align=center;verticalAlign=middle;"
                 vertex="1" parent="1">
           <mxGeometry x="120" y="305" width="240" height="40" as="geometry"/>
         </mxCell>
         <mxCell id="gr_s2" value="② Trích xuất thực thể"
-                style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#d79b00;strokeWidth=1.5;fontSize=14;align=center;verticalAlign=middle;"
+                style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#d79b00;strokeWidth=1.5;fontSize=15;align=center;verticalAlign=middle;"
                 vertex="1" parent="1">
           <mxGeometry x="120" y="355" width="240" height="40" as="geometry"/>
         </mxCell>
         <mxCell id="gr_s3" value="③ Truy xuất đa độ hạt"
-                style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#d79b00;strokeWidth=1.5;fontSize=14;align=center;verticalAlign=middle;"
+                style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#d79b00;strokeWidth=1.5;fontSize=15;align=center;verticalAlign=middle;"
                 vertex="1" parent="1">
           <mxGeometry x="120" y="405" width="240" height="40" as="geometry"/>
         </mxCell>
         <mxCell id="gr_s4" value="④ Tổ chức ngữ cảnh"
-                style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#d79b00;strokeWidth=1.5;fontSize=14;align=center;verticalAlign=middle;"
+                style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#d79b00;strokeWidth=1.5;fontSize=15;align=center;verticalAlign=middle;"
                 vertex="1" parent="1">
           <mxGeometry x="120" y="455" width="240" height="40" as="geometry"/>
         </mxCell>
@@ -73,22 +73,22 @@
         </mxCell>
 
         <mxCell id="gg_s1" value="① Xây dựng Prompt"
-                style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#9673a6;strokeWidth=1.5;fontSize=14;align=center;verticalAlign=middle;"
+                style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#9673a6;strokeWidth=1.5;fontSize=15;align=center;verticalAlign=middle;"
                 vertex="1" parent="1">
           <mxGeometry x="760" y="305" width="240" height="40" as="geometry"/>
         </mxCell>
         <mxCell id="gg_s2" value="② Chiến lược tạo sinh"
-                style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#9673a6;strokeWidth=1.5;fontSize=14;align=center;verticalAlign=middle;"
+                style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#9673a6;strokeWidth=1.5;fontSize=15;align=center;verticalAlign=middle;"
                 vertex="1" parent="1">
           <mxGeometry x="760" y="355" width="240" height="40" as="geometry"/>
         </mxCell>
         <mxCell id="gg_s3" value="③ Sinh câu trả lời"
-                style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#9673a6;strokeWidth=1.5;fontSize=14;align=center;verticalAlign=middle;"
+                style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#9673a6;strokeWidth=1.5;fontSize=15;align=center;verticalAlign=middle;"
                 vertex="1" parent="1">
           <mxGeometry x="760" y="405" width="240" height="40" as="geometry"/>
         </mxCell>
         <mxCell id="gg_s4" value="④ Kiểm soát chất lượng"
-                style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#9673a6;strokeWidth=1.5;fontSize=14;align=center;verticalAlign=middle;"
+                style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#9673a6;strokeWidth=1.5;fontSize=15;align=center;verticalAlign=middle;"
                 vertex="1" parent="1">
           <mxGeometry x="760" y="455" width="240" height="40" as="geometry"/>
         </mxCell>
@@ -139,31 +139,31 @@
 
         <!-- INTER-LAYER ARROWS -->
         <!-- UI → Processing -->
-        <mxCell id="e_ui_proc" value="Câu hỏi người dùng" style="endArrow=classic;html=1;rounded=0;strokeColor=#666666;strokeWidth=2;fontSize=12;fontStyle=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;"
+        <mxCell id="e_ui_proc" value="Câu hỏi người dùng" style="endArrow=classic;html=1;rounded=0;strokeColor=#666666;strokeWidth=2;fontSize=15;fontStyle=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;"
                 edge="1" source="ui_show" target="proc_layer" parent="1">
           <mxGeometry relative="1" as="geometry"/>
         </mxCell>
 
         <!-- Processing → KG -->
-        <mxCell id="e_proc_kg" value="truy vấn đồ thị" style="endArrow=classic;html=1;rounded=0;strokeColor=#82b366;strokeWidth=2;fontSize=12;fontStyle=1;exitX=0.3;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;"
+        <mxCell id="e_proc_kg" value="truy vấn đồ thị" style="endArrow=classic;html=1;rounded=0;strokeColor=#82b366;strokeWidth=2;fontSize=15;fontStyle=1;exitX=0.3;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;"
                 edge="1" source="gret_panel" target="kg_layer" parent="1">
           <mxGeometry relative="1" as="geometry"/>
         </mxCell>
 
         <!-- KG → Processing -->
-        <mxCell id="e_kg_proc" value="Nút, Cạnh, Đường" style="endArrow=classic;html=1;rounded=0;strokeColor=#82b366;strokeWidth=2;dashed=1;fontSize=12;fontStyle=1;exitX=0.7;exitY=0;exitDx=0;exitDy=0;entryX=0.4;entryY=1;entryDx=0;entryDy=0;"
+        <mxCell id="e_kg_proc" value="Nút, Cạnh, Đường" style="endArrow=classic;html=1;rounded=0;strokeColor=#82b366;strokeWidth=2;dashed=1;fontSize=15;fontStyle=1;exitX=0.7;exitY=0;exitDx=0;exitDy=0;entryX=0.4;entryY=1;entryDx=0;entryDy=0;"
                 edge="1" source="kg_layer" target="gret_panel" parent="1">
           <mxGeometry relative="1" as="geometry"/>
         </mxCell>
 
         <!-- Processing → LLM -->
-        <mxCell id="e_proc_llm" value="Prompt" style="endArrow=classic;html=1;rounded=0;strokeColor=#b85450;strokeWidth=2;fontSize=12;fontStyle=1;exitX=0.3;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;"
+        <mxCell id="e_proc_llm" value="Prompt" style="endArrow=classic;html=1;rounded=0;strokeColor=#b85450;strokeWidth=2;fontSize=15;fontStyle=1;exitX=0.3;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;"
                 edge="1" source="ggen_panel" target="llm_layer" parent="1">
           <mxGeometry relative="1" as="geometry"/>
         </mxCell>
 
         <!-- LLM → Processing -->
-        <mxCell id="e_llm_proc" value="Câu trả lời" style="endArrow=classic;html=1;rounded=0;strokeColor=#b85450;strokeWidth=2;dashed=1;fontSize=12;fontStyle=1;exitX=0.7;exitY=0;exitDx=0;exitDy=0;entryX=0.6;entryY=1;entryDx=0;entryDy=0;"
+        <mxCell id="e_llm_proc" value="Câu trả lời" style="endArrow=classic;html=1;rounded=0;strokeColor=#b85450;strokeWidth=2;dashed=1;fontSize=15;fontStyle=1;exitX=0.7;exitY=0;exitDx=0;exitDy=0;entryX=0.6;entryY=1;entryDx=0;entryDy=0;"
                 edge="1" source="llm_layer" target="ggen_panel" parent="1">
           <mxGeometry relative="1" as="geometry"/>
         </mxCell>

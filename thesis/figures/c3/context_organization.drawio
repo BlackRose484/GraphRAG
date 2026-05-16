@@ -7,7 +7,7 @@
 
         <!-- ĐẦU VÀO -->
         <mxCell id="input_g" value="&lt;b style=&quot;font-size:17px&quot;&gt;Đầu vào&lt;/b&gt;&lt;br&gt;&lt;br&gt;&lt;b&gt;GraphData G&lt;/b&gt;&lt;br&gt;{nodes, triplets,&lt;br&gt;paths, subgraph}"
-                style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;strokeWidth=2;fontSize=14;align=center;verticalAlign=middle;"
+                style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;strokeWidth=2;fontSize=15;align=center;verticalAlign=middle;"
                 vertex="1" parent="1">
           <mxGeometry x="60" y="240" width="220" height="160" as="geometry"/>
         </mxCell>
@@ -19,48 +19,48 @@
           <mxGeometry x="350" y="60" width="700" height="540" as="geometry"/>
         </mxCell>
 
-        <!-- 4 Định dạng -->
-        <mxCell id="fmt_nl" value="&lt;b&gt;Mô tả tự nhiên&lt;/b&gt;&lt;br&gt;(natural\_language)&lt;br&gt;&lt;br&gt;Chuyển bộ ba quan hệ&lt;br&gt;thành câu văn tiếng Việt"
-                style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#82b366;strokeWidth=1.5;fontSize=13;align=center;verticalAlign=middle;"
+        <!-- 4 Định dạng (chỉ giữ tên, vai trò mô tả qua text) -->
+        <mxCell id="fmt_nl" value="&lt;b style=&quot;font-size:16px&quot;&gt;Mô tả tự nhiên&lt;/b&gt;&lt;br&gt;(natural\_language)"
+                style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#82b366;strokeWidth=1.5;fontSize=15;align=center;verticalAlign=middle;"
                 vertex="1" parent="1">
-          <mxGeometry x="380" y="120" width="320" height="100" as="geometry"/>
+          <mxGeometry x="380" y="130" width="320" height="90" as="geometry"/>
         </mxCell>
 
-        <mxCell id="fmt_adj" value="&lt;b&gt;Bảng kề&lt;/b&gt;&lt;br&gt;(adjacency\_table)&lt;br&gt;&lt;br&gt;Bảng ba cột:&lt;br&gt;Nút khởi đầu, quan hệ, nút đích"
-                style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#82b366;strokeWidth=1.5;fontSize=13;align=center;verticalAlign=middle;"
+        <mxCell id="fmt_adj" value="&lt;b style=&quot;font-size:16px&quot;&gt;Bảng kề&lt;/b&gt;&lt;br&gt;(adjacency\_table)"
+                style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#82b366;strokeWidth=1.5;fontSize=15;align=center;verticalAlign=middle;"
                 vertex="1" parent="1">
-          <mxGeometry x="720" y="120" width="320" height="100" as="geometry"/>
+          <mxGeometry x="720" y="130" width="320" height="90" as="geometry"/>
         </mxCell>
 
-        <mxCell id="fmt_json" value="&lt;b&gt;Cấu trúc JSON&lt;/b&gt;&lt;br&gt;(code\_like)&lt;br&gt;&lt;br&gt;Đóng gói nút và quan hệ&lt;br&gt;cùng siêu dữ liệu"
-                style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#82b366;strokeWidth=1.5;fontSize=13;align=center;verticalAlign=middle;"
+        <mxCell id="fmt_json" value="&lt;b style=&quot;font-size:16px&quot;&gt;Cấu trúc JSON&lt;/b&gt;&lt;br&gt;(code\_like)"
+                style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#82b366;strokeWidth=1.5;fontSize=15;align=center;verticalAlign=middle;"
                 vertex="1" parent="1">
-          <mxGeometry x="380" y="250" width="320" height="100" as="geometry"/>
+          <mxGeometry x="380" y="250" width="320" height="90" as="geometry"/>
         </mxCell>
 
-        <mxCell id="fmt_seq" value="&lt;b&gt;Chuỗi nút&lt;/b&gt;&lt;br&gt;(node\_sequence)&lt;br&gt;&lt;br&gt;Đường dẫn dạng tuyến tính&lt;br&gt;A → B → C"
-                style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#82b366;strokeWidth=1.5;fontSize=13;align=center;verticalAlign=middle;"
+        <mxCell id="fmt_seq" value="&lt;b style=&quot;font-size:16px&quot;&gt;Chuỗi nút&lt;/b&gt;&lt;br&gt;(node\_sequence)"
+                style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#82b366;strokeWidth=1.5;fontSize=15;align=center;verticalAlign=middle;"
                 vertex="1" parent="1">
-          <mxGeometry x="720" y="250" width="320" height="100" as="geometry"/>
+          <mxGeometry x="720" y="250" width="320" height="90" as="geometry"/>
         </mxCell>
 
-        <!-- KEY FACTS BOX -->
-        <mxCell id="key_facts" value="&lt;b style=&quot;font-size:15px&quot;&gt;Trích Dữ kiện chính K&lt;/b&gt;&lt;br&gt;&lt;br&gt;Tóm tắt các thông tin cốt lõi&lt;br&gt;từ G theo dạng gạch đầu dòng:&lt;br&gt;• Mỗi thực thể kèm nhãn loại&lt;br&gt;• Quan hệ trực tiếp ưu tiên&lt;br&gt;• Lược bỏ chi tiết phiên bản"
-                style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;strokeWidth=2;fontSize=13;align=left;verticalAlign=top;spacingLeft=15;spacingTop=10;"
+        <!-- KEY FACTS BOX (chỉ giữ tên + dạng dữ liệu, không nêu vai trò/quy tắc) -->
+        <mxCell id="key_facts" value="&lt;b style=&quot;font-size:16px&quot;&gt;Dữ kiện chính K&lt;/b&gt;&lt;br&gt;&lt;br&gt;tập mệnh đề ngắn"
+                style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;strokeWidth=2;fontSize=15;align=center;verticalAlign=middle;"
                 vertex="1" parent="1">
-          <mxGeometry x="380" y="390" width="660" height="180" as="geometry"/>
+          <mxGeometry x="380" y="400" width="660" height="120" as="geometry"/>
         </mxCell>
 
         <!-- ĐẦU RA -->
         <mxCell id="output" value="&lt;b style=&quot;font-size:17px&quot;&gt;Đầu ra&lt;/b&gt;&lt;br&gt;&lt;br&gt;&lt;b&gt;(C, K)&lt;/b&gt;&lt;br&gt;&lt;br&gt;C = {(định dạng, nội dung)}&lt;br&gt;K = tập dữ kiện chính"
-                style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;strokeWidth=2;fontSize=14;align=center;verticalAlign=middle;"
+                style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;strokeWidth=2;fontSize=15;align=center;verticalAlign=middle;"
                 vertex="1" parent="1">
           <mxGeometry x="1130" y="240" width="220" height="160" as="geometry"/>
         </mxCell>
 
         <!-- ARROWS -->
         <!-- Đầu vào → Bộ chuyển đổi -->
-        <mxCell id="e_in_conv" value="G" style="endArrow=classic;html=1;rounded=0;strokeColor=#555555;strokeWidth=2.5;fontSize=14;fontStyle=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;"
+        <mxCell id="e_in_conv" value="G" style="endArrow=classic;html=1;rounded=0;strokeColor=#555555;strokeWidth=2.5;fontSize=15;fontStyle=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;"
                 edge="1" source="input_g" parent="1">
           <mxGeometry relative="1" as="geometry">
             <mxPoint x="350" y="320" as="targetPoint"/>
@@ -68,7 +68,7 @@
         </mxCell>
 
         <!-- Bộ chuyển đổi → Đầu ra -->
-        <mxCell id="e_conv_out" value="(C, K)" style="endArrow=classic;html=1;rounded=0;strokeColor=#555555;strokeWidth=2.5;fontSize=14;fontStyle=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;"
+        <mxCell id="e_conv_out" value="(C, K)" style="endArrow=classic;html=1;rounded=0;strokeColor=#555555;strokeWidth=2.5;fontSize=15;fontStyle=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;"
                 edge="1" target="output" parent="1">
           <mxGeometry relative="1" as="geometry">
             <mxPoint x="1050" y="320" as="sourcePoint"/>

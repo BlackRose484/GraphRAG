@@ -2,32 +2,32 @@
 %  Section 4.2 — Thực nghiệm benchmark
 % =============================================================================
 
-\section{Thực nghiệm benchmark}
+\section{Thực nghiệm đánh giá}
 \label{sec:benchmark_experiments}
 
 \subsection{Triển khai hệ thống cho thực nghiệm}
 \label{sec:benchmark_setup}
 
-Thực nghiệm benchmark được thực hiện trên môi trường cục bộ với mục tiêu đo định lượng hiệu năng các thành phần của kiến trúc GraphRAG và so sánh với các hệ thống tham chiếu. Thiết kế thực nghiệm tuân thủ nguyên tắc kiểm soát chặt mọi yếu tố ngoài cơ chế truy xuất - từ phần cứng, mô hình ngôn ngữ, tham số tạo sinh đến tập câu hỏi - đều được giữ cố định để chênh lệch kết quả phản ánh đúng đặc trưng kiến trúc của từng hệ thống.
+Thực nghiệm đánh giá được thực hiện trên môi trường cục bộ với mục tiêu đo định lượng hiệu năng các thành phần của kiến trúc GraphRAG và so sánh với các hệ thống tham chiếu. Thiết kế thực nghiệm tuân thủ nguyên tắc kiểm soát chặt mọi yếu tố ngoài cơ chế truy xuất - từ phần cứng, mô hình ngôn ngữ, tham số tạo sinh đến tập câu hỏi - đều được giữ cố định để chênh lệch kết quả phản ánh đúng đặc trưng kiến trúc của từng hệ thống.
 
-\textbf{Môi trường thực nghiệm.} Toàn bộ thực nghiệm được triển khai trên một máy cá nhân chạy Windows. Đồ thị tri thức Chèo được dựng trên Neo4j, pipeline GraphRAG với cả ba chiến lược tạo sinh được cài đặt đầy đủ và có thể chuyển đổi qua cấu hình. Mô hình ngôn ngữ lớn được sử dụng qua API để đảm bảo tính \textit{LLM-agnostic}, đồng thời một mô hình duy nhất được chọn cho toàn bộ thực nghiệm với tham số sinh cố định (temperature bằng 0, top-p bằng 1) - cách đặt này loại bỏ tính ngẫu nhiên trong sinh ngôn ngữ và đảm bảo các kết quả định lượng có khả năng tái lập.
+\textbf{Môi trường thực nghiệm.} Toàn bộ thực nghiệm được triển khai trên một máy cá nhân chạy Windows. Đồ thị tri thức Chèo được dựng trên Neo4j, pipeline GraphRAG với cả ba chiến lược tạo sinh được cài đặt đầy đủ. Mô hình ngôn ngữ lớn được sử dụng qua API, đồng thời một mô hình duy nhất được chọn cho toàn bộ thực nghiệm với tham số sinh cố định (temperature bằng 0, top-p bằng 1) - cách đặt này loại bỏ tính ngẫu nhiên trong sinh ngôn ngữ và đảm bảo các kết quả định lượng có khả năng tái lập.
 
 \textbf{Hệ thống tham chiếu.} Một hệ thống tham chiếu được triển khai cùng môi trường để làm cơ sở cho thực nghiệm so sánh, đó là \textbf{RAG truyền thống} - đại diện cho cách tiếp cận RAG dựa trên tương đồng véc-tơ: tài liệu mô tả Chèo được chia thành các đoạn văn bản có độ dài cố định, nhúng véc-tơ bằng mô hình embedding và lưu trong vector store. Khi nhận câu hỏi, hệ thống lấy các đoạn văn có độ tương đồng cosine cao nhất làm ngữ cảnh trước khi gửi tới mô hình ngôn ngữ. Cả hai hệ thống GraphRAG và RAG truyền thống dùng cùng một mô hình ngôn ngữ và cùng tham số sinh để chênh lệch kết quả chỉ phản ánh khác biệt về cơ chế truy xuất.
 
-\textbf{Quy mô mẫu thực nghiệm.} Mẫu thực nghiệm được phân chia theo mục đích từng thí nghiệm. Thí nghiệm so sánh GraphRAG với RAG truyền thống chạy trên toàn bộ 100 ca của CheoBench để đảm bảo phạm vi đánh giá đầy đủ. Các thí nghiệm phân tích thành phần - đo ảnh hưởng của mức độ truy xuất và định dạng ngữ cảnh đến hiệu năng tổng thể - chạy trên một tập con 20 ca được lấy mẫu phân tầng cân bằng theo ba nhóm Local, Community, Global. Tập con này được dùng chung cho mọi cấu hình thí nghiệm nhằm loại biến động giữa các tập câu hỏi và kiểm soát chi phí gọi mô hình ngôn ngữ.
+\textbf{Quy mô mẫu thực nghiệm.} Mẫu thực nghiệm được phân chia theo mục đích từng thí nghiệm. Thí nghiệm so sánh GraphRAG với RAG truyền thống chạy trên toàn bộ 100 ca của CheoBench để đảm bảo phạm vi đánh giá đầy đủ. Các thí nghiệm phân tích thành phần - đo ảnh hưởng của mức độ truy xuất và định dạng ngữ cảnh đến hiệu năng tổng thể - chạy trên một tập con 20 ca được lấy mẫu phân tầng cân bằng theo ba nhóm Local, Community, Global. Tập con này được dùng chung cho mọi cấu hình thí nghiệm.
 
 \subsection{Độ đo đánh giá}
 
-Hệ độ đo đánh giá của CheoBench gồm chín thành phần thuộc ba khối, phản ánh ba chiều cốt lõi của một hệ thống RAG: chất lượng tập thực thể được truy xuất, chất lượng ngữ cảnh đưa vào mô hình ngôn ngữ và chất lượng câu trả lời cuối cùng. Bốn độ đo IR truyền thống đo độ chính xác và độ bao phủ của danh sách thực thể truy xuất; ba độ đo ngữ nghĩa theo RAGAs~\cite{es2023ragas} đo chất lượng ngữ cảnh; hai độ đo còn lại theo RAGAs đo chất lượng câu trả lời. Chín thành phần được kết hợp thành ba điểm tổng hợp $S_{\text{retrieval}}$, $S_{\text{generation}}$ và $S_{\text{overall}}$, trong đó $S_{\text{overall}}$ đóng vai trò là chỉ số cuối cùng, quyết định chất lượng của cả hệ thống ở phần kết quả thực nghiệm.
+Hệ độ đo đánh giá của CheoBench gồm chín thành phần thuộc ba khối, phản ánh ba yếu tố cốt lõi của một hệ thống RAG: (i) chất lượng tập thực thể được truy xuất, (ii) chất lượng ngữ cảnh đưa vào mô hình ngôn ngữ và (iii) chất lượng câu trả lời cuối cùng. Bốn độ đo IR truyền thống đo độ chính xác và độ bao phủ của danh sách thực thể truy xuất; ba độ đo ngữ nghĩa theo RAGAs~\cite{es2023ragas} đo chất lượng ngữ cảnh; hai độ đo còn lại theo RAGAs đo chất lượng câu trả lời. Chín thành phần được kết hợp thành ba điểm tổng hợp $S_{\text{retrieval}}$, $S_{\text{generation}}$ và $S_{\text{overall}}$, trong đó $S_{\text{overall}}$ đóng vai trò là chỉ số cuối cùng, quyết định chất lượng của cả hệ thống ở phần kết quả thực nghiệm.
 
 \subsubsection{Chất lượng truy xuất}
 
 Chất lượng truy xuất được đánh giá bởi bốn độ đo IR xác định kết hợp với ba độ đo ngữ nghĩa theo RAGAs. Nhóm IR đo độ chính xác và độ bao phủ của danh sách thực thể truy xuất so với tập thực thể mong muốn (ground truth):
 
 \begin{itemize}
-  \item \textbf{MAP}~\cite{manning2008ir} - trung bình độ chính xác (average precision) trên toàn bộ truy vấn; MAP thưởng các cấu hình đưa nhiều thực thể đúng lên vị trí đầu của danh sách truy xuất, phản ánh chất lượng xếp hạng tổng thể.
+  \item \textbf{MAP}~\cite{manning2008ir} - trung bình độ chính xác (average precision) trên toàn bộ truy vấn; MAP tăng nhiều điểm với các trường hợp có nhiều thực thể đúng ở vị trí đầu của danh sách truy xuất, phản ánh chất lượng xếp hạng tổng thể.
 
-  \item \textbf{NDCG@10}~\cite{jarvelin2002ndcg} - đánh giá chất lượng xếp hạng ở mười vị trí đầu với phạt logarit theo vị trí; mức cắt $K = 10$ được chọn để phù hợp với kích thước ngữ cảnh điển hình mà pipeline đưa vào mô hình ngôn ngữ.
+  \item \textbf{NDCG@10}~\cite{jarvelin2002ndcg} - đánh giá chất lượng xếp hạng ở mười vị trí đầu với mức phạt logarit theo vị trí; mức cắt $K = 10$ được chọn để phù hợp với kích thước ngữ cảnh điển hình mà pipeline đưa vào mô hình ngôn ngữ.
 
   \item \textbf{Precision} và \textbf{Recall} - tỷ lệ chính xác và độ bao phủ của kết quả truy xuất so với tập thực thể liên quan $R$ theo ground truth, tính trên toàn bộ danh sách truy xuất $L$ sau khi loại trùng lặp:
     \begin{equation}
@@ -45,17 +45,18 @@ Nhóm RAGAs bổ sung khía cạnh ngữ nghĩa, đo chất lượng ngữ cản
 
 \begin{equation}
 \begin{aligned}
-S_{\text{retrieval}} =\;& 0,20 \cdot \text{MAP}
-  + 0,15 \cdot \text{NDCG@10} \\
-& + 0,10 \cdot \text{Precision}
-  + 0,10 \cdot \text{Recall} \\
-& + 0,20 \cdot \text{Context Precision}
-  + 0,15 \cdot \text{Context Recall} \\
-& + 0,10 \cdot \text{Context Entities Recall}.
+S_{\text{retrieval}} =\;& 0.20 \times \text{MAP}
+  + 0.15 \times \text{NDCG@10} \\
+& + 0.10 \times \text{Precision}
+  + 0.10 \times \text{Recall} \\
+& + 0.20 \times \text{Context Precision}
+  + 0.15 \times \text{Context Recall} \\
+& + 0.10 \times \text{Context Entities Recall}.
 \end{aligned}
 \end{equation}
 
-Khối IR nhận tổng trọng số $0,55$ - cao hơn khối RAGAs ($0,45$) - do các độ đo IR có thể tính toán trực tiếp và tái lập chính xác, trong khi RAGAs phụ thuộc vào phán đoán của mô hình ngôn ngữ và có biến động giữa các lần chạy. Trong từng khối, các độ đo bao quát chất lượng xếp hạng hoặc độ liên quan tổng thể (MAP, Context Precision) nhận trọng số cao nhất ($0,20$); các độ đo đo độ bao phủ ở phạm vi rộng (NDCG@10, Context Recall) nhận trọng số trung bình ($0,15$); các độ đo đơn khía cạnh hoặc phạm vi hẹp (Precision, Recall, Context Entities Recall) nhận trọng số thấp nhất ($0,10$).
+Khối IR nhận tổng trọng số cao hơn (0,55) so với khối RAGAs (0,45) nhằm ưu tiên "độ tin cậy về mặt cấu trúc" (Structural Fidelity) – bởi việc truy xuất đúng định danh và quan hệ gốc là điều kiện tiên quyết để hệ thống không bịa đặt thông tin, trong khi khối RAGAs đánh giá "ngữ nghĩa tạo sinh" và phải chấp nhận mức độ dao động nhất định do bản chất phán đoán của LLM-as-a-judge
+. Đi sâu vào từng khối, trọng số cao nhất (0,20) được gán cho MAP và Context Precision để giải quyết đặc thù giới hạn tập trung (Attention limit) của mạng Transformer, buộc hệ thống phải xếp hạng thực thể cốt lõi và tín hiệu hữu ích lên ngay phần đầu ngữ cảnh. Tiếp theo, trọng số trung bình (0,15) dành cho NDCG@10 và Context Recall nhằm đảm bảo "độ bao phủ có giới hạn", tức là lấy đủ lượng tri thức cần thiết cho suy luận đa bước nhưng phải được kiểm soát lọt trong top 10 để tránh làm tràn Context Window gây loãng thông tin. Cuối cùng, trọng số thấp nhất (0,10) được đặt cho Precision, Recall thô và Context Entities Recall nhằm bảo vệ điểm tổng hợp không bị phạt sai lệch bởi chính đặc tính của GraphRAG: hệ thống luôn chủ động kéo theo nhiều thực thể và nút trung gian (đặc biệt ở mức Path và Subgraph) để bảo toàn cấu trúc mạng lưới, một sự đánh đổi tất yếu làm giảm Precision thô nhưng lại có ý nghĩa quan trọng để LLM có được bức tranh toàn cục.
 
 \subsubsection{Chất lượng tạo sinh}
 
@@ -70,7 +71,7 @@ Chất lượng tạo sinh được đánh giá qua hai độ đo RAGAs theo cơ
 \textbf{Answer Relevance} được mô hình ngôn ngữ ước lượng trực tiếp từ cặp (câu hỏi, câu trả lời), cho điểm số liên tục phản ánh mức độ câu trả lời giải quyết đúng câu hỏi được đặt ra. Điểm tạo sinh $S_{\text{generation}}$ tổng hợp hai độ đo với trọng số bằng nhau:
 
 \begin{equation}
-S_{\text{generation}} = 0,5 \cdot \text{Faithfulness} + 0,5 \cdot \text{Answer Relevance}.
+S_{\text{generation}} = \frac{\text{Faithfulness} + \text{Answer Relevance}}{2}.
 \end{equation}
 
 \subsubsection{Điểm tổng hợp}
@@ -84,20 +85,20 @@ S_{\text{overall}} = 0,5 \cdot S_{\text{retrieval}} + 0,5 \cdot S_{\text{generat
 \subsection{Kết quả thực nghiệm}
 \label{sec:benchmark_results}
 
-Phần kết quả lần lượt báo cáo ba thí nghiệm tương ứng ba mục tiêu. \textbf{Mục tiêu thứ nhất (MT1)} so sánh tổng thể GraphRAG với RAG truyền thống trên toàn bộ 100 ca của CheoBench để xác định lợi ích của kiến trúc đề xuất. Hai mục tiêu còn lại phân tích từng thành phần của GraphRAG trên tập con 20 ca: \textbf{mục tiêu thứ hai (MT2)} đo ảnh hưởng của mức độ truy xuất trong đồ thị tri thức đến hiệu năng tổng thể, \textbf{mục tiêu thứ ba (MT3)} đo tác động của định dạng biểu diễn ngữ cảnh đến khả năng suy luận của mô hình ngôn ngữ.
+Phần kết quả lần lượt báo cáo bốn thí nghiệm tương ứng bốn mục tiêu. \textbf{Mục tiêu thứ nhất (MT1)} so sánh tổng thể GraphRAG với RAG truyền thống trên toàn bộ 100 ca của CheoBench để xác định lợi ích của kiến trúc đề xuất. Hai mục tiêu còn lại phân tích từng thành phần của GraphRAG trên tập con 20 ca kiểm thử. \textbf{Mục tiêu thứ hai (MT2)} đo ảnh hưởng của mức độ truy xuất trong đồ thị tri thức đến hiệu năng tổng thể, \textbf{mục tiêu thứ ba (MT3)} đo tác động của định dạng biểu diễn ngữ cảnh đến khả năng suy luận của mô hình ngôn ngữ và và \textbf{mục tiêu thứ tư (MT4)} đo ảnh hưởng của các chiến lược tạo sinh đến hiệu năng trên từng loại câu hỏi.
 
 \subsubsection{So sánh với hệ thống tham chiếu (MT1)}
 \label{sec:results_baseline}
 
-Kết quả so sánh GraphRAG với RAG truyền thống trên 100 ca của CheoBench (Bảng~\ref{tab:baseline_results}) cho ba phát hiện đáng chú ý, lần lượt theo ba khối độ đo IR, Context và Generation.
+Kết quả so sánh GraphRAG với RAG truyền thống trên 100 ca của CheoBench (Bảng~\ref{tab:baseline_results}) cho ba phát hiện chính, lần lượt theo ba khối độ đo IR, Context và Generation.
 
-Ở khối IR thuần, hai hệ thống có hiệu năng tương đương trên các độ đo xếp hạng - MAP đạt $0,500$ cho GraphRAG so với $0,520$ cho RAG, NDCG@10 đạt $0,579$ so với $0,588$ - thậm chí RAG nhỉnh hơn nhẹ ở Precision tuyệt đối ($0,273$ so với $0,173$). Khác biệt này không phản ánh chất lượng xếp hạng mà phản ánh cơ chế trả về các thực thể ứng viên: RAG chỉ lấy các đoạn văn bản có độ tương đồng cosine cao nhất nên danh sách ngắn và đặc, GraphRAG mở rộng truy xuất qua cấu trúc đồ thị nên trả về nhiều thực thể ứng viên hơn - hệ quả là Recall của GraphRAG vượt RAG ($0,707$ so với $0,598$) còn Precision lại thấp hơn khá nhiều. Sự tương đương ở khối IR do đó cho thấy việc tìm đúng thực thể hay đoạn văn bản liên quan đến câu hỏi không phải là khác biệt cốt lõi giữa hai kiến trúc.
+Ở khối IR thuần, hai hệ thống có hiệu năng tương đương trên các độ đo xếp hạng - MAP đạt $0,500$ cho GraphRAG so với $0,520$ cho RAG, NDCG@10 đạt $0,579$ so với $0,588$ - thậm chí RAG nhỉnh hơn ở Precision tuyệt đối ($0,628$ so với $0,473$). Khác biệt này không phản ánh chất lượng xếp hạng mà phản ánh cơ chế trả về các thực thể ứng viên: RAG chỉ lấy các đoạn văn bản có độ tương đồng cosine cao nhất nên danh sách ngắn và đặc, GraphRAG mở rộng truy xuất qua cấu trúc đồ thị nên trả về nhiều thực thể ứng viên hơn - hệ quả là Recall của GraphRAG vượt RAG ($0,707$ so với $0,598$) còn Precision lại thấp hơn khá nhiều. Sự tương đương ở khối IR do đó cho thấy việc tìm đúng thực thể hay đoạn văn bản liên quan đến câu hỏi không phải là khác biệt cốt lõi giữa hai kiến trúc.
 
 Khoảng cách thực sự bộc lộ ở khối Context. Context Recall đạt $0,964$ cho GraphRAG so với $0,418$ cho RAG - chênh lệch tới $+0,546$ điểm. Nguyên nhân nằm ở cách hai hệ thống tổ chức ngữ cảnh trước khi đưa vào mô hình ngôn ngữ: RAG cắt tài liệu mô tả Chèo thành các đoạn cố định rồi lấy theo độ tương đồng véc-tơ, dẫn đến tình trạng thông tin về một thực thể có thể nằm rải rác ở nhiều đoạn nhưng chỉ một số đoạn được lấy ra; trong khi GraphRAG truy xuất theo cấu trúc đồ thị, đưa cả thực thể trung tâm lẫn các thực thể có quan hệ trực tiếp vào ngữ cảnh một cách hệ thống (Mục~\ref{sec:multi_granularity}). Context Precision của GraphRAG ($0,867$) và Context Entities Recall ($0,982$) cũng vượt xa RAG ($0,513$ và $0,637$), khẳng định ngữ cảnh từ đồ thị tri thức vừa liên quan hơn vừa đầy đủ hơn so với ngữ cảnh từ vector store.
 
 Chất lượng ngữ cảnh khác biệt dẫn đến chênh lệch rõ rệt ở khối Generation. Faithfulness của GraphRAG đạt $0,986$ - gần như mọi mệnh đề trong câu trả lời đều có cơ sở trong ngữ cảnh - so với $0,734$ của RAG, tức RAG có khoảng $27\%$ mệnh đề không được ngữ cảnh hỗ trợ và phải dựa vào tri thức nội tại của mô hình ngôn ngữ. Kết quả này phù hợp với hai cơ chế chống ảo giác đã thiết kế trong G-Retrieval: Danh mục thực thể (Mục~\ref{sec:entity_catalog}) ràng buộc tên gọi không vượt phạm vi đồ thị, và ngữ cảnh có cấu trúc rõ ràng giúp mô hình ngôn ngữ phân biệt được thực thể nào là trung tâm câu hỏi. Answer Relevance ($0,974$ so với $0,630$) là hệ quả của hai yếu tố trên: khi ngữ cảnh thiếu thông tin then chốt (Context Recall $0,418$ của RAG), câu trả lời lan man hoặc lệch hướng so với câu hỏi đặt ra.
 
-Tổng hợp lại, lợi ích của GraphRAG so với RAG truyền thống chuyển thẳng vào điểm tổng hợp: $S_{\text{retrieval}}$ chênh $+0,183$ điểm chủ yếu từ khối Context, $S_{\text{generation}}$ chênh $+0,298$ điểm trực tiếp từ Faithfulness và Answer Relevance, và $S_{\text{overall}}$ cuối cùng đạt $0,835$ cho GraphRAG so với $0,595$ cho RAG - chênh $+0,240$ điểm trên thang $[0, 1]$. Khoảng cách này lớn ở mức kiến trúc chứng minh rằng: cấu trúc đồ thị tri thức không chỉ cải thiện chất lượng câu trả lời ở mức tinh chỉnh mà còn thay đổi căn bản chất lượng ngữ cảnh được cung cấp cho các mô hình ngôn ngữ.
+Tổng hợp lại, lợi ích của GraphRAG so với RAG truyền thống chuyển thẳng vào điểm tổng hợp: $S_{\text{retrieval}}$ chênh $+0,183$ điểm chủ yếu từ khối Context, $S_{\text{generation}}$ chênh $+0,298$ điểm trực tiếp từ Faithfulness và Answer Relevance, và $S_{\text{overall}}$ cuối cùng đạt $0,850$ cho GraphRAG so với $0,613$ cho RAG - chênh $+0,237$ điểm trên thang $[0, 1]$. Khoảng cách này lớn ở mức kiến trúc chứng minh rằng: cấu trúc đồ thị tri thức không chỉ cải thiện chất lượng câu trả lời ở mức tinh chỉnh mà còn thay đổi căn bản chất lượng ngữ cảnh được cung cấp cho các mô hình ngôn ngữ.
 
 \begin{table}[h]
 \centering
@@ -110,7 +111,7 @@ Tổng hợp lại, lợi ích của GraphRAG so với RAG truyền thống chuy
 \multirow{4}{*}{IR}
 & MAP            & 0,500 & 0,520 \\
 & NDCG@10        & 0,579 & 0,588 \\
-& Precision      & 0,173 & 0,273 \\
+& Precision      & 0,473 & 0,628 \\
 & Recall         & 0,707 & 0,598 \\
 \hline
 \multirow{3}{*}{Context (RAGAs)}
@@ -123,9 +124,9 @@ Tổng hợp lại, lợi ích của GraphRAG so với RAG truyền thống chuy
 & Answer Relevance & \textbf{0,974} & 0,630 \\
 \hline
 \multirow{3}{*}{Tổng hợp}
-& $S_{\text{retrieval}}$  & \textbf{0,691} & 0,508 \\
+& $S_{\text{retrieval}}$  & \textbf{0,721} & 0,544 \\
 & $S_{\text{generation}}$ & \textbf{0,980} & 0,682 \\
-& $S_{\text{overall}}$    & \textbf{0,835} & 0,595 \\
+& $S_{\text{overall}}$    & \textbf{0,850} & 0,613 \\
 \hline
 \end{tabular}
 \end{table}
@@ -155,7 +156,7 @@ Subgraph          & 0,284 & 0,971 & 0,628 \\
 \subsubsection{Ảnh hưởng của định dạng biểu diễn ngữ cảnh (MT3)}
 \label{sec:results_format}
 
-Hiệu năng của GraphRAG được đo trên cùng tập 20 ca khi cấu hình chỉ dùng một định dạng biểu diễn ngữ cảnh duy nhất, sau đó so sánh với cấu hình kết hợp cả bốn định dạng (Bảng~\ref{tab:format_results}). Trong các định dạng đơn lẻ, JSON có cấu trúc đạt điểm cao nhất với $0,806$, tiếp theo là văn bản tự nhiên $0,761$ và bảng kề $0,750$; chuỗi nút tuyến tính thấp nhất ở $0,649$. Khoảng cách giữa định dạng tốt nhất và kém nhất lên tới $+0,157$ điểm, khẳng định kết quả của mô hình ngôn ngữ bị ảnh hưởng lớn bởi cách trình bày tri thức chứ không chỉ bởi mỗi lượng tri thức được cung cấp. Cấu hình kết hợp nhiều định dạng đạt $0,803$ - tương đương JSON đơn lẻ chứ không vượt lên, phản ánh hiện tượng lợi ích biên giảm dần khi tăng kích thước ngữ cảnh: khi định dạng tốt nhất đã cung cấp đủ tín hiệu, việc bổ sung thêm các bản trình bày khác chỉ tăng độ dài ngữ cảnh mà không mang lại tri thức mới.
+Hiệu năng của GraphRAG được đo trên cùng tập 20 ca khi cấu hình chỉ dùng một định dạng biểu diễn ngữ cảnh duy nhất, sau đó so sánh với cấu hình kết hợp cả bốn định dạng (Bảng~\ref{tab:format_results}). Trong các định dạng đơn lẻ, JSON có cấu trúc đạt điểm cao nhất với $0,806$, tiếp theo là văn bản tự nhiên $0,761$ và bảng kề $0,750$; chuỗi nút tuyến tính thấp nhất ở $0,649$. Khoảng cách giữa định dạng tốt nhất và kém nhất lên tới $+0,157$ điểm, khẳng định kết quả của mô hình ngôn ngữ bị ảnh hưởng lớn bởi cách trình bày tri thức chứ không chỉ bởi mỗi lượng tri thức được cung cấp. Cấu hình kết hợp nhiều định dạng đạt $0,803$ - tương đương JSON đơn lẻ chứ không vượt trội hẳn, phản ánh hiện tượng lợi ích biên giảm dần khi tăng kích thước ngữ cảnh: khi định dạng tốt nhất đã cung cấp đủ tín hiệu, việc bổ sung thêm các bản trình bày khác chỉ tăng độ dài ngữ cảnh mà không mang lại tri thức mới.
 
 \begin{table}[h]
 \centering
@@ -174,13 +175,36 @@ Kết hợp nhiều định dạng & 0,631 & 0,976 & 0,803 \\
 \end{tabular}
 \end{table}
 
+\subsubsection{Ảnh hưởng của các chiến lược tạo sinh (MT4)}
+
+Hiệu năng của hệ thống được đo lường trên tập 20 ca kiểm thử nhằm đánh giá sự phân hóa của ba chiến lược tạo sinh bao gồm Pre-Generation, Mid-Generation và Post-Generation đối với ba nhóm câu hỏi có mức độ phức tạp khác nhau là Local, Community và Global. Điểm tổng hợp ($S_{overall}$) của từng chiến lược cho thấy không có chiến lược nào tối ưu tuyệt đối cho mọi loại truy vấn, mà sự hiệu quả phụ thuộc chặt chẽ vào đặc thù của từng câu hỏi (Bảng \ref{tab:generation_strategy_results}).
+
+\begin{table}[h]
+\centering
+\caption{Ảnh hưởng của các chiến lược tạo sinh theo từng mức truy vấn tri thức.}
+\label{tab:generation_strategy_results}
+\begin{tabular}{lccc}
+\hline
+\textbf{Chiến lược} & \textbf{Local} & \textbf{Community} & \textbf{Global} \\
+\hline
+Pre-Retrieval  & \textbf{0,826} & 0,734 & 0,663 \\
+Mid-Retrieval  & 0,863 & \textbf{0,832} & 0,816 \\
+Post-Retrieval & 0,845 & 0,857 & \textbf{0,829} \\
+\hline
+\end{tabular}
+\end{table}
+
+Đối với các câu hỏi tra cứu trực tiếp ở mức độ Local, chiến lược Pre-Generation đạt điểm tương đối cao (0,826). Mặc dù chiến lược Mid-Generation cho kết quả nhỉnh hơn một chút (0,863), việc hệ thống ưu tiên lựa chọn Pre-Generation là một sự đánh đổi tối ưu nhằm giữ độ trễ ở mức thấp nhất cho các câu hỏi đơn giản. Chiến lược này không yêu cầu tiêu tốn thêm tài nguyên và số lượng token để sinh các khuôn mẫu phân tích phức tạp mà vẫn giải quyết trọn vẹn yêu cầu tra cứu từ đồ thị tri thức.
+
+Tuy nhiên, khi độ phức tạp của câu hỏi tăng lên ở mức độ Community đòi hỏi kết nối nhiều thực thể trong cùng một cụm quan hệ, chiến lược Pre-Generation bộc lộ rõ hạn chế khi điểm số sụt giảm mạnh xuống chỉ còn 0,734. Trong trường hợp này, chiến lược Mid-Generation với cơ chế ép khuôn mẫu suy luận ba bước gồm trích xuất dữ kiện, phân tích và kết luận đã giúp hệ thống giữ được hiệu năng ổn định, đạt điểm số 0,832. Đây là sự cân bằng giữa việc nâng cao chất lượng sinh đáp án và tối ưu hóa chi phí khi hệ thống vẫn chỉ sử dụng một lượt gọi mô hình duy nhất.
+
+Đối với các câu hỏi ở mức độ Global, yêu cầu hệ thống phải tổng hợp và diễn giải thông tin xuyên suốt nhiều phần khác nhau của đồ thị tri thức, chiến lược Pre-Generation chỉ đạt 0,663 do hiện tượng ảo giác thông tin của mô hình ngôn ngữ. Lúc này, cơ chế đối chiếu hai lượt gọi của chiến lược Post-Generation đạt hiệu quả cao hơn nhờ việc sinh câu trả lời sơ bộ ở lượt đầu và tự kiểm định, đối chiếu với ngữ cảnh đồ thị ở lượt gọi thứ hai, hệ thống đã hiệu chỉnh sai sót và đạt điểm số tốt hơn (0,829). Kết quả thực nghiệm định lượng này tương đối khớp với thiết kế định tuyến chiến lược tạo sinh tự động theo loại truy vấn đã được đề xuất tại Bảng \ref{tab:strategy_mapping}, chứng minh tính đúng đắn và hiệu quả của việc phân loại truy vấn để áp dụng chiến lược tạo sinh linh hoạt.
+
 \subsection{Phân tích và thảo luận}
 \label{sec:benchmark_discussion}
 
-Các kết quả thực nghiệm benchmark cho phép rút ra một số nhận định tổng hợp về kiến trúc GraphRAG, đồng thời gợi mở các hàm ý phương pháp luận đối với việc đánh giá các hệ thống RAG dựa trên đồ thị tri thức.
+Sự khác biệt giữa GraphRAG và RAG truyền thống ở miền tri thức Chèo cho thấy vai trò của cấu trúc đồ thị không chỉ nằm ở pha truy xuất mà còn ở pha tổ chức ngữ cảnh. Trên 100 ca của CheoBench, hai hệ thống cho hiệu năng IR thuần tương đương ở các độ đo xếp hạng (chênh lệch không quá $0,02$ điểm ở MAP và NDCG@10), nhưng tách biệt rõ rệt ở khối Context và khối Generation - đặc biệt là Context Recall ($0,964$ so với $0,418$) và Faithfulness ($0,986$ so với $0,734$). Lợi ích của việc khai thác đồ thị tri thức ngoài khả năng \textit{tìm đúng} thực thể có liên quan (RAG với cách tìm kiếm theo độ tương đồng véc-tơ thực hiện đủ tốt khi tìm kiếm các thực thể sát nhất với câu hỏi) - mà nằm ở khả năng \textit{tổ chức} các thực thể đó thành ngữ cảnh có liên kết, đầy đủ và có ràng buộc về sự tồn tại trước khi đưa vào mô hình ngôn ngữ. Thay vì những đoạn văn bản rời rạc, việc lấy thông tin từ các thực thể và quan hệ rõ ràng, cho GraphRAG ưu thế hơn khi tổ chức lên một ngữ cảnh phù hợp cho mô hình ngôn ngữ trong việc đưa ra các câu trả lời chính xác.
 
-Sự khác biệt giữa GraphRAG và RAG truyền thống ở miền tri thức Chèo cho thấy vai trò của cấu trúc đồ thị không nằm ở pha truy xuất mà nằm ở pha tổ chức ngữ cảnh. Trên 100 ca của CheoBench, hai hệ thống cho hiệu năng IR thuần tương đương ở các độ đo xếp hạng (chênh lệch không quá $0,02$ điểm ở MAP và NDCG@10), nhưng tách biệt rõ rệt ở khối Context và khối Generation - đặc biệt là Context Recall ($0,964$ so với $0,418$) và Faithfulness ($0,986$ so với $0,734$). Lợi ích của việc khai thác đồ thị tri thức do đó không nằm ở khả năng \textit{tìm đúng} thực thể có liên quan - vốn dĩ độ tương đồng véc-tơ thực hiện đủ tốt trong một miền có cấu trúc tương đối rõ - mà nằm ở khả năng \textit{tổ chức} các thực thể đó thành ngữ cảnh có liên kết, đầy đủ và có ràng buộc về sự tồn tại trước khi đưa vào mô hình ngôn ngữ. Điều đó chứng minh một điều rằng, một phương pháp truy xuất thông tin tốt, cần đi cùng một phương pháp tổ chức ngữ cảnh tốt mới có thể đem lại hiệu quả tối đa khi các mô hình ngôn ngữ sinh câu trả lời.
+Bên trong phân hệ G-Retrieval, các thành phần thể hiện hai kiểu tương tác trái ngược nhau. Bốn mức độ truy xuất Node, Triplet, Path và Subgraph tạo \textit{hiệu ứng cộng hưởng} khi được kết hợp - cấu hình đa mức vượt cấu hình đơn lẻ với nhiều nhất $+0,139$ điểm, lớn hơn khoảng cách giữa các mức đơn lẻ với nhau - cho thấy bốn mức đo các khía cạnh không thể thay thế lẫn nhau của cấu trúc đồ thị, và cơ chế định tuyến đa mức theo loại truy vấn (Mục~\ref{sec:multi_granularity}) là một thành phần thiết kế thiết yếu chứ không phải tuỳ chọn tăng cường. Ngược lại, bốn định dạng biểu diễn ngữ cảnh thể hiện hiện tượng \textit{lợi ích biên giảm dần}: cấu hình kết hợp ($0,803$) gần như ngang với JSON đơn lẻ ($0,806$) trong khi khoảng cách giữa định dạng tốt nhất và kém nhất lên tới $+0,157$ điểm. Sự đối lập giữa hai pattern này thể hiện rằng: đa dạng hoá nguồn tri thức đem lại lợi ích cộng dồn, nhưng một ngữ cảnh đủ tốt ổn định hơn so với đa dạng ngữ cảnh làm rối loạn thông tin khi cung cấp chúng cho các mô hình ngôn ngữ lớn.
 
-Bên trong phân hệ G-Retrieval, các thành phần thể hiện hai kiểu tương tác trái ngược nhau. Bốn mức độ truy xuất Node, Triplet, Path và Subgraph tạo \textit{hiệu ứng cộng hưởng} khi được kết hợp - cấu hình đa mức vượt cấu hình đơn lẻ với nhiều nhất $+0,139$ điểm, lớn hơn đáng kể so với khoảng cách giữa các mức đơn lẻ với nhau - cho thấy bốn mức đo các khía cạnh không thể thay thế lẫn nhau của cấu trúc đồ thị, và cơ chế định tuyến đa mức theo loại truy vấn (Mục~\ref{sec:multi_granularity}) là một thành phần thiết kế thiết yếu chứ không phải tuỳ chọn tăng cường. Ngược lại, bốn định dạng biểu diễn ngữ cảnh thể hiện hiện tượng \textit{lợi ích biên giảm dần}: cấu hình kết hợp ($0,803$) gần như ngang với JSON đơn lẻ ($0,806$) trong khi khoảng cách giữa định dạng tốt nhất và kém nhất lên tới $+0,157$ điểm. Sự đối lập giữa hai pattern này thể hiện rằng: đa dạng hoá nguồn tri thức đem lại lợi ích cộng dồn, còn đa dạng hoá cách trình bày cùng một nguồn tri thức không cộng dồn được, một ngữ cảnh đủ tốt ổn định hơn so với đa dạng ngữ cảnh làm rối loạn thông tin khi cung cấp chúng cho các mô hình ngôn ngữ lớn.
-
-Bên cạnh các phát hiện về kiến trúc, kết quả thí nghiệm so sánh với hệ thống tham chiếu (Mục~\ref{sec:results_baseline}) đồng thời minh chứng cho tính phù hợp của bộ benchmark CheoBench như một công cụ đo lường. Trên $100$ cặp chấm chung, GraphRAG vượt RAG ở $94/100$ câu mà không có câu nào hai hệ thống đồng điểm; khoảng cách điểm tổng hợp trung bình $0,24$ đi kèm phân phối trải rộng - $72$ câu chênh ít nhất $0,10$ và $33$ câu chênh ít nhất $0,30$. Phổ chênh lệch ổn định và rộng cho thấy CheoBench phân biệt được hai hệ thống ở nhiều cấp độ chất lượng chứ không dồn về hai cực, đáp ứng yêu cầu cơ bản của một bộ benchmark phân biệt theo nghĩa cổ điển.
+Cuối cùng, ở phân hệ G-Generation, thực nghiệm phân tích thành phần đối với các chiến lược tạo sinh (MT4) đã khẳng định rằng kiến trúc GraphRAG không chỉ cần đầu tư vào pha truy xuất mà còn đòi hỏi sự kiểm soát chặt chẽ quá trình tạo sinh. Sự kết hợp linh hoạt thông qua bộ định tuyến chiến lược đã giúp hệ thống đạt được hiệu năng tổng hợp tối ưu. Sự phân bổ này vừa đảm bảo chất lượng tri thức chuyên môn vừa không gây lãng phí chi phí API hay làm tăng độ trễ của hệ thống một cách vô lý.

@@ -1,0 +1,57 @@
+% =============================================================================
+%  Section 4.1 - Kiểm nghiệm bộ benchmark
+% =============================================================================
+
+\section{Kiểm nghiệm bộ dữ liệu đánh giá}
+\label{sec:benchmark_validity}
+
+Phần này đánh giá bộ benchmark CheoBench qua các tính chất cơ bản của một bộ dữ liệu đánh giá: độ phủ trên đồ thị tri thức và phân tầng cấu trúc của bộ câu hỏi (khung \textit{construct validity} - Messick~\cite{messick1995validity}).
+
+\textbf{Độ phủ trên đồ thị tri thức.}
+CheoBench đảm bảo mọi câu hỏi đều có thể trả lời được từ tri thức trong đồ thị. Mức độ bao phủ được tính theo hai bước. Bước thứ nhất, gộp tập \texttt{related\_entities} của $100$ câu hỏi - tập thực thể tham gia vào ground truth của câu - thu được $225$ tham chiếu, tương ứng $55$ thực thể duy nhất sau khi loại trùng. Bước thứ hai, đối chiếu từng thực thể với định danh trên đồ thị, phân theo bốn loại chính: vở chèo, nhân vật, diễn viên và trích đoạn (Bảng~\ref{tab:coverage_entity}). Toàn bộ $225$ tham chiếu đều khớp với định danh, không câu nào dẫn tới thực thể không tồn tại. Tỷ lệ phủ cho mỗi loại được tính bằng tỷ số giữa số thực thể được tham chiếu và tổng số thực thể loại đó trong đồ thị: lớp vở chèo đạt $100\%$, các lớp con dao động từ $53\%$ đến $65\%$. Tỷ lệ phủ dưới $100\%$ ở lớp con phản ánh chiến lược thiết kế: bộ câu hỏi tập trung vào các thực thể trung tâm có nhiều liên kết quan hệ thay vì cố phủ đều mọi thực thể.
+
+\begin{table}[h]
+\centering
+\caption{Mức độ bao phủ của CheoBench trên đồ thị tri thức Chèo.}
+\label{tab:coverage_entity}
+\renewcommand{\arraystretch}{1.2}
+\begin{tabular}{lrrr}
+\hline
+\textbf{Loại thực thể} & \textbf{Đã phủ} & \textbf{Tổng} & \textbf{Tỷ lệ} \\
+\hline
+Vở chèo       &  7 &  7 & $100,0\%$ \\
+Nhân vật      & 25 & 38 &  $65,7\%$ \\
+Diễn viên     & 23 & 41 &  $56,1\%$ \\
+Trích đoạn    &  8 & 15 &  $53,3\%$ \\
+\hline
+\end{tabular}
+\end{table}
+
+\textbf{Phân tầng cấu trúc của bộ câu hỏi.}
+Phân nhóm Local-Community-Global cần phải có cơ sở cấu trúc thực sự trên đồ thị tri thức. Để kiểm chứng, hệ thống phân tích các đặc trưng cơ bản của một câu hỏi trong bối cảnh đánh giá các hệ thống sử dụng GraphRAG.
+
+\begin{itemize}
+\item \textit{Độ dài câu hỏi} - số token sau tách câu hỏi bằng khoảng trắng, đo độ phức tạp diễn đạt của truy vấn. 
+\item \textit{Kích thước tiểu đồ thị 1-hop} - số nút riêng biệt trong vùng lân cận một bước của tập thực thể ground truth trên đồ thị Neo4j, đo phạm vi đồ thị mà câu hỏi kích hoạt.
+\item \textit{Hop trung bình giữa các cặp thực thể} - trung bình độ dài đường đi ngắn nhất (số cạnh) giữa mọi cặp thực thể trong ground truth, đo khoảng cách suy luận trên đồ thị.
+\end{itemize}
+
+\begin{table}[h]
+\centering
+\caption{Trung bình các đặc trưng độ phức tạp của CheoBench theo nhóm câu hỏi.}
+\label{tab:benchmark_intrinsic}
+\renewcommand{\arraystretch}{1.25}
+\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}lrrr}
+\hline
+\textbf{Đặc trưng} & \textbf{Local} & \textbf{Community} & \textbf{Global} \\
+\hline
+Độ dài câu hỏi (token)         & $9,7$  & $11,0$ & $12,4$ \\
+Đồ thị con 1-hop (số nút)     & $9,2$  & $11,9$ & $17,9$ \\
+Hop trung bình cặp thực thể    & $2,18$ & $2,56$ & $5,71$ \\
+\hline
+\end{tabular*}
+\end{table}
+
+Cả ba đặc trưng đều tăng dần theo Local→Community→Global (Bảng~\ref{tab:benchmark_intrinsic}). Độ dài câu hỏi tăng từ $9,7$ ở Local đến $12,4$ ở Global, khớp với thiết kế câu Global đòi hỏi nhiều ràng buộc và mệnh đề phân tích hơn câu Local. Kích thước đồ thị con 1-hop tăng từ $9,2$ nút ở Local đến $17,9$ nút ở Global - các thực thể trung tâm mà câu Global xoay quanh có nhiều liên kết quan hệ trên đồ thị. Hop trung bình giữa các cặp thực thể có khác biệt rõ nhất, tăng từ $2,18$ ở Local đến $5,71$ ở Global - khoảng cách đường đi giữa các thực thể trong câu Global gấp $2,6$ lần so với câu Local, phản ánh trực tiếp yêu cầu suy luận đa bước trên đồ thị. Qua các số liệu này có thể thấy được phân nhóm thiết kế trùng với phân tầng cấu trúc trên đồ thị tri thức Chèo
+
+Hai phép đo cho kết quả nhất quán: bộ câu hỏi có độ phủ đầy đủ trên đồ thị tri thức và phân nhóm Local-Community-Global có cơ sở cấu trúc thực sự, được phản ánh đồng nhất qua ba đặc trưng độ phức tạp đo trực tiếp từ ground truth và đồ thị. CheoBench đáp ứng các yêu cầu của một công cụ đo cho hệ thống hỏi đáp trên đồ thị tri thức Chèo.

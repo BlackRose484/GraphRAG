@@ -1,0 +1,26 @@
+% ============================================================
+% Phụ lục D — Kết quả kiểm chứng tính hợp lệ của CheoBench
+% ============================================================
+
+\section*{D. Kết quả kiểm chứng tính hợp lệ của CheoBench}
+\label{appendix:benchmark_validity}
+\addcontentsline{toc}{section}{D. Kết quả kiểm chứng tính hợp lệ của CheoBench}
+
+Phụ lục này cung cấp kết quả chi tiết cho thí nghiệm kiểm chứng tính hợp lệ cấu trúc của bộ đánh giá CheoBench, được giới thiệu ở Mục~\ref{sec:benchmark_validity}. Toàn bộ script phân tích, dữ liệu thô và biểu đồ đi kèm có thể tái lập từ kho mã nguồn của khoá luận tại thư mục \texttt{benchmark/validity/}.
+
+Bảng~\ref{tab:appendix_score_by_cat} báo cáo phân bố điểm $S_{\text{overall}}$ trên CheoBench theo nhóm câu hỏi cho hai hệ thống GraphRAG và RAG. GraphRAG nhạy với độ khó câu hỏi - điểm giảm từ $0,862$ ở Local-Community xuống $0,782$ ở Global - trong khi RAG có hiệu năng gần phẳng giữa ba nhóm. Sự không nhạy của RAG với độ phức tạp câu hỏi không phản ánh thiếu sót của bộ benchmark mà phản ánh giới hạn của kiến trúc truy xuất phẳng: khi không khai thác được cấu trúc quan hệ, RAG cho ra ngữ cảnh chất lượng tương tự bất kể câu hỏi tra cứu hay tổng hợp.
+
+\begin{table}[h]
+\centering
+\caption{Phân bố $S_{\text{overall}}$ theo nhóm câu hỏi (n = 100).}
+\label{tab:appendix_score_by_cat}
+\renewcommand{\arraystretch}{1.2}
+\begin{tabular}{lrrr}
+\hline
+\textbf{Hệ thống} & \textbf{Local} & \textbf{Community} & \textbf{Global} \\
+\hline
+GraphRAG & $0,862$ & $0,861$ & $0,782$ \\
+RAG      & $0,553$ & $0,616$ & $0,619$ \\
+\hline
+\end{tabular}
+\end{table}

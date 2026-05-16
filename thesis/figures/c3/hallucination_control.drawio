@@ -7,7 +7,7 @@
 
         <!-- Đầu vào: (C, K, q) -->
         <mxCell id="input" value="&lt;b&gt;Đầu vào&lt;/b&gt;&lt;br&gt;&lt;br&gt;(C, K, q)&lt;br&gt;Ngữ cảnh + Dữ kiện chính&lt;br&gt;+ Câu hỏi"
-                style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;strokeWidth=2;fontSize=14;align=center;verticalAlign=middle;"
+                style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;strokeWidth=2;fontSize=15;align=center;verticalAlign=middle;"
                 vertex="1" parent="1">
           <mxGeometry x="40" y="220" width="200" height="140" as="geometry"/>
         </mxCell>
@@ -20,26 +20,26 @@
         </mxCell>
 
         <mxCell id="l1_a" value="&lt;b&gt;Neo định danh qua&lt;br&gt;Danh mục thực thể&lt;/b&gt;&lt;br&gt;&lt;br&gt;LLM chỉ trích xuất các&lt;br&gt;thực thể thuộc danh mục&lt;br&gt;hợp lệ từ Knowledge Graph"
-                style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#82b366;strokeWidth=1.5;fontSize=13;align=center;verticalAlign=middle;"
+                style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#82b366;strokeWidth=1.5;fontSize=15;align=center;verticalAlign=middle;"
                 vertex="1" parent="1">
           <mxGeometry x="320" y="120" width="280" height="120" as="geometry"/>
         </mxCell>
 
         <mxCell id="l1_b" value="&lt;b&gt;Tiêm dữ kiện chính&lt;/b&gt;&lt;br&gt;&lt;br&gt;Tập K được đặt ưu tiên&lt;br&gt;trong prompt, định hướng&lt;br&gt;suy luận theo các sự kiện&lt;br&gt;đã được xác minh"
-                style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#82b366;strokeWidth=1.5;fontSize=13;align=center;verticalAlign=middle;"
+                style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#82b366;strokeWidth=1.5;fontSize=15;align=center;verticalAlign=middle;"
                 vertex="1" parent="1">
           <mxGeometry x="630" y="120" width="280" height="120" as="geometry"/>
         </mxCell>
 
         <mxCell id="l1_c" value="&lt;b&gt;Chỉ dẫn ràng buộc&lt;/b&gt;&lt;br&gt;&lt;br&gt;Prompt yêu cầu mô hình&lt;br&gt;trích dẫn đúng tên thực thể&lt;br&gt;có trong dữ liệu, thu hẹp&lt;br&gt;không gian sinh"
-                style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#82b366;strokeWidth=1.5;fontSize=13;align=center;verticalAlign=middle;"
+                style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#82b366;strokeWidth=1.5;fontSize=15;align=center;verticalAlign=middle;"
                 vertex="1" parent="1">
           <mxGeometry x="940" y="120" width="290" height="120" as="geometry"/>
         </mxCell>
 
         <!-- Note giữa 2 lớp -->
         <mxCell id="bridge" value="&lt;i&gt;→ Giảm xác suất sinh thông tin sai ngay từ bước đầu&lt;/i&gt;"
-                style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=12;fontStyle=2;fontColor=#666666;"
+                style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=15;fontStyle=2;fontColor=#666666;"
                 vertex="1" parent="1">
           <mxGeometry x="320" y="270" width="900" height="30" as="geometry"/>
         </mxCell>
@@ -52,20 +52,20 @@
         </mxCell>
 
         <mxCell id="l2_mid" value="&lt;b&gt;Chiến lược Mid&lt;/b&gt;&lt;br&gt;&lt;br&gt;Khuôn mẫu ba phần buộc&lt;br&gt;mô hình trích xuất dữ kiện&lt;br&gt;trước khi đưa kết luận:&lt;br&gt;&lt;b&gt;Facts → Analysis → Conclusion&lt;/b&gt;&lt;br&gt;&lt;br&gt;Cho phép kiểm tra nhất quán&lt;br&gt;giữa bằng chứng và kết luận"
-                style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#d79b00;strokeWidth=1.5;fontSize=13;align=center;verticalAlign=middle;"
+                style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#d79b00;strokeWidth=1.5;fontSize=15;align=center;verticalAlign=middle;"
                 vertex="1" parent="1">
           <mxGeometry x="340" y="370" width="430" height="140" as="geometry"/>
         </mxCell>
 
         <mxCell id="l2_post" value="&lt;b&gt;Chiến lược Post&lt;/b&gt;&lt;br&gt;&lt;br&gt;Lượt thứ hai đối chiếu&lt;br&gt;câu trả lời sơ bộ a₀ với&lt;br&gt;ngữ cảnh từ Knowledge Graph&lt;br&gt;&lt;br&gt;Yêu cầu mô hình:&lt;br&gt;kiểm tra → sửa → bổ sung"
-                style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#d79b00;strokeWidth=1.5;fontSize=13;align=center;verticalAlign=middle;"
+                style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#d79b00;strokeWidth=1.5;fontSize=15;align=center;verticalAlign=middle;"
                 vertex="1" parent="1">
           <mxGeometry x="800" y="370" width="430" height="140" as="geometry"/>
         </mxCell>
 
         <!-- Đầu ra -->
         <mxCell id="output" value="&lt;b&gt;Đầu ra&lt;/b&gt;&lt;br&gt;&lt;br&gt;&lt;b&gt;a&lt;/b&gt;&lt;br&gt;Câu trả lời&lt;br&gt;đã kiểm soát"
-                style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;strokeWidth=2;fontSize=14;align=center;verticalAlign=middle;"
+                style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;strokeWidth=2;fontSize=15;align=center;verticalAlign=middle;"
                 vertex="1" parent="1">
           <mxGeometry x="40" y="380" width="200" height="140" as="geometry"/>
         </mxCell>

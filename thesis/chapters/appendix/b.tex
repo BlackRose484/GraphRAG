@@ -5,7 +5,7 @@
 %   \usepackage{longtable}
 % ============================================================
 
-\section*{B. Bảng các luật suy diễn áp dụng vào ontology Chèo}
+\section*{B. Bảng các luật suy diễn áp dụng vào đồ thị tri thức Chèo}
 \label{appendix:inference_rules}
 \addcontentsline{toc}{section}{B. Các luật suy diễn áp dụng vào ontology Chèo}
 
@@ -84,9 +84,7 @@
   & Versatile Actor Classification
   & Diễn viên đóng từ hai loại vai khác nhau trở lên là đa năng.
   & \texttt{Actor(?a), COUNT(DISTINCT roleType played by ?a) >= 2
-    => versatility(?a, "Đa năng")}\par
-    \textit{(Cần aggregation; SPARQL CONSTRUCT với GROUP BY ?a
-    HAVING COUNT(DISTINCT ?role) >= 2.)} \\
+    => versatility(?a, "Đa năng")}\par \\
   \hline
 
   \texttt{B.5}
@@ -94,9 +92,7 @@
   & Nhân vật xuất hiện trong $\geq 2$ trích đoạn cùng vở chèo là xuyên suốt.
   & \texttt{Character(?c), Play(?p),
     COUNT(DISTINCT scene of ?c in ?p) >= 2
-    => recurring(?c, true)}\par
-    \textit{(Cần aggregation; SPARQL với GROUP BY ?c
-    HAVING COUNT(DISTINCT ?s) >= 2.)} \\
+    => recurring(?c, true)}\par\\
   \hline
 
   \texttt{B.6}
@@ -105,8 +101,7 @@
   & \texttt{Character(?c), MODE(emotion in ?c's Moods) = ?e
     => dominantEmotion(?c, ?e)}\par
     \texttt{Character(?c), COUNT(DISTINCT emotion of ?c) = ?n
-    => emotionalRange(?c, ?n)}\par
-    \textit{(Cần aggregation; Cypher hoặc SPARQL + subquery argmax.)} \\
+    => emotionalRange(?c, ?n)}\par \\
   \hline
 
   \texttt{B.7}
@@ -114,9 +109,7 @@
   & Costume xuất hiện cùng Mood $\geq 3$ lần thì thể hiện Mood đó.
   & \texttt{Costume(?co), Mood(?m),
     COUNT(?ra : hasAppearance(?ra,?co), hasAppearance(?ra,?m)) >= 3
-    => represent(?co, ?m)}\par
-    \textit{(Cần aggregation; SPARQL CONSTRUCT với
-    GROUP BY ?co ?m HAVING COUNT(*) >= 3.)} \\
+    => represent(?co, ?m)}\par\\
   \hline
 
   \texttt{C.1}
@@ -138,8 +131,7 @@
   & \texttt{DaoCharacter(?c), subType(?c,"Chín"),
     COUNT(DISTINCT emotion of ?c) >= 4,
     EXISTS dark emotion of ?c IN \{Sad, Angry, Rage, Fear\}
-    => archetype(?c, "Nữ chính bi kịch")}\par
-    \textit{(Cần aggregation và filter exists.)} \\
+    => archetype(?c, "Nữ chính bi kịch")}\par \\
   \hline
 
   \texttt{C.3}

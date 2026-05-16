@@ -7,51 +7,51 @@
 
         <!-- ĐẦU VÀO -->
         <mxCell id="input_owl" value="&lt;b style=&quot;font-size:17px&quot;&gt;Đầu vào&lt;/b&gt;&lt;br&gt;&lt;br&gt;&lt;b&gt;Ontology gốc&lt;/b&gt;&lt;br&gt;(chuẩn OWL)"
-                style="shape=document;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;fillColor=#fff2cc;strokeColor=#d6b656;strokeWidth=2;fontSize=14;align=center;verticalAlign=middle;"
+                style="shape=document;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;fillColor=#fff2cc;strokeColor=#d6b656;strokeWidth=2;fontSize=15;align=center;verticalAlign=middle;"
                 vertex="1" parent="1">
           <mxGeometry x="60" y="200" width="200" height="160" as="geometry"/>
         </mxCell>
 
         <!-- BƯỚC 1 -->
         <mxCell id="step1" value="&lt;b style=&quot;font-size:17px&quot;&gt;Bước 1&lt;/b&gt;&lt;br&gt;&lt;b&gt;Phân tích cấu trúc&lt;/b&gt;&lt;br&gt;&lt;br&gt;Đọc tệp ontology, trích xuất:&lt;br&gt;• Tập cá thể (individual)&lt;br&gt;• Lớp tương ứng&lt;br&gt;• Giá trị thuộc tính"
-                style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;strokeWidth=2;fontSize=14;align=center;verticalAlign=top;spacingTop=10;"
+                style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;strokeWidth=2;fontSize=15;align=center;verticalAlign=top;spacingTop=10;"
                 vertex="1" parent="1">
           <mxGeometry x="320" y="180" width="240" height="200" as="geometry"/>
         </mxCell>
 
         <!-- BƯỚC 2 -->
         <mxCell id="step2" value="&lt;b style=&quot;font-size:17px&quot;&gt;Bước 2&lt;/b&gt;&lt;br&gt;&lt;b&gt;Ánh xạ sang property graph&lt;/b&gt;&lt;br&gt;&lt;br&gt;Quy tắc ánh xạ:&lt;br&gt;• Lớp ontology &lt;b&gt;→&lt;/b&gt; nhãn nút&lt;br&gt;• Cá thể &lt;b&gt;→&lt;/b&gt; nút (kèm thuộc tính)&lt;br&gt;• Quan hệ ngữ nghĩa &lt;b&gt;→&lt;/b&gt; loại cạnh có hướng"
-                style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;strokeWidth=2;fontSize=14;align=center;verticalAlign=top;spacingTop=10;"
+                style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;strokeWidth=2;fontSize=15;align=center;verticalAlign=top;spacingTop=10;"
                 vertex="1" parent="1">
           <mxGeometry x="620" y="180" width="320" height="200" as="geometry"/>
         </mxCell>
 
         <!-- BƯỚC 3 -->
         <mxCell id="step3" value="&lt;b style=&quot;font-size:17px&quot;&gt;Bước 3&lt;/b&gt;&lt;br&gt;&lt;b&gt;Nạp vào kho lưu trữ đồ thị&lt;/b&gt;&lt;br&gt;&lt;br&gt;Nguyên tắc:&lt;br&gt;• Idempotent (cập nhật thay vì trùng)&lt;br&gt;• Định danh duy nhất theo nhãn&lt;br&gt;• Bảo toàn ngữ nghĩa ontology"
-                style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;strokeWidth=2;fontSize=14;align=center;verticalAlign=top;spacingTop=10;"
+                style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;strokeWidth=2;fontSize=15;align=center;verticalAlign=top;spacingTop=10;"
                 vertex="1" parent="1">
           <mxGeometry x="1000" y="180" width="280" height="200" as="geometry"/>
         </mxCell>
 
         <!-- ĐẦU RA -->
         <mxCell id="output_kg" value="&lt;b style=&quot;font-size:17px&quot;&gt;Đầu ra&lt;/b&gt;&lt;br&gt;&lt;br&gt;&lt;b&gt;Knowledge Graph&lt;/b&gt;&lt;br&gt;dạng property graph"
-                style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;fillColor=#e1d5e7;strokeColor=#9673a6;strokeWidth=2;fontSize=14;align=center;verticalAlign=middle;"
+                style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;fillColor=#e1d5e7;strokeColor=#9673a6;strokeWidth=2;fontSize=15;align=center;verticalAlign=middle;"
                 vertex="1" parent="1">
           <mxGeometry x="600" y="450" width="200" height="120" as="geometry"/>
         </mxCell>
 
         <!-- ARROWS -->
-        <mxCell id="e_in_s1" style="endArrow=classic;html=1;rounded=0;strokeColor=#555555;strokeWidth=2.5;fontSize=12;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;"
+        <mxCell id="e_in_s1" style="endArrow=classic;html=1;rounded=0;strokeColor=#555555;strokeWidth=2.5;fontSize=15;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;"
                 edge="1" source="input_owl" target="step1" parent="1">
           <mxGeometry relative="1" as="geometry"/>
         </mxCell>
 
-        <mxCell id="e_s1_s2" style="endArrow=classic;html=1;rounded=0;strokeColor=#555555;strokeWidth=2.5;fontSize=12;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;"
+        <mxCell id="e_s1_s2" style="endArrow=classic;html=1;rounded=0;strokeColor=#555555;strokeWidth=2.5;fontSize=15;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;"
                 edge="1" source="step1" target="step2" parent="1">
           <mxGeometry relative="1" as="geometry"/>
         </mxCell>
 
-        <mxCell id="e_s2_s3" style="endArrow=classic;html=1;rounded=0;strokeColor=#555555;strokeWidth=2.5;fontSize=12;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;"
+        <mxCell id="e_s2_s3" style="endArrow=classic;html=1;rounded=0;strokeColor=#555555;strokeWidth=2.5;fontSize=15;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;"
                 edge="1" source="step2" target="step3" parent="1">
           <mxGeometry relative="1" as="geometry"/>
         </mxCell>

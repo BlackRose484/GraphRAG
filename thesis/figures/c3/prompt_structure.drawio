@@ -13,19 +13,19 @@
         </mxCell>
 
         <mxCell id="in_c" value="&lt;b&gt;C&lt;/b&gt;&lt;br&gt;&lt;br&gt;Tập ngữ cảnh đa định dạng&lt;br&gt;{(định dạng, nội dung)}"
-                style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#666666;strokeWidth=1.5;fontSize=14;align=center;verticalAlign=middle;"
+                style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#666666;strokeWidth=1.5;fontSize=15;align=center;verticalAlign=middle;"
                 vertex="1" parent="1">
           <mxGeometry x="80" y="100" width="200" height="120" as="geometry"/>
         </mxCell>
 
         <mxCell id="in_k" value="&lt;b&gt;K&lt;/b&gt;&lt;br&gt;&lt;br&gt;Tập dữ kiện chính&lt;br&gt;(dạng gạch đầu dòng)"
-                style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#666666;strokeWidth=1.5;fontSize=14;align=center;verticalAlign=middle;"
+                style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#666666;strokeWidth=1.5;fontSize=15;align=center;verticalAlign=middle;"
                 vertex="1" parent="1">
           <mxGeometry x="80" y="240" width="200" height="120" as="geometry"/>
         </mxCell>
 
         <mxCell id="in_q" value="&lt;b&gt;q&lt;/b&gt;&lt;br&gt;&lt;br&gt;Câu hỏi gốc"
-                style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#666666;strokeWidth=1.5;fontSize=14;align=center;verticalAlign=middle;"
+                style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#666666;strokeWidth=1.5;fontSize=15;align=center;verticalAlign=middle;"
                 vertex="1" parent="1">
           <mxGeometry x="80" y="380" width="200" height="100" as="geometry"/>
         </mxCell>
@@ -38,36 +38,36 @@
         </mxCell>
 
         <!-- ① Tiêu đề ngữ cảnh -->
-        <mxCell id="comp1" value="&lt;b style=&quot;font-size:15px&quot;&gt;① Tiêu đề ngữ cảnh&lt;/b&gt;&lt;font style=&quot;font-size:11px&quot;&gt; [hằng số]&lt;/font&gt;&lt;br&gt;&lt;br&gt;``Thông tin từ Knowledge Graph&lt;br&gt;về nghệ thuật Chèo''"
-                style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#6c8ebf;strokeWidth=1.5;fontSize=13;align=center;verticalAlign=middle;"
+        <mxCell id="comp1" value="&lt;b style=&quot;font-size:15px&quot;&gt;① Tiêu đề ngữ cảnh&lt;/b&gt;&lt;font style=&quot;font-size:15px&quot;&gt; [hằng số]&lt;/font&gt;&lt;br&gt;&lt;br&gt;``Thông tin từ đồ thị tri thức&lt;br&gt;về nghệ thuật Chèo''"
+                style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#6c8ebf;strokeWidth=1.5;fontSize=15;align=center;verticalAlign=middle;"
                 vertex="1" parent="1">
           <mxGeometry x="410" y="90" width="540" height="90" as="geometry"/>
         </mxCell>
 
         <!-- ② Dữ kiện chính -->
         <mxCell id="comp2" value="&lt;b style=&quot;font-size:15px&quot;&gt;② Dữ kiện chính&lt;/b&gt; ← K&lt;br&gt;&lt;br&gt;• Nhân vật: Thị Màu&lt;br&gt;• Diễn viên: Vân Quyền&lt;br&gt;• Quan hệ: Thị Màu ← PERFORMED_BY ← Vân Quyền"
-                style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#82b366;strokeWidth=1.5;fontSize=13;align=center;verticalAlign=middle;"
+                style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#82b366;strokeWidth=1.5;fontSize=15;align=center;verticalAlign=middle;"
                 vertex="1" parent="1">
           <mxGeometry x="410" y="190" width="540" height="100" as="geometry"/>
         </mxCell>
 
         <!-- ③ Khối ngữ cảnh -->
-        <mxCell id="comp3" value="&lt;b style=&quot;font-size:15px&quot;&gt;③ Khối ngữ cảnh&lt;/b&gt; ← C&lt;br&gt;&lt;br&gt;Mô tả tự nhiên: ``Nhân vật Thị Màu … đóng bởi Vân Quyền''&lt;br&gt;Bảng kề: nguồn / quan hệ / đích&lt;br&gt;&lt;font style=&quot;font-size:11px&quot;&gt;(các định dạng kích hoạt theo chiến lược)&lt;/font&gt;"
-                style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#d79b00;strokeWidth=1.5;fontSize=13;align=center;verticalAlign=middle;"
+        <mxCell id="comp3" value="&lt;b style=&quot;font-size:15px&quot;&gt;③ Khối ngữ cảnh&lt;/b&gt; ← C&lt;br&gt;&lt;br&gt;Mô tả tự nhiên: ``Nhân vật Thị Màu … đóng bởi Vân Quyền''&lt;br&gt;Bảng kề: nguồn / quan hệ / đích&lt;br&gt;&lt;font style=&quot;font-size:15px&quot;&gt;(các định dạng kích hoạt theo chiến lược)&lt;/font&gt;"
+                style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#d79b00;strokeWidth=1.5;fontSize=15;align=center;verticalAlign=middle;"
                 vertex="1" parent="1">
           <mxGeometry x="410" y="300" width="540" height="110" as="geometry"/>
         </mxCell>
 
         <!-- ④ Câu hỏi + Chỉ dẫn -->
-        <mxCell id="comp4" value="&lt;b style=&quot;font-size:15px&quot;&gt;④ Câu hỏi + Chỉ dẫn&lt;/b&gt; ← q + khuôn mẫu&lt;br&gt;&lt;br&gt;Câu hỏi: ``Ai đóng vai Thị Màu trong vở QATK?''&lt;br&gt;Chỉ dẫn: trả lời dựa trên Knowledge Graph,&lt;br&gt;trích dẫn tên thực thể chính xác, không bổ sung thông tin ngoài"
-                style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#b85450;strokeWidth=1.5;fontSize=13;align=center;verticalAlign=middle;"
+        <mxCell id="comp4" value="&lt;b style=&quot;font-size:15px&quot;&gt;④ Câu hỏi + Chỉ dẫn&lt;/b&gt; ← q + khuôn mẫu&lt;br&gt;&lt;br&gt;Câu hỏi: ``Ai đóng vai Thị Màu trong vở Quan Âm Thị Kính?''&lt;br&gt;Chỉ dẫn: trả lời dựa trên đồ thị tri thức,&lt;br&gt;trích dẫn tên thực thể chính xác, không bổ sung thông tin ngoài"
+                style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#b85450;strokeWidth=1.5;fontSize=15;align=center;verticalAlign=middle;"
                 vertex="1" parent="1">
           <mxGeometry x="410" y="420" width="540" height="100" as="geometry"/>
         </mxCell>
 
         <!-- ĐẦU RA: 𝒫 -->
         <mxCell id="output_p" value="&lt;b style=&quot;font-size:17px&quot;&gt;Đầu ra: 𝒫&lt;/b&gt;&lt;br&gt;&lt;br&gt;Prompt hoàn chỉnh&lt;br&gt;gửi đến LLM"
-                style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;strokeWidth=2;fontSize=14;align=center;verticalAlign=middle;"
+                style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;strokeWidth=2;fontSize=15;align=center;verticalAlign=middle;"
                 vertex="1" parent="1">
           <mxGeometry x="1040" y="240" width="120" height="120" as="geometry"/>
         </mxCell>

@@ -7,42 +7,42 @@
 
         <!-- Đầu vào: (C, K) -->
         <mxCell id="input_ck" value="&lt;b&gt;(C, K)&lt;/b&gt;&lt;br&gt;&lt;br&gt;Ngữ cảnh đã định dạng&lt;br&gt;+ Tập dữ kiện chính"
-                style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;strokeWidth=2;fontSize=14;align=center;verticalAlign=middle;"
+                style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;strokeWidth=2;fontSize=15;align=center;verticalAlign=middle;"
                 vertex="1" parent="1">
           <mxGeometry x="40" y="280" width="220" height="120" as="geometry"/>
         </mxCell>
 
         <!-- Bước 1: Xây dựng Prompt -->
         <mxCell id="build_prompt" value="&lt;b style=&quot;font-size:16px&quot;&gt;Xây dựng Prompt 𝒫&lt;/b&gt;&lt;br&gt;&lt;br&gt;Tổ hợp 4 thành phần:&lt;br&gt;① Tiêu đề ngữ cảnh&lt;br&gt;② Dữ kiện chính&lt;br&gt;③ Khối ngữ cảnh&lt;br&gt;④ Câu hỏi + Chỉ dẫn"
-                style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;strokeWidth=2;fontSize=13;align=center;verticalAlign=middle;"
+                style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;strokeWidth=2;fontSize=15;align=center;verticalAlign=middle;"
                 vertex="1" parent="1">
           <mxGeometry x="320" y="160" width="280" height="180" as="geometry"/>
         </mxCell>
 
         <!-- Câu hỏi q (input riêng vào prompt builder) -->
         <mxCell id="input_q" value="&lt;b&gt;q&lt;/b&gt;&lt;br&gt;Câu hỏi gốc"
-                style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;strokeWidth=2;fontSize=14;align=center;verticalAlign=middle;"
+                style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;strokeWidth=2;fontSize=15;align=center;verticalAlign=middle;"
                 vertex="1" parent="1">
           <mxGeometry x="40" y="80" width="220" height="80" as="geometry"/>
         </mxCell>
 
         <!-- Bước 2: Chiến lược tạo sinh -->
-        <mxCell id="strategies" value="&lt;b style=&quot;font-size:16px&quot;&gt;Chiến lược tạo sinh&lt;/b&gt;&lt;br&gt;&lt;br&gt;• Pre (1 lượt)&lt;br&gt;• Mid (1 lượt, có ràng buộc)&lt;br&gt;• Post (2 lượt, đối chiếu)&lt;br&gt;&lt;br&gt;+ Kiểm soát ảo giác (2 lớp)"
-                style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;strokeWidth=2;fontSize=13;align=center;verticalAlign=middle;"
+        <mxCell id="strategies" value="&lt;b style=&quot;font-size:16px&quot;&gt;Chiến lược tạo sinh&lt;/b&gt;&lt;br&gt;&lt;br&gt;• Pre&lt;br&gt;• Mid&lt;br&gt;• Post"
+                style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;strokeWidth=2;fontSize=15;align=center;verticalAlign=middle;"
                 vertex="1" parent="1">
           <mxGeometry x="700" y="160" width="280" height="180" as="geometry"/>
         </mxCell>
 
         <!-- LLM Service -->
-        <mxCell id="llm_box" value="&lt;b style=&quot;font-size:16px&quot;&gt;LLM&lt;/b&gt;&lt;br&gt;(1 hoặc 2 lượt)"
-                style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;strokeWidth=2;fontSize=14;align=center;verticalAlign=middle;"
+        <mxCell id="llm_box" value="&lt;b style=&quot;font-size:16px&quot;&gt;LLM&lt;/b&gt;"
+                style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;strokeWidth=2;fontSize=15;align=center;verticalAlign=middle;"
                 vertex="1" parent="1">
           <mxGeometry x="730" y="40" width="220" height="80" as="geometry"/>
         </mxCell>
 
         <!-- Đầu ra: a -->
         <mxCell id="output_a" value="&lt;b&gt;a&lt;/b&gt;&lt;br&gt;Câu trả lời"
-                style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;strokeWidth=2;fontSize=14;align=center;verticalAlign=middle;"
+                style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;strokeWidth=2;fontSize=15;align=center;verticalAlign=middle;"
                 vertex="1" parent="1">
           <mxGeometry x="1080" y="240" width="220" height="100" as="geometry"/>
         </mxCell>

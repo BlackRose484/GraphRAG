@@ -14,28 +14,28 @@
 
         <!-- TẦNG 1 -->
         <mxCell id="tier1" value="&lt;b style=&quot;font-size:17px&quot;&gt;Tầng 1 — Chỉ mục định danh&lt;/b&gt;&lt;br&gt;&lt;br&gt;&lt;b&gt;Cơ chế&lt;/b&gt;&lt;br&gt;Ràng buộc duy nhất trên định danh&lt;br&gt;chuẩn của từng loại nút&lt;br&gt;&lt;br&gt;&lt;b&gt;Mục tiêu&lt;/b&gt;&lt;br&gt;Truy xuất O(1) theo định danh&lt;br&gt;&lt;br&gt;&lt;b&gt;Truy vấn điển hình&lt;/b&gt;&lt;br&gt;Nạp một thực thể cụ thể&lt;br&gt;từ kết quả suy luận"
-                style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;strokeWidth=2;fontSize=14;align=center;verticalAlign=top;spacingTop=10;"
+                style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;strokeWidth=2;fontSize=15;align=center;verticalAlign=top;spacingTop=10;"
                 vertex="1" parent="1">
           <mxGeometry x="60" y="120" width="320" height="320" as="geometry"/>
         </mxCell>
 
         <!-- TẦNG 2 -->
         <mxCell id="tier2" value="&lt;b style=&quot;font-size:17px&quot;&gt;Tầng 2 — Chỉ mục thuộc tính&lt;/b&gt;&lt;br&gt;&lt;br&gt;&lt;b&gt;Cơ chế&lt;/b&gt;&lt;br&gt;Chỉ mục có thứ tự&lt;br&gt;trên các trường tên hiển thị&lt;br&gt;&lt;br&gt;&lt;b&gt;Mục tiêu&lt;/b&gt;&lt;br&gt;Tìm kiếm O(log n) theo tên&lt;br&gt;&lt;br&gt;&lt;b&gt;Truy vấn điển hình&lt;/b&gt;&lt;br&gt;Câu hỏi trực tiếp về tên thực thể&lt;br&gt;(``Ai đóng vai Thị Màu?'')"
-                style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;strokeWidth=2;fontSize=14;align=center;verticalAlign=top;spacingTop=10;"
+                style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;strokeWidth=2;fontSize=15;align=center;verticalAlign=top;spacingTop=10;"
                 vertex="1" parent="1">
           <mxGeometry x="400" y="120" width="320" height="320" as="geometry"/>
         </mxCell>
 
         <!-- TẦNG 3 -->
         <mxCell id="tier3" value="&lt;b style=&quot;font-size:17px&quot;&gt;Tầng 3 — Chỉ mục toàn văn&lt;/b&gt;&lt;br&gt;&lt;br&gt;&lt;b&gt;Cơ chế&lt;/b&gt;&lt;br&gt;Chuẩn hoá hoa--thường&lt;br&gt;khi đối chiếu chuỗi&lt;br&gt;&lt;br&gt;&lt;b&gt;Mục tiêu&lt;/b&gt;&lt;br&gt;Khớp không phân biệt hoa--thường&lt;br&gt;&lt;br&gt;&lt;b&gt;Truy vấn điển hình&lt;/b&gt;&lt;br&gt;Tên riêng có biến thể viết hoa&lt;br&gt;(``thị kính'' / ``Thị Kính'')"
-                style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;strokeWidth=2;fontSize=14;align=center;verticalAlign=top;spacingTop=10;"
+                style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;strokeWidth=2;fontSize=15;align=center;verticalAlign=top;spacingTop=10;"
                 vertex="1" parent="1">
           <mxGeometry x="740" y="120" width="320" height="320" as="geometry"/>
         </mxCell>
 
         <!-- BAO PHỦ TRUY VẤN -->
         <mxCell id="coverage" value="&lt;b style=&quot;font-size:17px&quot;&gt;Bao phủ phổ truy vấn&lt;/b&gt;&lt;br&gt;&lt;br&gt;&lt;b&gt;Tầng 1&lt;/b&gt; phục vụ tra cứu điểm đơn khi thực thể đã được định danh.&lt;br&gt;&lt;b&gt;Tầng 2&lt;/b&gt; phục vụ tìm kiếm theo tên trong các câu hỏi trực tiếp --- nhóm truy vấn phổ biến nhất.&lt;br&gt;&lt;b&gt;Tầng 3&lt;/b&gt; xử lý biến thể viết hoa trong đầu vào ngôn ngữ tự nhiên, vốn không đồng nhất theo người dùng."
-                style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fafafa;strokeColor=#999999;strokeWidth=1;fontSize=13;align=left;verticalAlign=top;spacingLeft=20;spacingTop=10;"
+                style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fafafa;strokeColor=#999999;strokeWidth=1;fontSize=15;align=left;verticalAlign=top;spacingLeft=20;spacingTop=10;"
                 vertex="1" parent="1">
           <mxGeometry x="60" y="480" width="1000" height="160" as="geometry"/>
         </mxCell>

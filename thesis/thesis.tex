@@ -176,7 +176,7 @@ PHỤC VỤ NGHIÊN CỨU NGHỆ THUẬT CHÈO}	%% title
 \definecolor{backcolour}{rgb}{0.95,0.95,0.92}
 
 \setcounter{secnumdepth}{4}
-\setcounter{tocdepth}{4}
+\setcounter{tocdepth}{2}
 
 \AtBeginDocument{
     \renewcommand{\listfigurename}{Danh mục ảnh}
@@ -196,23 +196,14 @@ PHỤC VỤ NGHIÊN CỨU NGHỆ THUẬT CHÈO}	%% title
 % Lời cảm ơn
 \input{chapters/acknowledgement}\newpage\cleardoublepage
 
-\newcommand{\showmargin}{
-\noindent
-Paper width: \the\paperwidth\\
-Text width: \the\textwidth\\
-Left margin: \the\dimexpr 1in + \oddsidemargin\relax\\
-Right margin: \the\dimexpr \paperwidth - \textwidth - (1in + \oddsidemargin)\relax
-}
-
-\showmargin
-
-\chapter*{Tuyên bố}
-\addcontentsline{toc}{chapter}{Tuyên bố}
-\input{chapters/Plus/Declaration}\newpage\cleardoublepage
 
 \chapter*{Tóm tắt}
 \addcontentsline{toc}{chapter}{Tóm tắt}
 \input{chapters/Plus/Brief}\newpage\cleardoublepage
+
+\chapter*{Lời cam đoan}
+\addcontentsline{toc}{chapter}{Lời cam đoan}
+\input{chapters/Plus/Declaration}\newpage\cleardoublepage
 
 \chapter*{Lời cảm ơn}
 \addcontentsline{toc}{chapter}{Lời cảm ơn}
@@ -244,7 +235,7 @@ Right margin: \the\dimexpr \paperwidth - \textwidth - (1in + \oddsidemargin)\rel
 \cleardoublepage
 
 \label{chapter-2}
-\chapter{Cơ sở lý thuyết \& Các công trình liên quan}
+\chapter{Cơ sở lý thuyết và Các công trình liên quan}
 \input{chapters/chapter02}
 \cleardoublepage
 
@@ -261,16 +252,17 @@ Right margin: \the\dimexpr \paperwidth - \textwidth - (1in + \oddsidemargin)\rel
 \label{chapter-5}
 \chapter{Kết luận}
 \input{chapters/conclusion}
-\clearpage
 
+\newpage\cleardoublepage
+
+\input{chapters/appendix/a}
+\input{chapters/appendix/b}
+
+\clearpage
 
 %\nocite{*}
 \phantomsection 
 \addcontentsline{toc}{chapter}{Tài liệu tham khảo}
 \bibliography{references}
-\newpage\cleardoublepage
 
-\input{chapters/appendix/a}
-\input{chapters/appendix/b}
-\input{chapters/appendix/c}
 \end{document}
