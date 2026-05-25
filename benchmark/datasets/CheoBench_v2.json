@@ -34,12 +34,8 @@
       "question": "Mô tả đặc điểm nhân vật Thị Kính?",
       "ground_truth": {
         "answer": "Con gái Mãng Ông, bị oan khuất phải lên chùa tu hành dưới danh Kính Tâm, chịu đựng mọi nỗi oan trái với lòng ngay thẳng.",
-        "related_entities": [
-          "Thị Kính"
-        ],
-        "must_include_keywords": [
-          "Thị"
-        ]
+        "related_entities": ["Thị Kính"],
+        "must_include_keywords": ["Thị Kính"]
       }
     },
     {
@@ -49,12 +45,8 @@
       "question": "Mô tả đặc điểm nhân vật Thị Màu?",
       "ground_truth": {
         "answer": "Con gái phú ông, táo bạo, hồn nhiên; cưa cẩm chú tiểu Kính Tâm không được, đổ oan thai nhi cho Thị Kính.",
-        "related_entities": [
-          "Thị Màu"
-        ],
-        "must_include_keywords": [
-          "Thị"
-        ]
+        "related_entities": ["Thị Màu"],
+        "must_include_keywords": ["Thị Màu"]
       }
     },
     {
@@ -64,12 +56,8 @@
       "question": "Mô tả đặc điểm nhân vật Súy Vân?",
       "ground_truth": {
         "answer": "Con gái huyện Tể, gả cho Kim Nham. Bị Trần Phương xúi giục, giả điên để thoát khỏi chồng.",
-        "related_entities": [
-          "Súy Vân"
-        ],
-        "must_include_keywords": [
-          "Súy"
-        ]
+        "related_entities": ["Súy Vân"],
+        "must_include_keywords": ["Súy Vân"]
       }
     },
     {
@@ -79,12 +67,8 @@
       "question": "Mô tả đặc điểm nhân vật Châu Long?",
       "ground_truth": {
         "answer": "Vợ ba của Dương Lễ. Âm thầm nuôi dưỡng Lưu Bình ăn học suốt ba năm, giữ trọn tiết hạnh.",
-        "related_entities": [
-          "Châu Long"
-        ],
-        "must_include_keywords": [
-          "Châu"
-        ]
+        "related_entities": ["Châu Long"],
+        "must_include_keywords": ["Châu Long"]
       }
     },
     {
@@ -94,12 +78,8 @@
       "question": "Mô tả đặc điểm nhân vật Lưu Bình?",
       "ground_truth": {
         "answer": "Người tài hoa nhưng lận đận. Nhờ Châu Long dìu dắt, đỗ Trạng nguyên.",
-        "related_entities": [
-          "Lưu Bình"
-        ],
-        "must_include_keywords": [
-          "Lưu"
-        ]
+        "related_entities": ["Lưu Bình"],
+        "must_include_keywords": ["Lưu Bình"]
       }
     },
     {
@@ -109,12 +89,8 @@
       "question": "Mô tả đặc điểm nhân vật Trương Viên?",
       "ground_truth": {
         "answer": "Người chồng thủy chung, con hiếu nghĩa. Sau 18 năm xa quê, nhờ tiếng hát xẩm nhận ra vợ.",
-        "related_entities": [
-          "Trương Viên"
-        ],
-        "must_include_keywords": [
-          "Trương"
-        ]
+        "related_entities": ["Trương Viên"],
+        "must_include_keywords": ["Trương Viên"]
       }
     },
     {
@@ -124,12 +100,8 @@
       "question": "Mô tả đặc điểm nhân vật Thị Phương?",
       "ground_truth": {
         "answer": "Vợ Trương Viên, khoét mắt mình cho mẹ chồng ăn. Gặp lại chồng nhờ đôi ngọc lưu ly.",
-        "related_entities": [
-          "Thị Phương"
-        ],
-        "must_include_keywords": [
-          "Thị"
-        ]
+        "related_entities": ["Thị Phương"],
+        "must_include_keywords": ["Thị Phương"]
       }
     },
     {
@@ -139,12 +111,8 @@
       "question": "Mô tả đặc điểm nhân vật Đào Huế?",
       "ground_truth": {
         "answer": "Vợ cũ Chu Mãi Thần, bỏ chồng theo Tuần Ty khi chồng còn nghèo khổ.",
-        "related_entities": [
-          "Đào Huế"
-        ],
-        "must_include_keywords": [
-          "Đào"
-        ]
+        "related_entities": ["Đào Huế"],
+        "must_include_keywords": ["Đào Huế"]
       }
     },
     {
@@ -154,12 +122,8 @@
       "question": "Mô tả đặc điểm nhân vật Thiệt Thê?",
       "ground_truth": {
         "answer": "Nhân vật nông nổi, ham vật chất, phải trả giá cho sai lầm của mình.",
-        "related_entities": [
-          "Thiệt Thê"
-        ],
-        "must_include_keywords": [
-          "Thiệt"
-        ]
+        "related_entities": ["Thiệt Thê"],
+        "must_include_keywords": ["Thiệt Thê"]
       }
     },
     {
@@ -169,12 +133,8 @@
       "question": "Mô tả đặc điểm nhân vật Tuần Ty?",
       "ground_truth": {
         "answer": "Viên quan tằng tịu với vợ cũ Chu Mãi Thần, định lấy làm vợ hai.",
-        "related_entities": [
-          "Tuần Ty"
-        ],
-        "must_include_keywords": [
-          "Tuần"
-        ]
+        "related_entities": ["Tuần Ty"],
+        "must_include_keywords": ["Tuần Ty"]
       }
     },
     {
@@ -184,15 +144,8 @@
       "question": "Ai đóng vai Thị Kính trong vở Quan Âm Thị Kính?",
       "ground_truth": {
         "answer": "Thảo Hiền và Hồng Thắm",
-        "related_entities": [
-          "Thảo Hiền",
-          "Hồng Thắm",
-          "Thị Kính"
-        ],
-        "must_include_keywords": [
-          "Thảo Hiền",
-          "Hồng Thắm"
-        ]
+        "related_entities": ["Thảo Hiền", "Hồng Thắm", "Thị Kính"],
+        "must_include_keywords": ["Thảo Hiền", "Hồng Thắm"]
       }
     },
     {
@@ -202,15 +155,8 @@
       "question": "Ai đóng vai Thị Màu trong vở Quan Âm Thị Kính?",
       "ground_truth": {
         "answer": "Vân Quyền và An Chinh",
-        "related_entities": [
-          "Vân Quyền",
-          "An Chinh",
-          "Thị Màu"
-        ],
-        "must_include_keywords": [
-          "Vân Quyền",
-          "An Chinh"
-        ]
+        "related_entities": ["Vân Quyền", "An Chinh", "Thị Màu"],
+        "must_include_keywords": ["Vân Quyền", "An Chinh"]
       }
     },
     {
@@ -220,15 +166,8 @@
       "question": "Ai đóng vai Súy Vân trong vở Kim Nham?",
       "ground_truth": {
         "answer": "Tạ Thị Kim Liên và Thúy Ngần",
-        "related_entities": [
-          "Tạ Thị Kim Liên",
-          "Thúy Ngần",
-          "Súy Vân"
-        ],
-        "must_include_keywords": [
-          "Tạ Thị Kim Liên",
-          "Thúy Ngần"
-        ]
+        "related_entities": ["Tạ Thị Kim Liên", "Thúy Ngần", "Súy Vân"],
+        "must_include_keywords": ["Tạ Thị Kim Liên", "Thúy Ngần"]
       }
     },
     {
@@ -238,14 +177,8 @@
       "question": "Ai đóng vai Sùng Bà trong vở Quan Âm Thị Kính?",
       "ground_truth": {
         "answer": "Thanh Ngoan và Trần Thị Thân",
-        "related_entities": [
-          "Thanh Ngoan",
-          "Trần Thị Thân",
-          "Sùng Bà"
-        ],
-        "must_include_keywords": [
-          "Thanh Ngoan"
-        ]
+        "related_entities": ["Thanh Ngoan", "Trần Thị Thân", "Sùng Bà"],
+        "must_include_keywords": ["Thanh Ngoan"]
       }
     },
     {
@@ -255,14 +188,8 @@
       "question": "Ai đóng vai Châu Long trong vở Lưu Bình Dương Lễ?",
       "ground_truth": {
         "answer": "Ngọc Ánh và Phương Mây",
-        "related_entities": [
-          "Ngọc Ánh",
-          "Phương Mây",
-          "Châu Long"
-        ],
-        "must_include_keywords": [
-          "Ngọc Ánh"
-        ]
+        "related_entities": ["Ngọc Ánh", "Phương Mây", "Châu Long"],
+        "must_include_keywords": ["Ngọc Ánh"]
       }
     },
     {
@@ -272,14 +199,8 @@
       "question": "Ai đóng vai Đào Huế trong vở Chu Mãi Thần?",
       "ground_truth": {
         "answer": "Thanh Ngoan và Kim Liên",
-        "related_entities": [
-          "Thanh Ngoan",
-          "Kim Liên",
-          "Đào Huế"
-        ],
-        "must_include_keywords": [
-          "Thanh Ngoan"
-        ]
+        "related_entities": ["Thanh Ngoan", "Kim Liên", "Đào Huế"],
+        "must_include_keywords": ["Thanh Ngoan"]
       }
     },
     {
@@ -289,13 +210,8 @@
       "question": "Ai đóng vai Từ Thức trong vở Từ Thức?",
       "ground_truth": {
         "answer": "Phú Kiên",
-        "related_entities": [
-          "Phú Kiên",
-          "Từ Thức"
-        ],
-        "must_include_keywords": [
-          "Phú Kiên"
-        ]
+        "related_entities": ["Phú Kiên", "Từ Thức"],
+        "must_include_keywords": ["Phú Kiên"]
       }
     },
     {
@@ -305,14 +221,8 @@
       "question": "Ai đóng vai Lưu Bình trong vở Lưu Bình Dương Lễ?",
       "ground_truth": {
         "answer": "Nguyễn Duy và Hồng Nam",
-        "related_entities": [
-          "Nguyễn Duy",
-          "Hồng Nam",
-          "Lưu Bình"
-        ],
-        "must_include_keywords": [
-          "Nguyễn Duy"
-        ]
+        "related_entities": ["Nguyễn Duy", "Hồng Nam", "Lưu Bình"],
+        "must_include_keywords": ["Nguyễn Duy"]
       }
     },
     {
@@ -322,13 +232,8 @@
       "question": "Vân Quyền đóng vai gì trong vở Quan Âm Thị Kính?",
       "ground_truth": {
         "answer": "Vân Quyền đóng vai Thị Màu",
-        "related_entities": [
-          "Vân Quyền",
-          "Thị Màu"
-        ],
-        "must_include_keywords": [
-          "Thị Màu"
-        ]
+        "related_entities": ["Vân Quyền", "Thị Màu"],
+        "must_include_keywords": ["Thị Màu"]
       }
     },
     {
@@ -338,13 +243,8 @@
       "question": "Huy Toàn đóng vai gì trong vở Quan Âm Thị Kính?",
       "ground_truth": {
         "answer": "Huy Toàn đóng vai Thiện Sỹ",
-        "related_entities": [
-          "Huy Toàn",
-          "Thiện Sỹ"
-        ],
-        "must_include_keywords": [
-          "Thiện Sỹ"
-        ]
+        "related_entities": ["Huy Toàn", "Thiện Sỹ"],
+        "must_include_keywords": ["Thiện Sỹ"]
       }
     },
     {
@@ -354,13 +254,8 @@
       "question": "Tuấn Kha đóng vai gì trong vở Quan Âm Thị Kính?",
       "ground_truth": {
         "answer": "Tuấn Kha đóng vai Mãng Ông (bố Thị Kính)",
-        "related_entities": [
-          "Tuấn Kha",
-          "Mãng Ông (bố Thị Kính)"
-        ],
-        "must_include_keywords": [
-          "Mãng Ông"
-        ]
+        "related_entities": ["Tuấn Kha", "Mãng Ông (bố Thị Kính)"],
+        "must_include_keywords": ["Mãng Ông"]
       }
     },
     {
@@ -370,13 +265,8 @@
       "question": "Bá Dũng đóng vai gì trong vở Kim Nham?",
       "ground_truth": {
         "answer": "Bá Dũng đóng vai Trần Phương",
-        "related_entities": [
-          "Bá Dũng",
-          "Trần Phương"
-        ],
-        "must_include_keywords": [
-          "Trần Phương"
-        ]
+        "related_entities": ["Bá Dũng", "Trần Phương"],
+        "must_include_keywords": ["Trần Phương"]
       }
     },
     {
@@ -386,14 +276,8 @@
       "question": "Trần Hải đóng vai gì trong vở Kim Nham?",
       "ground_truth": {
         "answer": "Trần Hải đóng vai Phù thủy trong trích đoạn Phù thủy sợ ma",
-        "related_entities": [
-          "Trần Hải",
-          "Phù thủy",
-          "Kim Nham"
-        ],
-        "must_include_keywords": [
-          "Phù thủy"
-        ]
+        "related_entities": ["Trần Hải", "Phù thủy", "Kim Nham"],
+        "must_include_keywords": ["Phù thủy"]
       }
     },
     {
@@ -403,13 +287,8 @@
       "question": "An Chinh đóng vai gì trong vở Kim Nham?",
       "ground_truth": {
         "answer": "An Chinh đóng vai Hỷ đồng",
-        "related_entities": [
-          "An Chinh",
-          "Hỷ đồng"
-        ],
-        "must_include_keywords": [
-          "Hỷ đồng"
-        ]
+        "related_entities": ["An Chinh", "Hỷ đồng"],
+        "must_include_keywords": ["Hỷ đồng"]
       }
     },
     {
@@ -419,13 +298,8 @@
       "question": "Ngọc Minh đóng vai gì trong vở Chu Mãi Thần?",
       "ground_truth": {
         "answer": "Ngọc Minh đóng vai Tuần Ty",
-        "related_entities": [
-          "Ngọc Minh",
-          "Tuần Ty"
-        ],
-        "must_include_keywords": [
-          "Tuần Ty"
-        ]
+        "related_entities": ["Ngọc Minh", "Tuần Ty"],
+        "must_include_keywords": ["Tuần Ty"]
       }
     },
     {
@@ -435,13 +309,8 @@
       "question": "Vở Quan Âm Thị Kính có những trích đoạn nào?",
       "ground_truth": {
         "answer": "Cắt râu, Lý trưởng - Mẹ Mõ, Mầu - Nô - Phú Ông, Thị Mầu lên chùa, Vu quy",
-        "related_entities": [
-          "Quan Âm Thị Kính"
-        ],
-        "must_include_keywords": [
-          "Thị Mầu lên chùa",
-          "Vu quy"
-        ]
+        "related_entities": ["Quan Âm Thị Kính"],
+        "must_include_keywords": ["Thị Mầu lên chùa", "Vu quy"]
       }
     },
     {
@@ -451,13 +320,8 @@
       "question": "Trích đoạn 'Thị Mầu lên chùa' thuộc vở nào?",
       "ground_truth": {
         "answer": "Trích đoạn Thị Mầu lên chùa thuộc vở Quan Âm Thị Kính",
-        "related_entities": [
-          "Thị Mầu lên chùa",
-          "Quan Âm Thị Kính"
-        ],
-        "must_include_keywords": [
-          "Quan Âm Thị Kính"
-        ]
+        "related_entities": ["Thị Mầu lên chùa", "Quan Âm Thị Kính"],
+        "must_include_keywords": ["Quan Âm Thị Kính"]
       }
     },
     {
@@ -467,13 +331,8 @@
       "question": "Nhân vật chính trong trích đoạn 'Thị Mầu lên chùa' là ai?",
       "ground_truth": {
         "answer": "Nhân vật chính là Thị Màu và Thị Kính (Kính Tâm)",
-        "related_entities": [
-          "Thị Màu",
-          "Thị Kính"
-        ],
-        "must_include_keywords": [
-          "Thị Màu"
-        ]
+        "related_entities": ["Thị Màu", "Thị Kính"],
+        "must_include_keywords": ["Thị Màu"]
       }
     },
     {
@@ -489,10 +348,7 @@
           "Thị Kính",
           "Thiện Sỹ"
         ],
-        "must_include_keywords": [
-          "Vu quy",
-          "đám cưới"
-        ]
+        "must_include_keywords": ["Vu quy", "đám cưới"]
       }
     },
     {
@@ -502,12 +358,8 @@
       "question": "Vở Kim Nham có những trích đoạn nào?",
       "ground_truth": {
         "answer": "Kim Nham có 4 trích đoạn: Mụ quán - Trần Phương, Phù thủy sợ ma, Súy Vân giả dại, Trần Phương vào chùa",
-        "related_entities": [
-          "Kim Nham"
-        ],
-        "must_include_keywords": [
-          "Súy Vân giả dại"
-        ]
+        "related_entities": ["Kim Nham"],
+        "must_include_keywords": ["Súy Vân giả dại"]
       }
     },
     {
@@ -517,13 +369,8 @@
       "question": "Trích đoạn 'Súy Vân giả dại' thuộc vở nào?",
       "ground_truth": {
         "answer": "Thuộc vở Kim Nham",
-        "related_entities": [
-          "Súy Vân giả dại",
-          "Kim Nham"
-        ],
-        "must_include_keywords": [
-          "Kim Nham"
-        ]
+        "related_entities": ["Súy Vân giả dại", "Kim Nham"],
+        "must_include_keywords": ["Kim Nham"]
       }
     },
     {
@@ -533,13 +380,8 @@
       "question": "Trích đoạn 'Lớp \"Tiên Nữ - Đoàn tụ\"' thuộc vở nào?",
       "ground_truth": {
         "answer": "Thuộc vở Trương Viên",
-        "related_entities": [
-          "Trương Viên",
-          "Lớp \"Tiên Nữ - Đoàn tụ\""
-        ],
-        "must_include_keywords": [
-          "Trương Viên"
-        ]
+        "related_entities": ["Trương Viên", "Lớp \"Tiên Nữ - Đoàn tụ\""],
+        "must_include_keywords": ["Trương Viên"]
       }
     },
     {
@@ -549,13 +391,8 @@
       "question": "Khắc Huy đóng vai gì trong vở Trương Viên?",
       "ground_truth": {
         "answer": "Khắc Huy đóng vai Hề trong trích đoạn Lớp \"Tiên Nữ - Đoàn tụ\"",
-        "related_entities": [
-          "Khắc Huy",
-          "Trương Viên"
-        ],
-        "must_include_keywords": [
-          "Hề"
-        ]
+        "related_entities": ["Khắc Huy", "Trương Viên"],
+        "must_include_keywords": ["Hề"]
       }
     },
     {
@@ -565,13 +402,8 @@
       "question": "Ngọc Ánh đóng vai gì trong vở Lưu Bình Dương Lễ?",
       "ground_truth": {
         "answer": "Ngọc Ánh đóng vai Châu Long",
-        "related_entities": [
-          "Ngọc Ánh",
-          "Châu Long"
-        ],
-        "must_include_keywords": [
-          "Châu Long"
-        ]
+        "related_entities": ["Ngọc Ánh", "Châu Long"],
+        "must_include_keywords": ["Châu Long"]
       }
     },
     {
@@ -581,13 +413,8 @@
       "question": "Mạnh Phóng đóng vai gì trong vở Quan Âm Thị Kính?",
       "ground_truth": {
         "answer": "Mạnh Phóng đóng vai Nô",
-        "related_entities": [
-          "Mạnh Phóng",
-          "Nô"
-        ],
-        "must_include_keywords": [
-          "Nô"
-        ]
+        "related_entities": ["Mạnh Phóng", "Nô"],
+        "must_include_keywords": ["Nô"]
       }
     },
     {
@@ -597,15 +424,8 @@
       "question": "Tất cả những diễn viên nào đã đóng vai Thị Màu?",
       "ground_truth": {
         "answer": "Vân Quyền và An Chinh",
-        "related_entities": [
-          "Thị Màu",
-          "Vân Quyền",
-          "An Chinh"
-        ],
-        "must_include_keywords": [
-          "Vân Quyền",
-          "An Chinh"
-        ]
+        "related_entities": ["Thị Màu", "Vân Quyền", "An Chinh"],
+        "must_include_keywords": ["Vân Quyền", "An Chinh"]
       }
     },
     {
@@ -615,15 +435,8 @@
       "question": "Tất cả những diễn viên nào đã đóng vai Thị Kính?",
       "ground_truth": {
         "answer": "Thảo Hiền và Hồng Thắm",
-        "related_entities": [
-          "Thị Kính",
-          "Thảo Hiền",
-          "Hồng Thắm"
-        ],
-        "must_include_keywords": [
-          "Thảo Hiền",
-          "Hồng Thắm"
-        ]
+        "related_entities": ["Thị Kính", "Thảo Hiền", "Hồng Thắm"],
+        "must_include_keywords": ["Thảo Hiền", "Hồng Thắm"]
       }
     },
     {
@@ -633,14 +446,8 @@
       "question": "Tất cả những diễn viên nào đã đóng vai Súy Vân?",
       "ground_truth": {
         "answer": "Tạ Thị Kim Liên và Thúy Ngần",
-        "related_entities": [
-          "Súy Vân",
-          "Tạ Thị Kim Liên",
-          "Thúy Ngần"
-        ],
-        "must_include_keywords": [
-          "Tạ Thị Kim Liên"
-        ]
+        "related_entities": ["Súy Vân", "Tạ Thị Kim Liên", "Thúy Ngần"],
+        "must_include_keywords": ["Tạ Thị Kim Liên"]
       }
     },
     {
@@ -650,14 +457,8 @@
       "question": "Tất cả những diễn viên nào đã đóng vai Sùng Bà?",
       "ground_truth": {
         "answer": "Thanh Ngoan và Trần Thị Thân",
-        "related_entities": [
-          "Sùng Bà",
-          "Thanh Ngoan",
-          "Trần Thị Thân"
-        ],
-        "must_include_keywords": [
-          "Thanh Ngoan"
-        ]
+        "related_entities": ["Sùng Bà", "Thanh Ngoan", "Trần Thị Thân"],
+        "must_include_keywords": ["Thanh Ngoan"]
       }
     },
     {
@@ -667,14 +468,8 @@
       "question": "Tất cả những diễn viên nào đã đóng vai Thiện Sỹ?",
       "ground_truth": {
         "answer": "Huy Toàn và Trần Xuân Tài",
-        "related_entities": [
-          "Thiện Sỹ",
-          "Huy Toàn",
-          "Trần Xuân Tài"
-        ],
-        "must_include_keywords": [
-          "Huy Toàn"
-        ]
+        "related_entities": ["Thiện Sỹ", "Huy Toàn", "Trần Xuân Tài"],
+        "must_include_keywords": ["Huy Toàn"]
       }
     },
     {
@@ -684,15 +479,8 @@
       "question": "Tất cả những diễn viên nào đã đóng vai Hỷ đồng?",
       "ground_truth": {
         "answer": "An Chinh và Thanh Mai",
-        "related_entities": [
-          "Hỷ đồng",
-          "An Chinh",
-          "Thanh Mai"
-        ],
-        "must_include_keywords": [
-          "An Chinh",
-          "Thanh Mai"
-        ]
+        "related_entities": ["Hỷ đồng", "An Chinh", "Thanh Mai"],
+        "must_include_keywords": ["An Chinh", "Thanh Mai"]
       }
     },
     {
@@ -702,14 +490,8 @@
       "question": "Tất cả những diễn viên nào đã đóng vai Châu Long?",
       "ground_truth": {
         "answer": "Ngọc Ánh và Phương Mây",
-        "related_entities": [
-          "Châu Long",
-          "Ngọc Ánh",
-          "Phương Mây"
-        ],
-        "must_include_keywords": [
-          "Ngọc Ánh"
-        ]
+        "related_entities": ["Châu Long", "Ngọc Ánh", "Phương Mây"],
+        "must_include_keywords": ["Ngọc Ánh"]
       }
     },
     {
@@ -719,14 +501,8 @@
       "question": "Tất cả những diễn viên nào đã đóng vai Tuần Ty?",
       "ground_truth": {
         "answer": "Ngọc Minh và Phú Kiên",
-        "related_entities": [
-          "Tuần Ty",
-          "Ngọc Minh",
-          "Phú Kiên"
-        ],
-        "must_include_keywords": [
-          "Ngọc Minh"
-        ]
+        "related_entities": ["Tuần Ty", "Ngọc Minh", "Phú Kiên"],
+        "must_include_keywords": ["Ngọc Minh"]
       }
     },
     {
@@ -736,14 +512,8 @@
       "question": "Tất cả những diễn viên nào đã đóng vai Đào Huế?",
       "ground_truth": {
         "answer": "Thanh Ngoan và Kim Liên",
-        "related_entities": [
-          "Đào Huế",
-          "Thanh Ngoan",
-          "Kim Liên"
-        ],
-        "must_include_keywords": [
-          "Thanh Ngoan"
-        ]
+        "related_entities": ["Đào Huế", "Thanh Ngoan", "Kim Liên"],
+        "must_include_keywords": ["Thanh Ngoan"]
       }
     },
     {
@@ -753,14 +523,8 @@
       "question": "Liệt kê tất cả nhân vật trong vở Quan Âm Thị Kính?",
       "ground_truth": {
         "answer": "Thị Kính, Thị Màu, Thiện Sỹ, Sùng Bà, Sùng Ông, Nô, Mãng Ông, Phú Ông, Lý Trưởng, Mẹ Mõ",
-        "related_entities": [
-          "Quan Âm Thị Kính"
-        ],
-        "must_include_keywords": [
-          "Thị Kính",
-          "Thị Màu",
-          "Thiện Sỹ"
-        ]
+        "related_entities": ["Quan Âm Thị Kính"],
+        "must_include_keywords": ["Thị Kính", "Thị Màu", "Thiện Sỹ"]
       }
     },
     {
@@ -770,13 +534,8 @@
       "question": "Liệt kê tất cả nhân vật trong vở Kim Nham?",
       "ground_truth": {
         "answer": "Súy Vân, Trần Phương, Mụ Quán, Hỷ đồng, Khoèo, Phù thủy",
-        "related_entities": [
-          "Kim Nham"
-        ],
-        "must_include_keywords": [
-          "Súy Vân",
-          "Trần Phương"
-        ]
+        "related_entities": ["Kim Nham"],
+        "must_include_keywords": ["Súy Vân", "Trần Phương"]
       }
     },
     {
@@ -786,13 +545,8 @@
       "question": "Liệt kê tất cả nhân vật trong vở Chu Mãi Thần?",
       "ground_truth": {
         "answer": "Đào Huế, Thiệt Thê, Tuần Ty",
-        "related_entities": [
-          "Chu Mãi Thần"
-        ],
-        "must_include_keywords": [
-          "Đào Huế",
-          "Tuần Ty"
-        ]
+        "related_entities": ["Chu Mãi Thần"],
+        "must_include_keywords": ["Đào Huế", "Tuần Ty"]
       }
     },
     {
@@ -802,13 +556,8 @@
       "question": "Liệt kê tất cả nhân vật trong vở Lưu Bình Dương Lễ?",
       "ground_truth": {
         "answer": "Lưu Bình, Châu Long, Dương Lễ",
-        "related_entities": [
-          "Lưu Bình Dương Lễ"
-        ],
-        "must_include_keywords": [
-          "Lưu Bình",
-          "Châu Long"
-        ]
+        "related_entities": ["Lưu Bình Dương Lễ"],
+        "must_include_keywords": ["Lưu Bình", "Châu Long"]
       }
     },
     {
@@ -818,13 +567,8 @@
       "question": "Những diễn viên nào đã tham gia vở Quan Âm Thị Kính?",
       "ground_truth": {
         "answer": "Thảo Hiền, Hồng Thắm, Vân Quyền, An Chinh, Huy Toàn, Trần Xuân Tài, Thanh Ngoan, Trần Thị Thân, Bá Dũng, Ngọc Minh, Văn Quân, Mạnh Phóng, Tuấn Kha",
-        "related_entities": [
-          "Quan Âm Thị Kính"
-        ],
-        "must_include_keywords": [
-          "Vân Quyền",
-          "Thanh Ngoan"
-        ]
+        "related_entities": ["Quan Âm Thị Kính"],
+        "must_include_keywords": ["Vân Quyền", "Thanh Ngoan"]
       }
     },
     {
@@ -834,13 +578,8 @@
       "question": "Những diễn viên nào đã tham gia vở Kim Nham?",
       "ground_truth": {
         "answer": "Tạ Thị Kim Liên, Thúy Ngần, An Chinh, Thanh Mai, Đăng Toàn, Tuấn Kha, Trần Hải, Bá Dũng, Huy Toàn, Thanh Mạn, Ngọc Minh",
-        "related_entities": [
-          "Kim Nham"
-        ],
-        "must_include_keywords": [
-          "Tạ Thị Kim Liên",
-          "Bá Dũng"
-        ]
+        "related_entities": ["Kim Nham"],
+        "must_include_keywords": ["Tạ Thị Kim Liên", "Bá Dũng"]
       }
     },
     {
@@ -850,14 +589,8 @@
       "question": "Những diễn viên nào đã tham gia đồng thời cả vở Quan Âm Thị Kính và Kim Nham?",
       "ground_truth": {
         "answer": "An Chinh, Tuấn Kha, Bá Dũng, Huy Toàn, Ngọc Minh",
-        "related_entities": [
-          "Quan Âm Thị Kính",
-          "Kim Nham"
-        ],
-        "must_include_keywords": [
-          "An Chinh",
-          "Tuấn Kha"
-        ]
+        "related_entities": ["Quan Âm Thị Kính", "Kim Nham"],
+        "must_include_keywords": ["An Chinh", "Tuấn Kha"]
       }
     },
     {
@@ -867,14 +600,8 @@
       "question": "Mối quan hệ giữa Thị Kính và Thiện Sỹ là gì?",
       "ground_truth": {
         "answer": "Thị Kính là vợ của Thiện Sỹ trong vở Quan Âm Thị Kính",
-        "related_entities": [
-          "Thị Kính",
-          "Thiện Sỹ"
-        ],
-        "must_include_keywords": [
-          "vợ",
-          "chồng"
-        ]
+        "related_entities": ["Thị Kính", "Thiện Sỹ"],
+        "must_include_keywords": ["vợ", "chồng"]
       }
     },
     {
@@ -884,13 +611,8 @@
       "question": "Mối quan hệ giữa Sùng Bà và Thiện Sỹ là gì?",
       "ground_truth": {
         "answer": "Sùng Bà là mẹ của Thiện Sỹ",
-        "related_entities": [
-          "Sùng Bà",
-          "Thiện Sỹ"
-        ],
-        "must_include_keywords": [
-          "mẹ"
-        ]
+        "related_entities": ["Sùng Bà", "Thiện Sỹ"],
+        "must_include_keywords": ["mẹ"]
       }
     },
     {
@@ -900,13 +622,8 @@
       "question": "Mối quan hệ giữa Châu Long và Dương Lễ là gì?",
       "ground_truth": {
         "answer": "Châu Long là vợ ba của Dương Lễ",
-        "related_entities": [
-          "Châu Long",
-          "Dương Lễ"
-        ],
-        "must_include_keywords": [
-          "vợ"
-        ]
+        "related_entities": ["Châu Long", "Dương Lễ"],
+        "must_include_keywords": ["vợ"]
       }
     },
     {
@@ -916,13 +633,8 @@
       "question": "Mối quan hệ giữa Lưu Bình và Dương Lễ là gì?",
       "ground_truth": {
         "answer": "Lưu Bình và Dương Lễ là bạn thân từ thời đi học",
-        "related_entities": [
-          "Lưu Bình",
-          "Dương Lễ"
-        ],
-        "must_include_keywords": [
-          "bạn"
-        ]
+        "related_entities": ["Lưu Bình", "Dương Lễ"],
+        "must_include_keywords": ["bạn"]
       }
     },
     {
@@ -932,14 +644,8 @@
       "question": "Mối quan hệ giữa Trương Viên và Thị Phương là gì?",
       "ground_truth": {
         "answer": "Trương Viên là chồng của Thị Phương",
-        "related_entities": [
-          "Trương Viên",
-          "Thị Phương"
-        ],
-        "must_include_keywords": [
-          "chồng",
-          "vợ"
-        ]
+        "related_entities": ["Trương Viên", "Thị Phương"],
+        "must_include_keywords": ["chồng", "vợ"]
       }
     },
     {
@@ -949,15 +655,8 @@
       "question": "Trần Phương tác động đến Súy Vân như thế nào?",
       "ground_truth": {
         "answer": "Trần Phương xúi giục Súy Vân giả điên để bỏ chồng Kim Nham",
-        "related_entities": [
-          "Trần Phương",
-          "Súy Vân",
-          "Kim Nham"
-        ],
-        "must_include_keywords": [
-          "xúi giục",
-          "giả điên"
-        ]
+        "related_entities": ["Trần Phương", "Súy Vân", "Kim Nham"],
+        "must_include_keywords": ["xúi giục", "giả điên"]
       }
     },
     {
@@ -967,13 +666,8 @@
       "question": "Thị Phương hy sinh điều gì vì Trương Mẫu?",
       "ground_truth": {
         "answer": "Thị Phương khoét mắt mình để cho mẹ chồng Trương Mẫu ăn khi đói khát",
-        "related_entities": [
-          "Thị Phương",
-          "Trương Mẫu"
-        ],
-        "must_include_keywords": [
-          "khoét mắt"
-        ]
+        "related_entities": ["Thị Phương", "Trương Mẫu"],
+        "must_include_keywords": ["khoét mắt"]
       }
     },
     {
@@ -983,15 +677,8 @@
       "question": "Những nhân vật nào trong Quan Âm Thị Kính tương tác trực tiếp với Thị Màu?",
       "ground_truth": {
         "answer": "Thị Kính (Kính Tâm), Nô, Phú Ông, Lý Trưởng, Mẹ Mõ",
-        "related_entities": [
-          "Thị Màu",
-          "Thị Kính",
-          "Nô"
-        ],
-        "must_include_keywords": [
-          "Thị Kính",
-          "Nô"
-        ]
+        "related_entities": ["Thị Màu", "Thị Kính", "Nô"],
+        "must_include_keywords": ["Thị Kính", "Nô"]
       }
     },
     {
@@ -1001,15 +688,8 @@
       "question": "Thị Kính bị Sùng Bà vu oan như thế nào?",
       "ground_truth": {
         "answer": "Sùng Bà vu oan Thị Kính định giết chồng khi cắt râu cho Thiện Sỹ, đuổi nàng khỏi nhà",
-        "related_entities": [
-          "Thị Kính",
-          "Sùng Bà",
-          "Thiện Sỹ"
-        ],
-        "must_include_keywords": [
-          "vu oan",
-          "cắt râu"
-        ]
+        "related_entities": ["Thị Kính", "Sùng Bà", "Thiện Sỹ"],
+        "must_include_keywords": ["vu oan", "cắt râu"]
       }
     },
     {
@@ -1019,15 +699,8 @@
       "question": "Có bao nhiêu diễn viên khác nhau từng đóng vai Thị Màu?",
       "ground_truth": {
         "answer": "2 diễn viên: Vân Quyền và An Chinh",
-        "related_entities": [
-          "Thị Màu",
-          "Vân Quyền",
-          "An Chinh"
-        ],
-        "must_include_keywords": [
-          "2",
-          "Vân Quyền"
-        ]
+        "related_entities": ["Thị Màu", "Vân Quyền", "An Chinh"],
+        "must_include_keywords": ["2", "Vân Quyền"]
       }
     },
     {
@@ -1037,14 +710,8 @@
       "question": "Có bao nhiêu diễn viên khác nhau từng đóng vai Thị Kính?",
       "ground_truth": {
         "answer": "2 diễn viên: Thảo Hiền và Hồng Thắm",
-        "related_entities": [
-          "Thị Kính",
-          "Thảo Hiền",
-          "Hồng Thắm"
-        ],
-        "must_include_keywords": [
-          "2"
-        ]
+        "related_entities": ["Thị Kính", "Thảo Hiền", "Hồng Thắm"],
+        "must_include_keywords": ["2"]
       }
     },
     {
@@ -1061,11 +728,7 @@
           "Thiệt Thê",
           "Trinh Nguyên"
         ],
-        "must_include_keywords": [
-          "Thị Màu",
-          "Hỷ đồng",
-          "Trinh Nguyên"
-        ]
+        "must_include_keywords": ["Thị Màu", "Hỷ đồng", "Trinh Nguyên"]
       }
     },
     {
@@ -1081,11 +744,7 @@
           "Khoèo",
           "Phù thủy"
         ],
-        "must_include_keywords": [
-          "Mãng Ông",
-          "Khoèo",
-          "Phù thủy"
-        ]
+        "must_include_keywords": ["Mãng Ông", "Khoèo", "Phù thủy"]
       }
     },
     {
@@ -1095,15 +754,8 @@
       "question": "Diễn viên Bá Dũng đã đóng những vai nào?",
       "ground_truth": {
         "answer": "Bá Dũng đóng 2 vai: Sùng Ông (Quan Âm Thị Kính), Trần Phương (Kim Nham)",
-        "related_entities": [
-          "Bá Dũng",
-          "Sùng Ông",
-          "Trần Phương"
-        ],
-        "must_include_keywords": [
-          "Sùng Ông",
-          "Trần Phương"
-        ]
+        "related_entities": ["Bá Dũng", "Sùng Ông", "Trần Phương"],
+        "must_include_keywords": ["Sùng Ông", "Trần Phương"]
       }
     },
     {
@@ -1113,15 +765,8 @@
       "question": "Diễn viên Ngọc Minh đã đóng những vai nào?",
       "ground_truth": {
         "answer": "Ngọc Minh đóng 3 vai: Sùng Ông (Quan Âm Thị Kính), Hề trong trích đoạn Mụ quán - Trần Phương (Kim Nham), Tuần Ty (Chu Mãi Thần)",
-        "related_entities": [
-          "Ngọc Minh",
-          "Sùng Ông",
-          "Tuần Ty"
-        ],
-        "must_include_keywords": [
-          "Sùng Ông",
-          "Tuần Ty"
-        ]
+        "related_entities": ["Ngọc Minh", "Sùng Ông", "Tuần Ty"],
+        "must_include_keywords": ["Sùng Ông", "Tuần Ty"]
       }
     },
     {
@@ -1131,15 +776,8 @@
       "question": "Diễn viên Thanh Ngoan đã đóng những vai nào?",
       "ground_truth": {
         "answer": "Thanh Ngoan đóng 2 vai: Sùng Bà (Quan Âm Thị Kính), Đào Huế (Chu Mãi Thần)",
-        "related_entities": [
-          "Thanh Ngoan",
-          "Sùng Bà",
-          "Đào Huế"
-        ],
-        "must_include_keywords": [
-          "Sùng Bà",
-          "Đào Huế"
-        ]
+        "related_entities": ["Thanh Ngoan", "Sùng Bà", "Đào Huế"],
+        "must_include_keywords": ["Sùng Bà", "Đào Huế"]
       }
     },
     {
@@ -1149,14 +787,8 @@
       "question": "Liệt kê toàn bộ vai diễn của diễn viên Tuấn Kha?",
       "ground_truth": {
         "answer": "Mãng Ông (Quan Âm Thị Kính), Khoèo (Kim Nham), Phù thủy (Kim Nham) — 3 vai ở 2 vở",
-        "related_entities": [
-          "Tuấn Kha"
-        ],
-        "must_include_keywords": [
-          "Mãng Ông",
-          "Khoèo",
-          "Phù thủy"
-        ]
+        "related_entities": ["Tuấn Kha"],
+        "must_include_keywords": ["Mãng Ông", "Khoèo", "Phù thủy"]
       }
     },
     {
@@ -1166,9 +798,7 @@
       "question": "Tổng kết sự nghiệp diễn xuất của diễn viên An Chinh?",
       "ground_truth": {
         "answer": "An Chinh đóng 4 vai ở 4 vở: Thị Màu (Quan Âm Thị Kính), Hỷ đồng (Kim Nham), Thiệt Thê (Chu Mãi Thần), Trinh Nguyên (vở Trinh Nguyên)",
-        "related_entities": [
-          "An Chinh"
-        ],
+        "related_entities": ["An Chinh"],
         "must_include_keywords": [
           "Thị Màu",
           "Hỷ đồng",
@@ -1184,13 +814,8 @@
       "question": "Tổng kết sự nghiệp của diễn viên Bá Dũng?",
       "ground_truth": {
         "answer": "Bá Dũng đóng 2 vai: Sùng Ông (QATK), Trần Phương (KN)",
-        "related_entities": [
-          "Bá Dũng"
-        ],
-        "must_include_keywords": [
-          "Sùng Ông",
-          "Trần Phương"
-        ]
+        "related_entities": ["Bá Dũng"],
+        "must_include_keywords": ["Sùng Ông", "Trần Phương"]
       }
     },
     {
@@ -1200,15 +825,8 @@
       "question": "Diễn viên Trần Hải đã tham gia những vở nào và vai gì?",
       "ground_truth": {
         "answer": "Trần Hải đóng vai Phù thủy trong vở Kim Nham (trích đoạn Phù thủy sợ ma)",
-        "related_entities": [
-          "Trần Hải",
-          "Phù thủy",
-          "Kim Nham"
-        ],
-        "must_include_keywords": [
-          "Phù thủy",
-          "Kim Nham"
-        ]
+        "related_entities": ["Trần Hải", "Phù thủy", "Kim Nham"],
+        "must_include_keywords": ["Phù thủy", "Kim Nham"]
       }
     },
     {
@@ -1218,13 +836,8 @@
       "question": "Diễn viên Ngọc Minh tham gia bao nhiêu vở? Vai gì?",
       "ground_truth": {
         "answer": "3 vở: Sùng Ông (QATK), Hề (KN), Tuần Ty (CMT)",
-        "related_entities": [
-          "Ngọc Minh"
-        ],
-        "must_include_keywords": [
-          "Sùng Ông",
-          "Tuần Ty"
-        ]
+        "related_entities": ["Ngọc Minh"],
+        "must_include_keywords": ["Sùng Ông", "Tuần Ty"]
       }
     },
     {
@@ -1234,13 +847,8 @@
       "question": "Thanh Ngoan tham gia bao nhiêu vở? Liệt kê vai diễn?",
       "ground_truth": {
         "answer": "2 vở: Sùng Bà (QATK), Đào Huế (CMT)",
-        "related_entities": [
-          "Thanh Ngoan"
-        ],
-        "must_include_keywords": [
-          "Sùng Bà",
-          "Đào Huế"
-        ]
+        "related_entities": ["Thanh Ngoan"],
+        "must_include_keywords": ["Sùng Bà", "Đào Huế"]
       }
     },
     {
@@ -1250,14 +858,8 @@
       "question": "Phú Kiên đã tham gia bao nhiêu vở và đóng những vai nào?",
       "ground_truth": {
         "answer": "Phú Kiên đóng 4 vai ở 4 vở: Phú Ông (Quan Âm Thị Kính), Tuần Ty (Chu Mãi Thần), Từ Thức (vở Từ Thức), Thầy Đồ (vở Trinh Nguyên)",
-        "related_entities": [
-          "Phú Kiên"
-        ],
-        "must_include_keywords": [
-          "Tuần Ty",
-          "Từ Thức",
-          "Thầy Đồ"
-        ]
+        "related_entities": ["Phú Kiên"],
+        "must_include_keywords": ["Tuần Ty", "Từ Thức", "Thầy Đồ"]
       }
     },
     {
@@ -1267,13 +869,8 @@
       "question": "Huy Toàn đã tham gia bao nhiêu vở và đóng những vai nào?",
       "ground_truth": {
         "answer": "2 vở: Thiện Sỹ (Quan Âm Thị Kính), Trần Phương (Kim Nham)",
-        "related_entities": [
-          "Huy Toàn"
-        ],
-        "must_include_keywords": [
-          "Thiện Sỹ",
-          "Trần Phương"
-        ]
+        "related_entities": ["Huy Toàn"],
+        "must_include_keywords": ["Thiện Sỹ", "Trần Phương"]
       }
     },
     {
@@ -1283,14 +880,8 @@
       "question": "Diễn viên nào xuất hiện trong nhiều vở nhất?",
       "ground_truth": {
         "answer": "An Chinh và Phú Kiên là hai diễn viên tham gia nhiều vở nhất, mỗi người đóng 4 vai ở 4 vở khác nhau",
-        "related_entities": [
-          "An Chinh",
-          "Phú Kiên"
-        ],
-        "must_include_keywords": [
-          "An Chinh",
-          "Phú Kiên"
-        ]
+        "related_entities": ["An Chinh", "Phú Kiên"],
+        "must_include_keywords": ["An Chinh", "Phú Kiên"]
       }
     },
     {
@@ -1300,17 +891,8 @@
       "question": "Liệt kê những diễn viên đã tham gia từ 2 vở chèo trở lên?",
       "ground_truth": {
         "answer": "An Chinh (4 vở), Phú Kiên (4 vở), Ngọc Minh (3 vở), Tuấn Kha (2 vở), Bá Dũng (2 vở), Huy Toàn (2 vở), Thanh Ngoan (2 vở)",
-        "related_entities": [
-          "An Chinh",
-          "Phú Kiên",
-          "Ngọc Minh",
-          "Tuấn Kha"
-        ],
-        "must_include_keywords": [
-          "An Chinh",
-          "Phú Kiên",
-          "Ngọc Minh"
-        ]
+        "related_entities": ["An Chinh", "Phú Kiên", "Ngọc Minh", "Tuấn Kha"],
+        "must_include_keywords": ["An Chinh", "Phú Kiên", "Ngọc Minh"]
       }
     },
     {
@@ -1341,12 +923,8 @@
       "question": "Vở chèo nào có nhiều nhân vật nhất?",
       "ground_truth": {
         "answer": "Quan Âm Thị Kính có nhiều nhân vật nhất (Thị Kính, Thị Màu, Thiện Sỹ, Sùng Bà, Sùng Ông, Nô, Mãng Ông, Phú Ông, Lý Trưởng, Mẹ Mõ)",
-        "related_entities": [
-          "Quan Âm Thị Kính"
-        ],
-        "must_include_keywords": [
-          "Quan Âm Thị Kính"
-        ]
+        "related_entities": ["Quan Âm Thị Kính"],
+        "must_include_keywords": ["Quan Âm Thị Kính"]
       }
     },
     {
@@ -1356,13 +934,8 @@
       "question": "Vở chèo nào có nhiều trích đoạn nhất?",
       "ground_truth": {
         "answer": "Quan Âm Thị Kính có nhiều trích đoạn nhất: 5 trích đoạn (Cắt râu, Lý trưởng - Mẹ Mõ, Mầu - Nô - Phú Ông, Thị Mầu lên chùa, Vu quy)",
-        "related_entities": [
-          "Quan Âm Thị Kính"
-        ],
-        "must_include_keywords": [
-          "Quan Âm Thị Kính",
-          "5"
-        ]
+        "related_entities": ["Quan Âm Thị Kính"],
+        "must_include_keywords": ["Quan Âm Thị Kính", "5"]
       }
     },
     {
@@ -1372,12 +945,8 @@
       "question": "Vở chèo nào có nhiều diễn viên tham gia nhất?",
       "ground_truth": {
         "answer": "Quan Âm Thị Kính với hơn 13 diễn viên",
-        "related_entities": [
-          "Quan Âm Thị Kính"
-        ],
-        "must_include_keywords": [
-          "Quan Âm Thị Kính"
-        ]
+        "related_entities": ["Quan Âm Thị Kính"],
+        "must_include_keywords": ["Quan Âm Thị Kính"]
       }
     },
     {
@@ -1387,14 +956,8 @@
       "question": "So sánh chủ đề của vở Quan Âm Thị Kính và Kim Nham?",
       "ground_truth": {
         "answer": "QATK: oan khuất, lòng từ bi Phật giáo. Kim Nham: tình yêu trắc trở, giả điên vì tình.",
-        "related_entities": [
-          "Quan Âm Thị Kính",
-          "Kim Nham"
-        ],
-        "must_include_keywords": [
-          "oan khuất",
-          "giả điên"
-        ]
+        "related_entities": ["Quan Âm Thị Kính", "Kim Nham"],
+        "must_include_keywords": ["oan khuất", "giả điên"]
       }
     },
     {
@@ -1411,10 +974,7 @@
           "Thị Phương",
           "Đào Huế"
         ],
-        "must_include_keywords": [
-          "Thị Kính",
-          "Súy Vân"
-        ]
+        "must_include_keywords": ["Thị Kính", "Súy Vân"]
       }
     },
     {
@@ -1424,13 +984,8 @@
       "question": "Những vở chèo cổ nào có chủ đề oan khuất?",
       "ground_truth": {
         "answer": "Có 2 vở: Quan Âm Thị Kính (Thị Kính bị oan), Trương Viên (Thị Phương bị nghi ngờ)",
-        "related_entities": [
-          "Quan Âm Thị Kính",
-          "Trương Viên"
-        ],
-        "must_include_keywords": [
-          "oan khuất"
-        ]
+        "related_entities": ["Quan Âm Thị Kính", "Trương Viên"],
+        "must_include_keywords": ["oan khuất"]
       }
     },
     {
@@ -1440,14 +995,8 @@
       "question": "Những vở chèo nào có yếu tố hài (nhân vật Hề)?",
       "ground_truth": {
         "answer": "Quan Âm Thị Kính, Kim Nham, Trương Viên đều có nhân vật Hề",
-        "related_entities": [
-          "Quan Âm Thị Kính",
-          "Kim Nham",
-          "Trương Viên"
-        ],
-        "must_include_keywords": [
-          "Hề"
-        ]
+        "related_entities": ["Quan Âm Thị Kính", "Kim Nham", "Trương Viên"],
+        "must_include_keywords": ["Hề"]
       }
     },
     {
@@ -1457,15 +1006,8 @@
       "question": "Những vở chèo nào có chủ đề tình yêu bị cản trở?",
       "ground_truth": {
         "answer": "Kim Nham (Súy Vân-Kim Nham), Lưu Bình Dương Lễ (Lưu Bình-Châu Long), Từ Thức (Từ Thức-Giáng Hương)",
-        "related_entities": [
-          "Kim Nham",
-          "Lưu Bình Dương Lễ",
-          "Từ Thức"
-        ],
-        "must_include_keywords": [
-          "Kim Nham",
-          "Lưu Bình"
-        ]
+        "related_entities": ["Kim Nham", "Lưu Bình Dương Lễ", "Từ Thức"],
+        "must_include_keywords": ["Kim Nham", "Lưu Bình"]
       }
     },
     {
@@ -1475,17 +1017,8 @@
       "question": "Nhân vật Hề xuất hiện trong những vở chèo nào?",
       "ground_truth": {
         "answer": "Nhân vật Hề xuất hiện trong Kim Nham (trích đoạn Mụ quán - Trần Phương), Trương Viên (Lớp \"Tiên Nữ - Đoàn tụ\") và Từ Thức (Hề theo Thầy)",
-        "related_entities": [
-          "Hề",
-          "Kim Nham",
-          "Trương Viên",
-          "Từ Thức"
-        ],
-        "must_include_keywords": [
-          "Hề",
-          "Kim Nham",
-          "Trương Viên"
-        ]
+        "related_entities": ["Hề", "Kim Nham", "Trương Viên", "Từ Thức"],
+        "must_include_keywords": ["Hề", "Kim Nham", "Trương Viên"]
       }
     },
     {
@@ -1495,15 +1028,8 @@
       "question": "Tổng cộng có bao nhiêu trích đoạn trong các vở chèo cổ và phân bổ thế nào?",
       "ground_truth": {
         "answer": "Quan Âm Thị Kính: 5 trích đoạn; Kim Nham: 4 trích đoạn; Lưu Bình - Dương Lễ: 2 trích đoạn; Chu Mãi Thần, Trương Viên, Từ Thức, Trinh Nguyên: mỗi vở 1 trích đoạn. Tổng cộng 15 trích đoạn.",
-        "related_entities": [
-          "Quan Âm Thị Kính",
-          "Kim Nham",
-          "Trương Viên"
-        ],
-        "must_include_keywords": [
-          "Thị Mầu lên chùa",
-          "15"
-        ]
+        "related_entities": ["Quan Âm Thị Kính", "Kim Nham", "Trương Viên"],
+        "must_include_keywords": ["Thị Mầu lên chùa", "15"]
       }
     },
     {
@@ -1513,15 +1039,8 @@
       "question": "Có bao nhiêu diễn viên và bao nhiêu nhân vật tổng cộng trong các vở chèo cổ tiêu biểu?",
       "ground_truth": {
         "answer": "Khoảng 41 diễn viên và 31 nhân vật trải đều trên 7 vở chèo cổ",
-        "related_entities": [
-          "Quan Âm Thị Kính",
-          "Kim Nham",
-          "Chu Mãi Thần"
-        ],
-        "must_include_keywords": [
-          "41",
-          "31"
-        ]
+        "related_entities": ["Quan Âm Thị Kính", "Kim Nham", "Chu Mãi Thần"],
+        "must_include_keywords": ["41", "31"]
       }
     },
     {
@@ -1531,16 +1050,8 @@
       "question": "Nhân vật loại Đào trong chèo là gì? Có những ai là đại diện tiêu biểu?",
       "ground_truth": {
         "answer": "Đào là vai nữ chính diện: Thị Kính, Châu Long, Thị Phương. Đào lệch: Thị Màu, Súy Vân",
-        "related_entities": [
-          "Thị Kính",
-          "Châu Long",
-          "Thị Màu",
-          "Súy Vân"
-        ],
-        "must_include_keywords": [
-          "Đào",
-          "Đào lệch"
-        ]
+        "related_entities": ["Thị Kính", "Châu Long", "Thị Màu", "Súy Vân"],
+        "must_include_keywords": ["Đào", "Đào lệch"]
       }
     },
     {
@@ -1550,15 +1061,8 @@
       "question": "Phân tích nhân vật Thị Màu: tính cách, hành động và ý nghĩa?",
       "ground_truth": {
         "answer": "Thị Màu là nhân vật Đào lệch, táo bạo, phá vỡ khuôn phép phong kiến. Tượng trưng cho khát vọng tự do của người phụ nữ.",
-        "related_entities": [
-          "Thị Màu",
-          "Quan Âm Thị Kính"
-        ],
-        "must_include_keywords": [
-          "táo bạo",
-          "tự do",
-          "Đào lệch"
-        ]
+        "related_entities": ["Thị Màu", "Quan Âm Thị Kính"],
+        "must_include_keywords": ["táo bạo", "tự do", "Đào lệch"]
       }
     },
     {
@@ -1568,14 +1072,8 @@
       "question": "Phân tích nhân vật Thị Kính: oan khuất và lòng nhẫn nhịn?",
       "ground_truth": {
         "answer": "Thị Kính là biểu tượng của đức nhẫn nhịn và lòng từ bi. Bị vu oan 3 lần nhưng vẫn giữ lòng trong sạch, cuối cùng được giải oan.",
-        "related_entities": [
-          "Thị Kính"
-        ],
-        "must_include_keywords": [
-          "oan khuất",
-          "nhẫn nhịn",
-          "từ bi"
-        ]
+        "related_entities": ["Thị Kính"],
+        "must_include_keywords": ["oan khuất", "nhẫn nhịn", "từ bi"]
       }
     },
     {
@@ -1585,14 +1083,8 @@
       "question": "Phân tích hình tượng người phụ nữ hy sinh trong các vở chèo cổ?",
       "ground_truth": {
         "answer": "Châu Long (hy sinh 3 năm nuôi bạn chồng), Thị Phương (khoét mắt cho mẹ chồng), Thị Kính (chịu oan suốt đời tu hành)",
-        "related_entities": [
-          "Châu Long",
-          "Thị Phương",
-          "Thị Kính"
-        ],
-        "must_include_keywords": [
-          "hy sinh"
-        ]
+        "related_entities": ["Châu Long", "Thị Phương", "Thị Kính"],
+        "must_include_keywords": ["hy sinh"]
       }
     },
     {
@@ -1602,14 +1094,8 @@
       "question": "So sánh số phận bi kịch của Súy Vân và Thị Kính?",
       "ground_truth": {
         "answer": "Súy Vân bị dụ dỗ giả điên, bị Trần Phương bỏ. Thị Kính bị oan khuất, bị đuổi khỏi nhà, bị đổ oan thai nhi. Cả hai đều là nạn nhân của xã hội.",
-        "related_entities": [
-          "Súy Vân",
-          "Thị Kính"
-        ],
-        "must_include_keywords": [
-          "bi kịch",
-          "oan khuất"
-        ]
+        "related_entities": ["Súy Vân", "Thị Kính"],
+        "must_include_keywords": ["bi kịch", "oan khuất"]
       }
     },
     {
@@ -1619,14 +1105,8 @@
       "question": "Triết lý Phật giáo thể hiện như thế nào qua nhân vật Thị Kính?",
       "ground_truth": {
         "answer": "Thị Kính thể hiện lòng từ bi, nhẫn nhịn, và tin vào nhân quả của Phật giáo. Tên Kính Tâm (kính trọng tâm Phật) thể hiện rõ điều này.",
-        "related_entities": [
-          "Thị Kính"
-        ],
-        "must_include_keywords": [
-          "Phật giáo",
-          "từ bi",
-          "nhân quả"
-        ]
+        "related_entities": ["Thị Kính"],
+        "must_include_keywords": ["Phật giáo", "từ bi", "nhân quả"]
       }
     },
     {
@@ -1636,15 +1116,8 @@
       "question": "Vai trò của nhân vật phản diện trong các vở chèo cổ?",
       "ground_truth": {
         "answer": "Sùng Bà (vu oan Thị Kính), Trần Phương (dụ dỗ Súy Vân), Đào Huế (phụ bạc Chu Mãi Thần) — đại diện cho bất công xã hội",
-        "related_entities": [
-          "Sùng Bà",
-          "Trần Phương",
-          "Đào Huế"
-        ],
-        "must_include_keywords": [
-          "phản diện",
-          "vu oan"
-        ]
+        "related_entities": ["Sùng Bà", "Trần Phương", "Đào Huế"],
+        "must_include_keywords": ["phản diện", "vu oan"]
       }
     },
     {
@@ -1654,16 +1127,8 @@
       "question": "Liệt kê các mối quan hệ vợ-chồng trong các vở chèo cổ và kết cục của họ?",
       "ground_truth": {
         "answer": "Thị Kính-Thiện Sỹ (ly hôn vì vu oan), Trương Viên-Thị Phương (đoàn tụ), Châu Long-Dương Lễ (đoàn tụ), Súy Vân-Kim Nham (tan vỡ), Đào Huế-Chu Mãi Thần (ly hôn)",
-        "related_entities": [
-          "Thị Kính",
-          "Trương Viên",
-          "Châu Long",
-          "Súy Vân"
-        ],
-        "must_include_keywords": [
-          "đoàn tụ",
-          "ly hôn"
-        ]
+        "related_entities": ["Thị Kính", "Trương Viên", "Châu Long", "Súy Vân"],
+        "must_include_keywords": ["đoàn tụ", "ly hôn"]
       }
     },
     {
@@ -1673,15 +1138,8 @@
       "question": "Nghệ thuật chèo phân loại nhân vật theo những loại gì?",
       "ground_truth": {
         "answer": "Chèo có 4 loại chính: Đào (nữ chính), Kép (nam chính), Hề (hài), Lão/Cụ (nhân vật lớn tuổi)",
-        "related_entities": [
-          "Quan Âm Thị Kính",
-          "Kim Nham"
-        ],
-        "must_include_keywords": [
-          "Đào",
-          "Kép",
-          "Hề"
-        ]
+        "related_entities": ["Quan Âm Thị Kính", "Kim Nham"],
+        "must_include_keywords": ["Đào", "Kép", "Hề"]
       }
     },
     {
@@ -1691,14 +1149,8 @@
       "question": "Tổng quan toàn bộ nhân vật và diễn viên trong vở Quan Âm Thị Kính?",
       "ground_truth": {
         "answer": "Vở Quan Âm Thị Kính có 10 nhân vật và hơn 13 diễn viên, 5 trích đoạn. Thị Kính (Thảo Hiền, Hồng Thắm), Thị Màu (Vân Quyền, An Chinh), Thiện Sỹ (Huy Toàn, Trần Xuân Tài), ...",
-        "related_entities": [
-          "Quan Âm Thị Kính"
-        ],
-        "must_include_keywords": [
-          "Thị Kính",
-          "Thị Màu",
-          "Thiện Sỹ"
-        ]
+        "related_entities": ["Quan Âm Thị Kính"],
+        "must_include_keywords": ["Thị Kính", "Thị Màu", "Thiện Sỹ"]
       }
     },
     {
@@ -1715,11 +1167,7 @@
           "Từ Thức",
           "Trinh Nguyên"
         ],
-        "must_include_keywords": [
-          "7 vở",
-          "31",
-          "41"
-        ]
+        "must_include_keywords": ["7 vở", "31", "41"]
       }
     }
   ]
