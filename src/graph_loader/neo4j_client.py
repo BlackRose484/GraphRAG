@@ -1,21 +1,4 @@
-"""
-Neo4j connection manager for GraphRAGv2.
-
-Provides a single, reusable driver instance (connection pool) with:
-- Context-manager support  (with neo4j_client() as client: ...)
-- Health-check / ping
-- Convenience wrappers for read / write queries
-- Auto-close on process exit
-
-Usage::
-
-    from src.graph_loader.neo4j_client import Neo4jClient
-
-    with Neo4jClient() as client:
-        client.ping()                        # raises if unreachable
-        rows = client.read("MATCH (n:Play) RETURN n.title AS title LIMIT 5")
-        client.write("CREATE (n:Play {id: $id})", id="test")
-"""
+"""Neo4j connection manager for GraphRAGv2."""
 
 from __future__ import annotations
 
@@ -32,11 +15,10 @@ logger = get_logger(__name__)
 
 
 class Neo4jClient:
-    """
-    Thin wrapper around the official neo4j driver.
+    """Thin wrapper around the official neo4j driver.
 
-    Thread-safe: the underlying driver maintains a connection pool,
-    so a single Neo4jClient instance can be shared across threads/components.
+    Thread-safe: the underlying driver maintains a connection pool, so a
+    single instance can be shared across threads/components.
     """
 
     def __init__(
@@ -49,8 +31,6 @@ class Neo4jClient:
         self._user     = user     or settings.neo4j.user
         self._password = password or settings.neo4j.password
         self._driver: Optional[Driver] = None
-
-    # ── Connection lifecycle ──────────────────────────────────────────────────
 
     def connect(self) -> None:
         """Open the driver / connection pool (idempotent)."""
@@ -71,9 +51,7 @@ class Neo4jClient:
             logger.info("Neo4j driver closed")
 
     def ping(self) -> None:
-        """
-        Verify connectivity.  Raises ``ConnectionError`` if unreachable.
-        """
+        """Verify connectivity. Raises ``ConnectionError`` if unreachable."""
         self._ensure_connected()
         try:
             self._driver.verify_connectivity()  # type: ignore[union-attr]
@@ -87,8 +65,6 @@ class Neo4jClient:
                 f"Neo4j authentication failed (user={self._user}): {exc}"
             ) from exc
 
-    # ── Context manager ───────────────────────────────────────────────────────
-
     def __enter__(self) -> "Neo4jClient":
         self.connect()
         return self
@@ -96,25 +72,13 @@ class Neo4jClient:
     def __exit__(self, *_: Any) -> None:
         self.close()
 
-    # ── Query helpers ─────────────────────────────────────────────────────────
-
     def read(
         self,
         cypher: str,
         params: Optional[Dict[str, Any]] = None,
         database: Optional[str] = None,
     ) -> List[Dict[str, Any]]:
-        """
-        Execute a read-only Cypher query and return all rows as dicts.
-
-        Args:
-            cypher:   Cypher query string.
-            params:   Optional parameter dict.
-            database: Neo4j database name (None → default).
-
-        Returns:
-            List of row dicts (field-name → value).
-        """
+        """Execute a read-only Cypher query and return all rows as dicts."""
         self._ensure_connected()
         with self._driver.session(database=database) as session:  # type: ignore
             result = session.run(cypher, params or {})
@@ -128,14 +92,7 @@ class Neo4jClient:
         params: Optional[Dict[str, Any]] = None,
         database: Optional[str] = None,
     ) -> None:
-        """
-        Execute a write Cypher query inside an auto-commit transaction.
-
-        Args:
-            cypher:   Cypher query string.
-            params:   Optional parameter dict.
-            database: Neo4j database name (None → default).
-        """
+        """Execute a write Cypher query inside an auto-commit transaction."""
         self._ensure_connected()
         with self._driver.session(database=database) as session:  # type: ignore
             session.run(cypher, params or {})
@@ -147,10 +104,8 @@ class Neo4jClient:
         params: Optional[Dict[str, Any]] = None,
         database: Optional[str] = None,
     ) -> None:
-        """
-        Execute a write query inside an explicit managed transaction
-        (auto-retry on transient failures).
-        """
+        """Execute a write query inside an explicit managed transaction
+        (auto-retry on transient failures)."""
         self._ensure_connected()
 
         def _work(tx: Any) -> None:
@@ -166,8 +121,6 @@ class Neo4jClient:
         self._ensure_connected()
         with self._driver.session(**kwargs) as s:  # type: ignore
             yield s
-
-    # ── Stats helpers ─────────────────────────────────────────────────────────
 
     def count_nodes(self, label: Optional[str] = None) -> int:
         """Return number of nodes, optionally filtered by label."""
@@ -185,10 +138,7 @@ class Neo4jClient:
         return int(rows[0]["cnt"]) if rows else 0
 
     def get_schema_summary(self) -> Dict[str, Any]:
-        """
-        Return a lightweight schema summary:
-        node labels + relationship types + counts.
-        """
+        """Return node labels, relationship types, and counts."""
         node_labels  = self.read("CALL db.labels() YIELD label RETURN label")
         rel_types    = self.read(
             "CALL db.relationshipTypes() YIELD relationshipType RETURN relationshipType"
@@ -202,8 +152,6 @@ class Neo4jClient:
             "total_nodes":      total_nodes,
             "total_relationships": total_rels,
         }
-
-    # ── Internal ──────────────────────────────────────────────────────────────
 
     def _ensure_connected(self) -> None:
         if self._driver is None:

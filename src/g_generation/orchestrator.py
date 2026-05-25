@@ -1,9 +1,4 @@
-"""
-G-Generation orchestrator.
-
-Wraps the three generation strategies (Pre / Mid / Post) and produces a
-:class:`GenerationResult` dataclass.
-"""
+"""G-Generation orchestrator wrapping Pre/Mid/Post strategies."""
 from __future__ import annotations
 
 import time
@@ -30,7 +25,7 @@ class GenerationResult:
     response: str
     strategy: str
     generation_time: float
-    context_length: int     # len(context) passed to the model
+    context_length: int
     key_facts_used: str
     model_name: str
     error: str | None = None
@@ -47,14 +42,7 @@ class GenerationResult:
 
 
 class GenerationOrchestrator:
-    """Manage generation using a configurable strategy.
-
-    Args:
-        strategy: One of ``'pre'``, ``'mid'`` (default), ``'post'``.
-
-    Raises:
-        ValueError: If an unknown strategy name is provided.
-    """
+    """Manage generation using a configurable strategy."""
 
     def __init__(self, strategy: str = GenerationStrategy.DEFAULT) -> None:
         if strategy not in STRATEGY_REGISTRY:
@@ -66,20 +54,13 @@ class GenerationOrchestrator:
         self._strategy: BaseGenerationStrategy = STRATEGY_REGISTRY[strategy]()
         _logger.info("GenerationOrchestrator initialised with strategy='%s'", strategy)
 
-    # ── Public API ────────────────────────────────────────────────────────────
-
     @property
     def strategy_name(self) -> str:
         return self._strategy_name
 
     @property
     def default_formats(self) -> list[str]:
-        """Format keys preferred by the currently active strategy.
-
-        Used by the pipeline when ``auto_routing`` is enabled and the user
-        did not pin an explicit format list — each strategy has different
-        format affinities (Pre/Mid: 2 formats, Post: 3 formats).
-        """
+        """Format keys preferred by the currently active strategy."""
         return list(self._strategy.DEFAULT_FORMATS)
 
     def generate(
@@ -90,24 +71,14 @@ class GenerationOrchestrator:
         selected_formats: list[str] | None = None,
         key_facts: str = "",
     ) -> GenerationResult:
-        """Run the configured strategy and return a :class:`GenerationResult`.
-
-        Args:
-            query: User query.
-            graph_data: Retrieved graph data from :class:`~src.g_retrieval.orchestrator.RetrievalOrchestrator`.
-            selected_formats: :class:`~src.constants.constant.FormatKey` values to include.
-            key_facts: Pre-computed key facts string (computed fresh if empty).
-
-        Returns:
-            :class:`GenerationResult` — *error* is set on failure, response is empty string.
-        """
+        """Run the configured strategy and return a :class:`GenerationResult`."""
         formats = selected_formats or _DEFAULT_FORMATS
         start = time.perf_counter()
 
         try:
             _logger.info("Generation start  strategy=%s  query=%r", self._strategy_name, query[:60])
 
-            # Build context once — pass it down to avoid a second build inside the strategy
+            # Build context here so the strategy doesn't redo it internally.
             context = self._strategy._build_context(graph_data, formats, key_facts=key_facts)
             context_length = len(context)
 
@@ -131,7 +102,7 @@ class GenerationOrchestrator:
             _logger.info("Generation done: %s", result.summary())
             return result
 
-        except Exception as exc:  # noqa: BLE001
+        except Exception as exc:
             elapsed = time.perf_counter() - start
             _logger.error("Generation failed: %s", exc, exc_info=True)
             return GenerationResult(
@@ -146,11 +117,7 @@ class GenerationOrchestrator:
             )
 
     def switch_strategy(self, strategy: str) -> None:
-        """Hot-swap the strategy without recreating the orchestrator.
-
-        Args:
-            strategy: New strategy name (``'pre'``, ``'mid'``, or ``'post'``).
-        """
+        """Hot-swap the strategy without recreating the orchestrator."""
         if strategy not in STRATEGY_REGISTRY:
             raise ValueError(f"Unknown strategy '{strategy}'")
         self._strategy_name = strategy

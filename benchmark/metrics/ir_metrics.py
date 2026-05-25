@@ -1,12 +1,7 @@
-"""
-Information Retrieval metrics.
+"""Information Retrieval metrics.
 
-References
-----------
-Manning, C. D., Raghavan, P., & Schütze, H. (2008).
-    Introduction to Information Retrieval. Cambridge University Press.
-Järvelin, K., & Kekäläinen, J. (2002).
-    Cumulated gain-based evaluation of IR techniques. ACM TOIS, 20(4), 422–446.
+Manning, C. D., Raghavan, P., & Schütze, H. (2008). Introduction to Information Retrieval.
+Järvelin, K., & Kekäläinen, J. (2002). Cumulated gain-based evaluation of IR techniques.
 """
 
 from __future__ import annotations
@@ -19,8 +14,6 @@ from typing import List, Set
 
 from .base import MetricBase, MetricGroup
 
-
-# ── Normalization ─────────────────────────────────────────────────────────────
 
 # Vietnamese descriptor prefixes that don't change the underlying entity.
 # Stripped during normalization so "Vai diễn Thị Mầu" ≡ "Thị Mầu".
@@ -42,11 +35,7 @@ def _strip_diacritics(s: str) -> str:
 
 
 def _norm(s: str) -> str:
-    """Normalize for matching: lowercase, strip punctuation/whitespace.
-
-    Note: diacritics are kept here because relevant-set matching should be
-    strict on Vietnamese spelling. Use ``_canon`` for fuzzy dedup.
-    """
+    """Normalize for strict matching; diacritics preserved (use ``_canon`` for fuzzy)."""
     s = s.strip().lower()
     s = _PUNCT_RE.sub(" ", s)
     s = _WS_RE.sub(" ", s).strip()
@@ -56,23 +45,19 @@ def _norm(s: str) -> str:
 def _canon(s: str) -> Set[str]:
     """Canonical word-set for fuzzy entity comparison.
 
-    Pipeline: lowercase → strip diacritics → strip punctuation → tokenize →
-    remove descriptor stop-words. Returned as a set so word order doesn't
-    matter ("Sùng Bà" ≡ "Bà Sùng") and descriptor padding is ignored
-    ("Vai Thị Mầu" ≡ "nhân vật Thị Mầu" ≡ "Thị Mầu").
+    Returned as a set so word order doesn't matter ("Sùng Bà" ≡ "Bà Sùng")
+    and descriptor padding is ignored ("Vai Thị Mầu" ≡ "Thị Mầu").
     """
     s = _strip_diacritics(s.strip().lower())
     s = _PUNCT_RE.sub(" ", s)
     tokens = [t for t in s.split() if t]
-    # Drop descriptor tokens (also accent-stripped to match)
     drop = {_strip_diacritics(d) for d in _DESCRIPTOR_TOKENS}
     drop |= {t for d in drop for t in d.split()}
     return {t for t in tokens if t not in drop}
 
 
 def _same_entity(a_words: Set[str], b_words: Set[str]) -> bool:
-    """Two word-sets refer to the same entity if one is a subset of the other,
-    or Jaccard similarity ≥ 0.6 (fuzzy match for partial overlaps)."""
+    """Subset or Jaccard ≥ 0.6 — fuzzy match for partial overlaps."""
     if not a_words or not b_words:
         return False
     if a_words <= b_words or b_words <= a_words:
@@ -82,19 +67,13 @@ def _same_entity(a_words: Set[str], b_words: Set[str]) -> bool:
     return union > 0 and inter / union >= 0.6
 
 
-# ── Hit / dedup helpers ───────────────────────────────────────────────────────
-
 def _is_hit(item: str, relevant: Set[str]) -> bool:
-    """Case-insensitive substring match (no double-count protection).
-    Kept for backward compatibility — internal metrics use ``_hit_flags``.
-    """
     item_n = _norm(item)
     return any(item_n == _norm(r) or _norm(r) in item_n or item_n in _norm(r)
                for r in relevant)
 
 
 def _match_relevant(item: str, relevant: Set[str]) -> str | None:
-    """Return the normalized relevant entity ``item`` matches (fuzzy), or None."""
     item_words = _canon(item)
     if not item_words:
         return None
@@ -123,17 +102,7 @@ def _hit_flags(retrieved: List[str], relevant: Set[str]) -> List[bool]:
 
 
 def _dedupe(retrieved: List[str]) -> List[str]:
-    """Collapse retrieved items that refer to the same entity.
-
-    Uses canonical word-set matching (``_same_entity``) so the following
-    surface forms collapse to one:
-      • "Thị Kính" + "vai Thị Kính" + "nhân vật Thị Kính"  (descriptor padding)
-      • "Thị Kính" + "thi kinh"                            (diacritic variants)
-      • "Sùng Bà"  + "Bà Sùng"                             (word reorder)
-      • "Thị Kính" + "Thị Kính."                           (punctuation)
-
-    First occurrence wins so retrieval order is preserved.
-    """
+    """Collapse retrieved items referring to the same entity; first occurrence wins."""
     kept: List[str] = []
     kept_words: List[Set[str]] = []
     for item in retrieved:
@@ -147,19 +116,11 @@ def _dedupe(retrieved: List[str]) -> List[str]:
     return kept
 
 
-# ── Precision ─────────────────────────────────────────────────────────────────
-
 class PrecisionMetric(MetricBase):
     """Precision = |relevant ∩ unique(retrieved)| / |unique(retrieved)|.
 
-    Textbook precision over the entire retrieved set (no rank cutoff).
-    Retrieved entities are first deduplicated by substring equivalence so a
-    single relevant entity surfaced under multiple aliases is not counted
-    multiple times.
-
-    No-cutoff form is appropriate when the downstream consumer (the LLM) is
-    fed all retrieved context as a set — the order/cutoff K is not what
-    determines what the model sees.
+    No-cutoff form: the downstream LLM consumes all retrieved context as a
+    set, so rank-cutoff K is not what determines what the model sees.
     """
 
     @property
@@ -173,15 +134,13 @@ class PrecisionMetric(MetricBase):
 
     def evaluate(self, retrieved: List[str], relevant: Set[str], **_) -> float:
         if not relevant:
-            return 1.0  # nothing to be precise about
+            return 1.0
         retrieved = _dedupe(retrieved)
         if not retrieved:
             return 0.0
         flags = _hit_flags(retrieved, relevant)
         return sum(flags) / len(retrieved)
 
-
-# ── Recall ────────────────────────────────────────────────────────────────────
 
 class RecallMetric(MetricBase):
     """Recall = |relevant ∩ unique(retrieved)| / |relevant| (no rank cutoff)."""
@@ -197,20 +156,14 @@ class RecallMetric(MetricBase):
 
     def evaluate(self, retrieved: List[str], relevant: Set[str], **_) -> float:
         if not relevant:
-            return 1.0  # nothing to recall
+            return 1.0
         retrieved = _dedupe(retrieved)
         flags = _hit_flags(retrieved, relevant)
         return sum(flags) / len(relevant)
 
 
-# ── MAP ───────────────────────────────────────────────────────────────────────
-
 class MAPMetric(MetricBase):
-    """
-    Mean Average Precision.
-
-    AP = (1/R) × Σ P(k)·rel(k)   (Manning 2008, §8.4)
-    """
+    """Mean Average Precision — AP = (1/R) × Σ P(k)·rel(k)  (Manning 2008, §8.4)."""
 
     @property
     def name(self) -> str:         return "MAP"
@@ -236,34 +189,8 @@ class MAPMetric(MetricBase):
         return sum_p / len(relevant)
 
 
-# ── MRR ───────────────────────────────────────────────────────────────────────
-
-class MRRMetric(MetricBase):
-    """Mean Reciprocal Rank = 1/rank_of_first_relevant"""
-
-    @property
-    def name(self) -> str:         return "MRR"
-    @property
-    def group(self) -> MetricGroup: return MetricGroup.IR
-    @property
-    def requires_llm(self) -> bool: return False
-    @property
-    def requires_ground_truth(self) -> bool: return True
-
-    def evaluate(self, retrieved: List[str], relevant: Set[str], **_) -> float:
-        retrieved = _dedupe(retrieved)
-        flags = _hit_flags(retrieved, relevant)
-        for k, hit in enumerate(flags, 1):
-            if hit:
-                return 1.0 / k
-        return 0.0
-
-
-# ── NDCG@K ────────────────────────────────────────────────────────────────────
-
 class NDCGAtK(MetricBase):
-    """
-    Normalized Discounted Cumulative Gain @ K.
+    """Normalized Discounted Cumulative Gain @ K.
 
     DCG@p  = Σ  rel_i / log₂(i+1)
     NDCG@p = DCG@p / IDCG@p        (Järvelin & Kekäläinen 2002)
@@ -291,7 +218,7 @@ class NDCGAtK(MetricBase):
             (1.0 if hit else 0.0) / math.log2(i + 1)
             for i, hit in enumerate(flags, 1)
         )
-        # Ideal DCG: place all relevant items first
+        # IDCG: place all relevant items first
         n_ideal = min(len(relevant), self.k)
         idcg    = sum(1.0 / math.log2(i + 1) for i in range(1, n_ideal + 1))
 

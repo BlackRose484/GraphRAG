@@ -1,15 +1,7 @@
-"""
-Base classes and abstract interfaces for all GraphRAG components.
+"""Base classes and abstract interfaces for all GraphRAG components.
 
-Uses LiteLLM as the provider-agnostic LLM layer — no provider SDK is imported
-directly here. Switching models only requires changing settings.llm.model in .env.
-
-Supported providers (via LiteLLM prefix):
-    gemini/...      → Google Gemini
-    anthropic/...   → Anthropic Claude
-    openai/...      → OpenAI GPT
-    ollama/...      → local Ollama
-    openrouter/...  → OpenRouter
+Uses LiteLLM as the provider-agnostic LLM layer — switching models only
+requires changing settings.llm.model in .env.
 """
 
 from __future__ import annotations
@@ -31,70 +23,34 @@ from src.utils.logger import get_logger
 
 logger = get_logger(__name__)
 
-# Suppress litellm's verbose internal logging
 litellm.suppress_debug_info = True
 
-# Auto-drop params the target model doesn't support (e.g. GPT-5 rejects
-# temperature=0.0 — only temperature=1 is allowed). Without this flag, RAGAs
-# metrics that pass temperature=0 for reproducibility would crash on gpt-5.
+# Auto-drop params the target model doesn't support (e.g. GPT-5 only allows
+# temperature=1). Without this flag, RAGAs metrics that pass temperature=0
+# would crash on gpt-5.
 litellm.drop_params = True
 
 
-# ── LLM Base ─────────────────────────────────────────────────────────────────
-
 class BaseModel(ABC):
-    """
-    Base class for any component that calls an LLM.
+    """Base class for any component that calls an LLM via LiteLLM."""
 
-    Backed by LiteLLM — works with Gemini, OpenAI, Anthropic, Ollama, and
-    100+ other providers. The provider is selected at runtime via
-    ``settings.llm.model`` (e.g. ``'gemini/gemini-2.0-flash'``).
-
-    Provides:
-    - ``safe_generate(prompt)``  — text in, text out, with exponential-backoff retry
-    - ``safe_embed(texts)``      — list of texts → list of embedding vectors
-
-    Usage::
-
-        class MyQueryProcessor(BaseModel):
-            def run(self, query: str) -> str:
-                return self.safe_generate(f"Expand: {query}")
-    """
-
-    # Exception types LiteLLM raises for transient failures
     _RETRYABLE = (RateLimitError, ServiceUnavailableError, Timeout, APIConnectionError)
 
     def __init__(self, model_name: Optional[str] = None) -> None:
         # When None, ``self.model_name`` resolves dynamically from
-        # ``settings.llm.model`` on every access — this lets cached pipeline
-        # instances pick up runtime model switches (e.g. the benchmark UI's
-        # ``override_model`` context manager).
+        # ``settings.llm.model`` so cached instances pick up runtime model
+        # switches (e.g. benchmark UI's ``override_model`` context manager).
         self._model_name: Optional[str] = model_name
 
     @property
     def model_name(self) -> str:
         return self._model_name or settings.llm.model
 
-    # ── Text generation ───────────────────────────────────────────────────────
-
     def safe_generate(self, prompt: str, temperature: Optional[float] = None) -> str:
-        """
-        Call the LLM with automatic retry on transient failures.
+        """Call the LLM with exponential-backoff retry on transient failures.
 
-        Converts the prompt string to a single user message (OpenAI chat format,
-        which LiteLLM translates to the correct format for every provider).
-
-        Args:
-            prompt: The full prompt string.
-            temperature: Per-call temperature override. When ``None`` (default),
-                ``settings.llm.temperature`` is used. Pass ``0.0`` for
-                deterministic output (e.g. LLM-judge metrics).
-
-        Returns:
-            The model's response text.
-
-        Raises:
-            RuntimeError: If all retry attempts are exhausted.
+        ``temperature=None`` falls back to ``settings.llm.temperature``. Pass
+        ``0.0`` for deterministic output (e.g. LLM-judge metrics).
         """
         messages = [{"role": "user", "content": prompt}]
         last_error: Optional[Exception] = None
@@ -125,7 +81,6 @@ class BaseModel(ABC):
                 time.sleep(delay)
 
             except Exception as exc:
-                # Non-retryable — fail immediately
                 raise RuntimeError(
                     f"LLM generation failed (non-retryable): {exc}"
                 ) from exc
@@ -135,28 +90,12 @@ class BaseModel(ABC):
             f"{last_error}"
         )
 
-    # ── Embeddings ────────────────────────────────────────────────────────────
-
     # Gemini's batchEmbedContents caps at 100 per request; other providers allow
     # more but 100 is a universally safe chunk size.
     _EMBED_BATCH_SIZE = 100
 
     def safe_embed(self, texts: List[str]) -> List[List[float]]:
-        """
-        Embed a list of texts using the configured embedding model.
-
-        Automatically splits the input into batches of ``_EMBED_BATCH_SIZE`` to
-        respect provider limits (e.g. Gemini caps at 100 per request).
-
-        Args:
-            texts: List of strings to embed.
-
-        Returns:
-            List of embedding vectors (one per input text, in the same order).
-
-        Raises:
-            RuntimeError: On API error.
-        """
+        """Embed a list of texts, batching to respect provider limits."""
         if not texts:
             return []
 
@@ -175,58 +114,25 @@ class BaseModel(ABC):
         return vectors
 
 
-# ── Abstract Interfaces ───────────────────────────────────────────────────────
-
 class BaseRetriever(ABC):
-    """
-    Abstract interface every G-Retrieval component must implement.
-
-    The ``retrieve`` call is intentionally generic — each implementation
-    specifies concrete kwarg names in its own docstring.
-    """
+    """Abstract interface every G-Retrieval component must implement."""
 
     @abstractmethod
     def retrieve(self, query: str, **kwargs) -> Dict[str, Any]:
-        """
-        Retrieve relevant graph data for *query*.
-
-        Returns:
-            A dict whose keys are retrieval-method names (e.g. ``"nodes"``,
-            ``"triplets"``) mapping to lists of result objects.
-        """
+        """Retrieve relevant graph data for *query*."""
 
 
 class BaseGenerator(ABC):
-    """
-    Abstract interface every G-Generation component must implement.
-    """
+    """Abstract interface every G-Generation component must implement."""
 
     @abstractmethod
     def generate(self, query: str, context: Dict[str, Any], **kwargs) -> str:
-        """
-        Generate a natural-language answer for *query* given *context*.
-
-        Args:
-            query:   The original user question.
-            context: Formatted graph data produced by ``GraphFormatConverter``.
-
-        Returns:
-            The final answer string.
-        """
+        """Generate a natural-language answer for *query* given *context*."""
 
 
 class BaseLoader(ABC):
-    """
-    Abstract interface for data loaders (e.g. Neo4j ontology loader).
-
-    Separating loading from retrieval keeps both layers independently testable.
-    """
+    """Abstract interface for data loaders (e.g. Neo4j ontology loader)."""
 
     @abstractmethod
     def load(self, **kwargs) -> bool:
-        """
-        Load data into the target store.
-
-        Returns:
-            True on success, False on partial failure (with logged details).
-        """
+        """Load data into the target store."""

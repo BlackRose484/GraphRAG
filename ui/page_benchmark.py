@@ -398,7 +398,6 @@ def _render_graphrag_config() -> Dict:
         FormatKey.CODE_LIKE:         "JSON có cấu trúc",
         FormatKey.ADJACENCY_TABLE:   "Bảng kề",
         FormatKey.NODE_SEQUENCE:     "Chuỗi nút",
-        FormatKey.COMMUNITY_SUMMARY: "Community summary",
     }
     if varying == "format_keys":
         st.sidebar.info(

@@ -576,7 +576,6 @@ def render() -> None:
             continue
         rat      = step.get("rating", {})
         best_sys = rat.get("best_system", "")
-        best_color = _SYS_COLOR.get(best_sys, "#999")
         diff_color, diff_label = _DIFF_META[i]
 
         with st.expander(

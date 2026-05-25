@@ -1,21 +1,4 @@
-"""
-Entity extraction from user queries — BASIC pipeline only.
-
-Used by :class:`~src.g_retrieval.orchestrator.RetrievalOrchestrator._basic_pipeline`
-when ``enable_enhancement=False`` (i.e. the user-study Experiment page).
-The enhanced pipeline does extraction inline via
-:meth:`~src.g_retrieval.query_processor.QueryProcessor.expand_and_extract`
-with the entity catalog injected into the prompt, so this class is NOT used
-in the production hot path.
-
-Two-stage approach:
-  1. Regex pattern matching for capitalised Vietnamese proper nouns (fast, no LLM).
-  2. LLM extraction using the ENTITY_EXTRACT prompt for structured JSON results.
-
-Results from both stages are merged and de-duplicated before returning.
-Note: stage 2 here does NOT inject the entity catalog, so the LLM may emit
-names that don't exist in Neo4j (those will simply match nothing downstream).
-"""
+"""Entity extraction from user queries via regex + LLM."""
 from __future__ import annotations
 
 import json
@@ -29,7 +12,6 @@ from src.utils.logger import get_logger
 
 _logger = get_logger(__name__)
 
-# Regex that matches Vietnamese capitalised proper nouns (single or multi-word).
 _VN_PROPER_NOUN = re.compile(
     r"\b[A-ZĐÂĂÊÔƠƯ][a-zđâăêôơưáàảãạăắằẳẵặâấầẩẫậéèẻẽẹêếềểễệíìỉĩịóòỏõọôốồổỗộơớờởỡợúùủũụưứừửữựýỳỷỹỵ]+"
     r"(?:\s+[A-ZĐÂĂÊÔƠƯ][a-zđâăêôơưáàảãạăắằẳẵặâấầẩẫậéèẻẽẹêếềểễệíìỉĩịóòỏõọôốồổỗộơớờởỡợúùủũụưứừửữựýỳỷỹỵ]+)*\b"
@@ -57,15 +39,9 @@ class EntityExtractor(BaseModel):
         super().__init__()
         _logger.info("EntityExtractor initialised")
 
-    # ── Public API ────────────────────────────────────────────────────────────
-
     def extract(self, query: str) -> ExtractedEntities:
-        """Extract entities from *query*.
-
-        Returns:
-            Merged dict with lists for characters / actors / plays / scenes.
-        """
-        # Stage 1: regex patterns → go into characters as a safe default
+        """Extract entities from *query*."""
+        # Regex-matched names default to characters; LLM stage refines categories.
         pattern_names = _VN_PROPER_NOUN.findall(query)
 
         entities: ExtractedEntities = {
@@ -75,7 +51,6 @@ class EntityExtractor(BaseModel):
             EntityType.SCENES:     [],
         }
 
-        # Stage 2: LLM
         try:
             llm_entities = self._extract_by_llm(query)
             for key in EntityType.ALL:
@@ -83,31 +58,26 @@ class EntityExtractor(BaseModel):
                 entities[key] = merged  # type: ignore[literal-required]
             total = sum(len(v) for v in entities.values())
             _logger.info("Entity extraction complete — %d entities found", total)
-        except Exception as exc:  # noqa: BLE001
+        except Exception as exc:
             _logger.warning("LLM entity extraction failed: %s", exc)
 
         return entities
-
-    # ── Private helpers ───────────────────────────────────────────────────────
 
     def _extract_by_llm(self, query: str) -> dict[str, list[str]]:
         prompt = ENTITY_EXTRACT.format(query=query)
         raw = self.safe_generate(prompt).strip()
 
-        # Strip ```json ... ``` fences if present
         if "```" in raw:
             m = re.search(r"```(?:json)?\s*(\{.*?\})\s*```", raw, re.DOTALL)
             if m:
                 raw = m.group(1)
 
-        # Also handle a bare JSON object without fences
         m2 = re.search(r"\{.*\}", raw, re.DOTALL)
         if m2:
             raw = m2.group(0)
 
         try:
             parsed = json.loads(raw)
-            # Normalise: ensure all keys exist and values are lists of strings
             result: dict[str, list[str]] = {}
             for key in EntityType.ALL:
                 val = parsed.get(key, [])

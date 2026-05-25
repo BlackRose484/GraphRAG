@@ -18,7 +18,6 @@ from __future__ import annotations
 import email
 import imaplib
 import re
-from contextlib import contextmanager
 from dataclasses import dataclass
 from datetime import datetime
 from email.header import decode_header, make_header

@@ -28,13 +28,13 @@
 
 ## ✨ Tính năng chính
 
-- **5 chiến lược truy xuất** trên đồ thị: `nodes`, `triplets`, `paths`, `subgraph`, `community`
+- **4 chiến lược truy xuất** đa mức trên đồ thị: `nodes`, `triplets`, `paths`, `subgraph`
 - **3 chiến lược sinh câu trả lời**: `pre-generation`, `mid-generation`, `post-generation`
 - **Auto-routing**: tự động chọn chiến lược phù hợp với từng loại câu hỏi
 - **Đa nhà cung cấp LLM** qua LiteLLM: Google Gemini, Anthropic Claude, OpenAI, Ollama (local)
 - **Vector RAG baseline** để đối chứng với GraphRAG
 - **UI Streamlit 11 trang**: demo, so sánh, benchmark, trực quan hóa đồ thị, user study
-- **Bộ benchmark CheoBench_v2** (21 câu hỏi) + metrics đa dạng (IR, RAGAS, exact match)
+- **Bộ benchmark CheoBench_v2** (100 câu hỏi: 35 Local / 32 Community / 33 Global) + 9 độ đo (IR: MAP, NDCG@10, Precision, Recall; RAGAS: Context Precision/Recall/EntitiesRecall, Faithfulness, Answer Relevance)
 - **Chế độ Demo & Guest** cho khảo sát người dùng và quay video demo
 
 ---
@@ -423,8 +423,7 @@ GraphRAGv2/
 ├── data/
 │   ├── CheoOntology_v4.ttl       # Ontology chính (RDF/Turtle)
 │   ├── CheoOntology.ttl          # Phiên bản cũ
-│   ├── cheo_entities.txt         # Danh sách entity
-│   ├── community_cache.json      # Tóm tắt cộng đồng pre-computed
+│   ├── cheo_entities.txt         # Danh mục thực thể (fallback cho EntityCatalog)
 │   └── vector_store.pkl          # Vector store cho Vector RAG baseline
 │
 ├── thesis/                       # Luận văn LaTeX (5 chương)
@@ -465,7 +464,7 @@ streamlit run main.py --server.port 8888 --server.address 0.0.0.0
 
 - **Luận văn**: [`thesis/`](thesis/) — LaTeX, 5 chương (Giới thiệu → Cơ sở lý thuyết → Phương pháp đề xuất → Thực nghiệm → Kết luận) + 3 phụ lục
 - **Ontology**: [`data/cheo_entities_summary.md`](data/cheo_entities_summary.md) — mô tả các loại thực thể trong ontology Chèo
-- **Benchmark dataset**: [`benchmark/datasets/CheoBench_v2.json`](benchmark/datasets/CheoBench_v2.json) — 21 câu hỏi đánh giá
+- **Benchmark dataset**: [`benchmark/datasets/CheoBench_v2.json`](benchmark/datasets/CheoBench_v2.json) — 100 câu hỏi đánh giá (phân loại Local/Community/Global)
 
 ---
 

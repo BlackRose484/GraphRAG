@@ -1,23 +1,4 @@
-"""
-Graph retrieval from Neo4j.
-
-Provides five complementary retrieval strategies:
-  - nodes      → individual matching nodes
-  - triplets   → (subject, relationship, object) triples
-  - paths      → multi-hop connection chains
-  - subgraph   → ego-subgraph centred on matched entities
-  - community  → pre-loaded play-centric community subgraphs
-
-All Cypher queries are built using typed constants (NodeType, RelType, NodeProp,
-Limit) so that changes to the ontology propagate automatically.
-
-All entity names are batched into list parameters ($names) so each retrieval
-method issues a fixed number of Cypher queries regardless of entity count:
-  nodes     → 4 queries (one per label)
-  triplets  → 3 queries (one per relationship pattern)
-  paths     → 1 query
-  subgraph  → 1 query
-"""
+"""Graph retrieval from Neo4j across four strategies: nodes, triplets, paths, subgraph."""
 from __future__ import annotations
 
 from typing import Any, TypedDict
@@ -27,8 +8,6 @@ from src.graph_loader.neo4j_client import Neo4jClient
 from src.utils.logger import get_logger
 
 _logger = get_logger(__name__)
-
-# ── Type aliases ──────────────────────────────────────────────────────────────
 
 NodeDict = dict[str, Any]
 Triplet = tuple[str, str, str]
@@ -49,8 +28,6 @@ class GraphData(TypedDict):
     subgraph: SubgraphResult
 
 
-# ── Helpers ───────────────────────────────────────────────────────────────────
-
 def _all_names(entities: dict[str, list[str]]) -> list[str]:
     names: list[str] = []
     for key in _ALL_ENTITY_TYPES:
@@ -65,9 +42,6 @@ def _path_names(entities: dict[str, list[str]]) -> list[str]:
     return names
 
 
-# ── Main class ────────────────────────────────────────────────────────────────
-
-
 class GraphRetriever:
     """Retrieve graph data from Neo4j using a shared :class:`Neo4jClient`."""
 
@@ -75,26 +49,12 @@ class GraphRetriever:
         self._client = client
         _logger.info("GraphRetriever initialised")
 
-    # ── Public API ────────────────────────────────────────────────────────────
-
     def retrieve(
         self,
         entities: dict[str, list[str]],
         methods: list[str] | None = None,
-        *,
-        community_index: Any | None = None,
     ) -> GraphData:
-        """Run one or more retrieval methods and return combined graph data.
-
-        Args:
-            entities: Extracted entities.
-            methods: Any subset of ``RetrievalMethod.ALL``.
-            community_index: Optional :class:`~community_index.CommunityIndex`
-                             required when ``'community'`` is in *methods*.
-
-        Returns:
-            :class:`GraphData` dict with lists for every key.
-        """
+        """Run one or more retrieval methods and return combined graph data."""
         if methods is None:
             methods = RetrievalMethod.DEFAULT
 
@@ -113,30 +73,6 @@ class GraphRetriever:
         }
 
         for method in methods:
-            # Community is handled separately (needs community_index)
-            if method == RetrievalMethod.COMMUNITY:
-                if community_index is None or not community_index.is_loaded():
-                    _logger.debug("Community method skipped — no index loaded")
-                    continue
-                try:
-                    comm_data = self._get_community(entities, community_index)
-                    # Merge community nodes & triplets into graph_data
-                    graph_data["nodes"].extend(comm_data.get("nodes", []))
-                    graph_data["triplets"].extend(comm_data.get("triplets", []))
-                    # Store raw community context for format_converter
-                    graph_data["community_context"] = comm_data.get(  # type: ignore[typeddict-unknown-key]
-                        "community_context", ""
-                    )
-                    n_nodes = len(comm_data.get("nodes", []))
-                    n_trips = len(comm_data.get("triplets", []))
-                    _logger.info(
-                        "Method 'community' retrieved %d nodes, %d triplets",
-                        n_nodes, n_trips,
-                    )
-                except Exception as exc:  # noqa: BLE001
-                    _logger.error("Community retrieval failed: %s", exc)
-                continue
-
             if method not in dispatch:
                 _logger.warning("Unknown retrieval method: %s — skipped", method)
                 continue
@@ -151,12 +87,10 @@ class GraphRetriever:
                     method,
                     len(result) if isinstance(result, list) else len(result.get("nodes", [])),
                 )
-            except Exception as exc:  # noqa: BLE001
+            except Exception as exc:
                 _logger.error("Retrieval method '%s' failed: %s", method, exc)
 
         return graph_data
-
-    # ── Retrieval strategies ──────────────────────────────────────────────────
 
     def _get_nodes(self, entities: dict[str, list[str]]) -> list[NodeDict]:
         nodes: list[NodeDict] = []
@@ -166,7 +100,6 @@ class GraphRetriever:
         if not names:
             return nodes
 
-        # One query per label, all names batched — 4 queries instead of N×4
         label_queries: list[tuple[str, str, str]] = [
             (NodeType.CHARACTER, NodeProp.CHAR_NAME,  "c"),
             (NodeType.ACTOR,     NodeProp.ACTOR_NAME, "a"),
@@ -187,7 +120,6 @@ class GraphRetriever:
                     seen.add(uid)
                     nodes.append(node)
 
-        # Broad fuzzy fallback when nothing matched — all terms in one query
         if not nodes and names:
             fallback_labels = " OR ".join(
                 f"n:{t}" for t in NodeType.SEARCHABLE
@@ -218,7 +150,6 @@ class GraphRetriever:
         if not names:
             return triplets
 
-        # Character ↔ Actor (via RoleAssignment) — all names at once
         cypher = f"""
             MATCH (c:{NodeType.CHARACTER})-[:{RelType.FOR_CHARACTER}]-(ra:{NodeType.ROLE_ASSIGNMENT})-[:{RelType.PERFORMED_BY}]->(a:{NodeType.ACTOR})
             WHERE any(n IN $names WHERE toLower(c.{NodeProp.CHAR_NAME}) CONTAINS toLower(n)
@@ -232,7 +163,6 @@ class GraphRetriever:
                 seen.add(t)
                 triplets.append(t)
 
-        # Play → Character — all names at once
         cypher = f"""
             MATCH (p:{NodeType.PLAY})-[:{RelType.HAS_CHARACTER}]->(c:{NodeType.CHARACTER})
             WHERE any(n IN $names WHERE toLower(c.{NodeProp.CHAR_NAME}) CONTAINS toLower(n)
@@ -246,7 +176,6 @@ class GraphRetriever:
                 seen.add(t)
                 triplets.append(t)
 
-        # Play → Scene — all names at once
         cypher = f"""
             MATCH (p:{NodeType.PLAY})-[:{RelType.HAS_SCENE}]->(s:{NodeType.SCENE})
             WHERE any(n IN $names WHERE toLower(p.{NodeProp.TITLE}) CONTAINS toLower(n)
@@ -260,11 +189,8 @@ class GraphRetriever:
                 seen.add(t)
                 triplets.append(t)
 
-        # Actor → Play — derived 5-hop chain. `isPerformedIn` is declared in
-        # the ontology but its instance edges are not yet materialized in the
-        # graph, so we walk Actor ← PERFORMED_BY ← RA → IN_VERSION → Version
-        #                 ← HAS_VERSION ← Scene ← HAS_SCENE ← Play to surface
-        # the Actor↔Play link the LLM would otherwise have to infer.
+        # Actor↔Play link via 5-hop walk: instance edges for `isPerformedIn`
+        # aren't materialized, so we traverse Actor←RA→Version←Scene←Play.
         cypher = f"""
             MATCH (a:{NodeType.ACTOR})<-[:{RelType.PERFORMED_BY}]-(ra:{NodeType.ROLE_ASSIGNMENT})
                   -[:{RelType.IN_VERSION}]->(:{NodeType.VERSION})
@@ -281,9 +207,7 @@ class GraphRetriever:
                 seen.add(t)
                 triplets.append(t)
 
-        # RoleAssignment → Version — surface which version a performance
-        # belongs to, with a human-readable version label (coalesce keeps the
-        # triple informative whether data uses `versionNumber` or `vidVersion`).
+        # coalesce keeps the triple informative across versionNumber / vidVersion / id.
         cypher = f"""
             MATCH (ra:{NodeType.ROLE_ASSIGNMENT})-[:{RelType.FOR_CHARACTER}]->(c:{NodeType.CHARACTER})
             MATCH (ra)-[:{RelType.PERFORMED_BY}]->(a:{NodeType.ACTOR})
@@ -301,9 +225,6 @@ class GraphRetriever:
                 seen.add(t)
                 triplets.append(t)
 
-        # RoleAssignment → Appearance — surface emotion / subtitle that the
-        # character expresses (196 emotion values, 48 subtitle values in the
-        # dataset that were previously unreachable via retrieval).
         cypher = f"""
             MATCH (ra:{NodeType.ROLE_ASSIGNMENT})-[:{RelType.FOR_CHARACTER}]->(c:{NodeType.CHARACTER})
             MATCH (ra)-[:{RelType.HAS_APPEARANCE}]->(app:{NodeType.APPEARANCE})
@@ -320,9 +241,7 @@ class GraphRetriever:
                 seen.add(t)
                 triplets.append(t)
 
-        # ── v3 — Actor → Mood (EXPRESS) ──────────────────────────────────────
-        # Distinct emotions an actor has expressed across performances. Skip
-        # placeholder/Other values.
+        # Skip placeholder/Other mood values which carry no semantic content.
         cypher = f"""
             MATCH (a:{NodeType.ACTOR})-[:{RelType.EXPRESS}]->(m:{NodeType.MOOD})
             WHERE any(n IN $names WHERE toLower(a.{NodeProp.ACTOR_NAME}) CONTAINS toLower(n))
@@ -340,7 +259,6 @@ class GraphRetriever:
                 seen.add(t)
                 triplets.append(t)
 
-        # ── v3 — Costume ←-IS_WEAR_BY-→ Actor (canonical wearership) ─────────
         cypher = f"""
             MATCH (co:{NodeType.COSTUME})-[:{RelType.IS_WEAR_BY}]->(a:{NodeType.ACTOR})
             WHERE any(n IN $names WHERE toLower(a.{NodeProp.ACTOR_NAME}) CONTAINS toLower(n))
@@ -355,25 +273,6 @@ class GraphRetriever:
                 seen.add(t)
                 triplets.append(t)
 
-        # ── v3 — Character WEARS_COSTUME (derived via RA → hasAppearance) ────
-        # Surfaces "Vai Thị Kính mặc trang phục Đào-Chín" without forcing the
-        # LLM to walk the RA → Appearance → Costume chain itself.
-        cypher = f"""
-            MATCH (c:{NodeType.CHARACTER})<-[:{RelType.FOR_CHARACTER}]-(ra:{NodeType.ROLE_ASSIGNMENT})
-            MATCH (ra)-[:{RelType.HAS_APPEARANCE}]->(co:{NodeType.COSTUME})
-            WHERE any(n IN $names WHERE toLower(c.{NodeProp.CHAR_NAME}) CONTAINS toLower(n))
-            RETURN DISTINCT c.{NodeProp.CHAR_NAME} AS subj,
-                            'WEARS_COSTUME' AS rel,
-                            co.{NodeProp.LABEL} AS obj
-            LIMIT $lim
-        """
-        for r in self._client.read(cypher, {"names": names, "lim": Limit.TRIPLET_QUERY}):
-            t = (r["subj"] or "", r["rel"], r["obj"] or "")
-            if t not in seen and t[0] and t[2]:
-                seen.add(t)
-                triplets.append(t)
-
-        # Fallback: return a sample of character–actor relationships
         if not triplets and names:
             cypher = f"""
                 MATCH (c:{NodeType.CHARACTER})-[:{RelType.FOR_CHARACTER}]-(ra:{NodeType.ROLE_ASSIGNMENT})-[:{RelType.PERFORMED_BY}]->(a:{NodeType.ACTOR})
@@ -396,7 +295,6 @@ class GraphRetriever:
         if not names:
             return paths
 
-        # All names batched into a single path query
         cypher = f"""
             MATCH path = (start)-[*1..{Limit.PATH_HOPS_MAX}]-(end)
             WHERE (
@@ -426,7 +324,6 @@ class GraphRetriever:
         if not names:
             return subgraph
 
-        # All names batched into a single subgraph expansion query
         cypher = f"""
             MATCH path = (center)-[r*1..{Limit.SUBGRAPH_HOPS_MAX}]-(neighbor)
             WHERE (
@@ -445,14 +342,12 @@ class GraphRetriever:
             LIMIT $lim
         """
         for record in self._client.read(cypher, {"names": names, "lim": Limit.SUBGRAPH_QUERY}):
-            # Center node
             center = dict(record["center"])
             c_id = str(center)
             if c_id not in seen_nodes:
                 seen_nodes.add(c_id)
                 subgraph["nodes"].append(center)
 
-            # All nodes in paths
             for node_list in record["all_nodes"]:
                 for node in node_list:
                     if node is not None:
@@ -462,7 +357,6 @@ class GraphRetriever:
                             seen_nodes.add(n_id)
                             subgraph["nodes"].append(n)
 
-            # Relationships
             for rel_info in record["all_rels"]:
                 if not rel_info:
                     continue
@@ -478,42 +372,3 @@ class GraphRetriever:
                     })
 
         return subgraph
-
-    # ── Community (pre-loaded) ────────────────────────────────────────────────
-
-    @staticmethod
-    def _get_community(
-        entities: dict[str, list[str]],
-        community_index: Any,
-    ) -> dict[str, Any]:
-        """Resolve entities to play communities and return merged graph data.
-
-        Uses the pre-loaded :class:`~community_index.CommunityIndex` — no
-        Cypher queries are executed at query time.
-
-        Args:
-            entities: Extracted entity dict.
-            community_index: Loaded :class:`CommunityIndex` instance.
-
-        Returns:
-            Dict with ``nodes``, ``triplets``, ``community_context`` keys.
-        """
-        # Collect all entity names
-        all_names: list[str] = []
-        for key in _ALL_ENTITY_TYPES:
-            all_names.extend(entities.get(key, []))
-
-        if not all_names:
-            return {"nodes": [], "triplets": [], "community_context": ""}
-
-        # Resolve to communities
-        communities = community_index.resolve_many(all_names)
-
-        if not communities:
-            _logger.debug("Community: no plays matched for entities %s", all_names)
-            return {"nodes": [], "triplets": [], "community_context": ""}
-
-        play_titles = [c.play_title for c in communities]
-        _logger.info("Community: resolved %d plays: %s", len(play_titles), play_titles)
-
-        return community_index.as_graph_data(play_titles)

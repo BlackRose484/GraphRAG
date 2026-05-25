@@ -1,28 +1,16 @@
-"""
-RAGAS-inspired LLM-based metrics.
+"""RAGAS-inspired LLM-based metrics.
 
-Reference
----------
-Es, S., James, J., Espinosa-Anke, L., & Schockaert, S. (2023).
-    RAGAS: Automated Evaluation of Retrieval Augmented Generation.
-    arXiv:2309.15217
-
-All five metrics use :class:`src.core.base.BaseModel` (LiteLLM) so the same
-LLM configured in ``.env`` is used — no extra SDK needed.
-
-These metrics are **disabled by default** in :class:`MetricRegistry` because
-each question triggers 1–3 LLM calls.
+Es, S., James, J., Espinosa-Anke, L., & Schockaert, S. (2023). RAGAS: Automated
+Evaluation of Retrieval Augmented Generation. arXiv:2309.15217
 """
 
 from __future__ import annotations
 
 import re
-from typing import List, Set
+from typing import List
 
 from .base import MetricBase, MetricGroup
 
-
-# ── Shared LLM helper ─────────────────────────────────────────────────────────
 
 class _RAGASBase(MetricBase):
     """Shared scaffolding for RAGAS metrics.
@@ -45,7 +33,7 @@ class _RAGASBase(MetricBase):
     @property
     def requires_llm(self) -> bool: return True
     @property
-    def requires_ground_truth(self) -> bool: return False  # overridden where needed
+    def requires_ground_truth(self) -> bool: return False
 
     def _ask(self, prompt: str) -> str:
         return self._llm.safe_generate(prompt, temperature=0.0)
@@ -55,7 +43,6 @@ class _RAGASBase(MetricBase):
         m = re.search(r"\b([01](?:\.\d+)?)\b", text)
         if m:
             return max(0.0, min(1.0, float(m.group(1))))
-        # Try extracting any decimal in text
         nums = re.findall(r"\d+\.?\d*", text)
         if nums:
             v = float(nums[0])
@@ -64,22 +51,15 @@ class _RAGASBase(MetricBase):
 
     @staticmethod
     def _extract_list(text: str) -> List[str]:
-        """Extract newline or numbered list items from LLM output."""
         lines = [re.sub(r"^\s*[\d\-\*\.]+\s*", "", l).strip()
                  for l in text.splitlines()]
         return [l for l in lines if len(l) > 5]
 
 
-# ── Faithfulness ──────────────────────────────────────────────────────────────
-
 class FaithfulnessMetric(_RAGASBase):
-    """
-    Faithfulness = supported claims / total claims in answer.
+    """Faithfulness = supported claims / total claims in answer.
 
-    Method:
-        1. LLM extracts atomic claims from the answer.
-        2. LLM verifies each claim against the retrieved context.
-        3. Score = fraction of supported claims.
+    Two-step: (1) LLM extracts atomic claims, (2) LLM verifies each against context.
     """
 
     @property
@@ -94,7 +74,6 @@ class FaithfulnessMetric(_RAGASBase):
         if not hypothesis or not context:
             return 0.0
 
-        # Step 1 — extract claims
         claims_raw = self._ask(
             f"Liệt kê từng mệnh đề nguyên tử (atomic claim) trong câu trả lời sau. "
             f"Mỗi mệnh đề trên một dòng.\n\nCâu trả lời:\n{hypothesis}"
@@ -103,7 +82,6 @@ class FaithfulnessMetric(_RAGASBase):
         if not claims:
             return 1.0
 
-        # Step 2 — verify each claim
         supported = 0
         for claim in claims:
             verdict = self._ask(
@@ -118,15 +96,7 @@ class FaithfulnessMetric(_RAGASBase):
         return supported / len(claims)
 
 
-# ── Answer Relevance ──────────────────────────────────────────────────────────
-
 class AnswerRelevanceMetric(_RAGASBase):
-    """
-    Answer Relevance — how well does the answer address the question?
-
-    Prompt LLM to score directly on [0, 1].
-    """
-
     @property
     def name(self) -> str: return "AnswerRelevance"
 
@@ -142,16 +112,7 @@ class AnswerRelevanceMetric(_RAGASBase):
         return self._parse_float(raw)
 
 
-# ── Context Precision ─────────────────────────────────────────────────────────
-
 class ContextPrecisionMetric(_RAGASBase):
-    """
-    Context Precision — fraction of retrieved context chunks that are relevant
-    to the question.
-
-    Prompt LLM to rate relevance of the context.
-    """
-
     @property
     def name(self) -> str: return "ContextPrecision"
 
@@ -167,14 +128,7 @@ class ContextPrecisionMetric(_RAGASBase):
         return self._parse_float(raw)
 
 
-# ── Context Recall ────────────────────────────────────────────────────────────
-
 class ContextRecallMetric(_RAGASBase):
-    """
-    Context Recall — how much of the ground-truth answer is covered by the
-    retrieved context?
-    """
-
     @property
     def name(self) -> str: return "ContextRecall"
     @property
@@ -192,14 +146,7 @@ class ContextRecallMetric(_RAGASBase):
         return self._parse_float(raw)
 
 
-# ── Context Relevance ─────────────────────────────────────────────────────────
-
 class ContextRelevanceMetric(_RAGASBase):
-    """
-    Context Relevance — overall relevance of the retrieved context to the
-    question, independent of the generated answer.
-    """
-
     @property
     def name(self) -> str: return "ContextRelevance"
 
@@ -215,14 +162,10 @@ class ContextRelevanceMetric(_RAGASBase):
         return self._parse_float(raw)
 
 
-# ── Context Entities Recall ───────────────────────────────────────────────────
-
 class ContextEntitiesRecallMetric(_RAGASBase):
-    """
-    Context Entities Recall — fraction of ground-truth entities (from the
-    reference answer) that appear in the retrieved context.
+    """Fraction of ground-truth entities appearing in the retrieved context.
 
-    Distinct from ``EntityCoverage`` (which checks the *generated answer*) —
+    Distinct from ``EntityCoverage`` (which checks the generated answer) —
     this measures whether the retriever surfaced the entities the gold answer
     relies on, regardless of whether the LLM later used them.
     """
@@ -236,11 +179,9 @@ class ContextEntitiesRecallMetric(_RAGASBase):
         if not reference or not context:
             return 0.0
 
-        # Prefer the explicit entity list from ground truth if provided
         if entities:
             ent_list = list(entities)
         else:
-            # Fall back to LLM extraction from the reference answer
             extracted = self._ask(
                 f"Liệt kê các thực thể (tên người, vở chèo, vai diễn, sự kiện) "
                 f"có trong câu trả lời sau. Mỗi thực thể trên một dòng, "
@@ -251,7 +192,6 @@ class ContextEntitiesRecallMetric(_RAGASBase):
             if not ent_list:
                 return 0.0
 
-        # Count how many of those entities appear in the retrieved context
         ctx_lower = context.lower()
         found = sum(1 for e in ent_list if e and e.strip().lower() in ctx_lower)
         return found / len(ent_list)

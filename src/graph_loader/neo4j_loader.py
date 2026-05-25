@@ -1,13 +1,4 @@
-"""
-Load Chèo ontology (Turtle/RDF) into Neo4j.
-
-Improvements over GraphRAG v1:
-- Extends BaseLoader ABC
-- Zero magic strings — all types/properties from src.constants
-- Proper logging (no print)
-- Idempotent MERGE instead of CREATE → safe to re-run
-- Progress counters returned as LoadResult
-"""
+"""Load Chèo ontology (Turtle/RDF) into Neo4j."""
 
 from __future__ import annotations
 
@@ -17,7 +8,7 @@ from typing import Dict, Optional
 
 from collections import defaultdict
 
-from rdflib import Graph, Namespace, RDF, RDFS
+from rdflib import Graph, Namespace
 
 from src.core.base import BaseLoader
 from src.core.settings import settings
@@ -28,8 +19,6 @@ from src.utils.logger import get_logger
 
 logger = get_logger(__name__)
 
-
-# ── Result dataclass ──────────────────────────────────────────────────────────
 
 @dataclass
 class LoadResult:
@@ -54,24 +43,9 @@ class LoadResult:
         )
 
 
-# ── Loader ────────────────────────────────────────────────────────────────────
-
 class Neo4jLoader(BaseLoader):
-    """
-    Parse a Chèo Turtle ontology file and populate a Neo4j database.
+    """Parse a Chèo Turtle ontology file and populate a Neo4j database."""
 
-    Usage::
-
-        loader = Neo4jLoader()
-        result = loader.load()          # uses path from settings
-        result = loader.load("my.ttl")  # explicit path
-
-        # Or use as context manager (auto-closes Neo4j driver):
-        with Neo4jLoader() as loader:
-            result = loader.load()
-    """
-
-    # Cypher constraints — one per unique-id node type
     _CONSTRAINTS = [
         "CREATE CONSTRAINT IF NOT EXISTS FOR (n:Play)           REQUIRE n.id IS UNIQUE",
         "CREATE CONSTRAINT IF NOT EXISTS FOR (n:Character)      REQUIRE n.id IS UNIQUE",
@@ -87,8 +61,6 @@ class Neo4jLoader(BaseLoader):
         self._owns_client  = client is None   # close only if we created it
         self._cheo_ns      = Namespace(ONTOLOGY_NAMESPACE)
 
-    # ── Context manager ───────────────────────────────────────────────────────
-
     def __enter__(self) -> "Neo4jLoader":
         self._client.connect()
         return self
@@ -97,18 +69,8 @@ class Neo4jLoader(BaseLoader):
         if self._owns_client:
             self._client.close()
 
-    # ── BaseLoader ABC ────────────────────────────────────────────────────────
-
     def load(self, source: Optional[str] = None) -> LoadResult:  # type: ignore[override]
-        """
-        Parse ``source`` (Turtle file path) and write to Neo4j.
-
-        Args:
-            source: Path to .ttl file.  Defaults to ``settings.ontology.file_path``.
-
-        Returns:
-            :class:`LoadResult` with counts and any errors.
-        """
+        """Parse ``source`` (Turtle file path) and write to Neo4j."""
         ttl_path = Path(source) if source else settings.ontology.file_path
 
         if not ttl_path.exists():
@@ -117,7 +79,6 @@ class Neo4jLoader(BaseLoader):
         logger.info("Loading ontology: %s", ttl_path)
         result = LoadResult()
 
-        # ── Parse RDF ─────────────────────────────────────────────────────────
         g = Graph()
         g.parse(str(ttl_path), format="turtle")
         result.triples_parsed = len(g)
@@ -125,13 +86,8 @@ class Neo4jLoader(BaseLoader):
 
         self._client.connect()
 
-        # ── Setup schema ──────────────────────────────────────────────────────
         self._create_constraints()
-
-        # ── Load nodes ────────────────────────────────────────────────────────
         result.nodes_created, result.skipped_nodes = self._load_individuals(g)
-
-        # ── Load relationships ────────────────────────────────────────────────
         result.relationships_created = self._load_relationships(g)
 
         logger.info("Load complete: %s", result)
@@ -143,42 +99,30 @@ class Neo4jLoader(BaseLoader):
         self._client.write("MATCH (n) DETACH DELETE n")
         logger.info("Database cleared")
 
-    # ── Schema setup ─────────────────────────────────────────────────────────
-
     def _create_constraints(self) -> None:
         logger.debug("Ensuring constraints exist")
         for cypher in self._CONSTRAINTS:
             self._client.write(cypher)
         logger.debug("Constraints OK")
 
-    # ── Individuals → nodes ───────────────────────────────────────────────────
-
     # Predicates excluded from the data-property pass — they are either
     # rdf/rdfs meta or object properties materialised as Neo4j relationships.
     _SKIP_DATATYPE_PREDICATES = frozenset({
-        # rdf / rdfs / owl meta
         "type", "label", "subClassOf",
-        # Existing object properties (v1)
         "hasCharacter", "hasScene", "hasVersion",
         "performedBy", "forCharacter", "inVersion", "hasAppearance",
-        # New object properties (v3)
-        "express", "isWearBy", "isAccompaniedBy", "represent",
-        "follow", "hasRelation", "isOpponentOf",
-        "trainedBy", "collaboratesWith",
+        "express", "isWearBy", "represent",
+        "hasRelation", "collaboratesWith",
     })
 
     def _load_individuals(self, g: Graph) -> tuple[int, int]:
         """Return (created_count, skipped_count).
 
-        Strategy: collect *all* rdf:types per individual first, then decide
-        a primary Neo4j label and any secondary labels / property-encoded
-        subclass info. Each individual is MERGEd exactly once.
+        Collect all rdf:types per individual first, then decide primary Neo4j
+        label and secondary labels — each individual is MERGEd exactly once.
         """
-        # individual_uri -> set of type local names
         types_by_ind: dict = defaultdict(set)
-        # individual_uri -> rdfs:label (last one wins; usually unique)
         label_by_ind: dict = {}
-        # individual_uri -> the rdflib subject node (needed for property extraction)
         subject_by_ind: dict = {}
 
         sparql = """
@@ -227,15 +171,6 @@ class Neo4jLoader(BaseLoader):
     def _classify_types(
         types: set,
     ) -> tuple[str | None, list[str], str | None]:
-        """Pick (primary_label, secondary_labels, role_type) from rdf:types.
-
-        - primary  = the matching `NodeType.PRIMARY` label.
-        - secondaries = matching `NodeType.APPEARANCE_SUBTYPES` (only when
-          primary is Appearance) PLUS any matching `NodeType.VALIDATION_TAGS`
-          (regardless of primary).
-        - role_type = Vietnamese mainType when one of the Character subclasses
-          is present.
-        """
         primary: str | None = None
         for t in types:
             if t in NodeType.PRIMARY:
@@ -263,12 +198,6 @@ class Neo4jLoader(BaseLoader):
         return primary, secondaries, role_type
 
     def _extract_data_properties(self, g: Graph, subject) -> Dict[str, str]:
-        """Return datatype properties (non-object-properties) for a subject.
-
-        Skips predicates listed in :attr:`_SKIP_DATATYPE_PREDICATES` so that
-        object properties (turned into Neo4j relationships elsewhere) and
-        meta predicates do not leak into node properties.
-        """
         props: Dict[str, str] = {}
         for predicate, obj in g.predicate_objects(subject):
             pred_name = str(predicate).split("#")[-1]
@@ -285,10 +214,9 @@ class Neo4jLoader(BaseLoader):
     ) -> None:
         """MERGE node by id with primary + optional secondary labels.
 
-        Idempotent — safe to re-run. The Cypher MERGE is on `(n:Primary {id})`,
-        then secondary labels (if any) are added via SET because labels are
-        not allowed in the MERGE pattern beyond the matched one without
-        risking creating duplicates.
+        Secondary labels are added via SET because Cypher MERGE only matches
+        the primary label — putting more labels in the pattern would risk
+        creating duplicates.
         """
         set_assignments = [f"n.{k} = ${k}" for k in props if k != NodeProp.ID]
         for sec in secondaries:
@@ -297,10 +225,7 @@ class Neo4jLoader(BaseLoader):
         cypher = f"MERGE (n:{primary} {{id: $id}}) {set_clause}".strip()
         self._client.write(cypher, props)
 
-    # ── Object properties → relationships ─────────────────────────────────────
-
     def _load_relationships(self, g: Graph) -> int:
-        """Return total relationships created."""
         total = 0
 
         for rdf_prop, from_type, to_type, neo4j_rel in RelType.OWL_MAPPING:
@@ -332,7 +257,6 @@ class Neo4jLoader(BaseLoader):
         to_type:   str, to_id:   str,
         rel_type:  str,
     ) -> None:
-        """MERGE relationship — idempotent."""
         cypher = f"""
         MATCH (a:{from_type} {{id: $from_id}})
         MATCH (b:{to_type}   {{id: $to_id}})

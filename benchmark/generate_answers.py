@@ -1,13 +1,4 @@
-"""
-Batch-generate answers for all 21 experiment questions x 3 systems.
-
-Outputs:
-  - benchmark/datasets/pregenerated_answers.json (structured data + blind label mapping — read by the Preference page at runtime)
-  - benchmark/results/pregenerated_answers.md    (human-readable, copy-paste for forms)
-
-Usage:
-    python -m benchmark.generate_answers
-"""
+"""Batch-generate answers for all 21 experiment questions x 3 systems."""
 
 from __future__ import annotations
 
@@ -23,8 +14,6 @@ from typing import Any, Optional
 
 if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8")
-
-# ── Question bank (mirrored from ui/page_experiment.py) ─────────────────────
 
 QUESTIONS: dict[str, list[dict[str, str]]] = {
     "Dạng 1 — Tra cứu trực tiếp (Dễ)": [
@@ -67,18 +56,15 @@ _CHAT_SYSTEM_PROMPT = (
 
 SYSTEMS = ["graphrag", "rag", "chat"]
 
-# Display names for the form (hide real system identity)
+# Hide real system identity from the form
 DISPLAY_NAMES: dict[str, str] = {
     "chat":     "Hệ thống AI",
     "rag":      "Hệ thống AI Plus",
     "graphrag": "Hệ thống AI Pro",
 }
 
-# Order to display in the form
 DISPLAY_ORDER = ["chat", "rag", "graphrag"]
 
-
-# ── Result container ─────────────────────────────────────────────────────────
 
 @dataclass
 class SystemResult:
@@ -87,8 +73,6 @@ class SystemResult:
     error: Optional[str] = None
     metadata: dict[str, Any] | None = None
 
-
-# ── Runner functions (no Streamlit dependency) ───────────────────────────────
 
 def _run_graphrag(query: str) -> SystemResult:
     t0 = time.time()
@@ -178,8 +162,6 @@ def _run_all(query: str) -> dict[str, SystemResult]:
     return results
 
 
-# ── Flatten question bank ────────────────────────────────────────────────────
-
 def _flat_questions() -> list[dict[str, str]]:
     flat = []
     for category, qs in QUESTIONS.items():
@@ -187,8 +169,6 @@ def _flat_questions() -> list[dict[str, str]]:
             flat.append({"id": q["id"], "category": category, "question": q["q"]})
     return flat
 
-
-# ── Incremental save helpers ─────────────────────────────────────────────────
 
 def _save_json(
     all_results: list[dict[str, Any]],
@@ -222,7 +202,6 @@ def _save_markdown(
     errors: int,
     total: int,
 ) -> Path:
-    """Write Markdown after every question so no progress is lost."""
     done = len(all_results)
     md_lines = [
         "# Câu trả lời từ 3 hệ thống",
@@ -253,7 +232,6 @@ def _save_markdown(
         md_lines.append("---")
         md_lines.append("")
 
-    # System name mapping at the end (for researcher only)
     md_lines.append("## Bảng ánh xạ tên hệ thống (CHỈ DÀNH CHO NGHIÊN CỨU VIÊN)")
     md_lines.append("")
     md_lines.append("| Tên hiển thị | Hệ thống thực |")
@@ -267,10 +245,7 @@ def _save_markdown(
     return path
 
 
-# ── Main ─────────────────────────────────────────────────────────────────────
-
 def _load_existing() -> dict[str, dict[str, Any]]:
-    """Load existing entries from pregenerated_answers.json as {id: entry}."""
     path = _DATASETS_DIR / "pregenerated_answers.json"
     if not path.exists():
         return {}
@@ -292,7 +267,6 @@ def main() -> None:
 
     all_questions = _flat_questions()
     if requested_ids:
-        # Validate
         known = {q["id"] for q in all_questions}
         unknown = requested_ids - known
         if unknown:
@@ -317,7 +291,6 @@ def main() -> None:
     print(f"Total answers to (re)generate: {total_target * len(SYSTEMS)}")
     print()
 
-    # Seed results with preserved entries (kept in original order of QUESTIONS)
     all_results: list[dict[str, Any]] = []
     if requested_ids:
         for q in all_questions:
@@ -336,7 +309,6 @@ def main() -> None:
         results = _run_all(question)
         elapsed = time.time() - t0
 
-        # Build answer entry
         answers_raw = {}
         for sys_name in SYSTEMS:
             r = results.get(sys_name, SystemResult(answer="", elapsed=0, error="not run"))
@@ -364,17 +336,14 @@ def main() -> None:
                   flush=True)
             new_entry = existing[qid]
 
-        # Replace the preserved copy if selective mode
         if requested_ids and any(e["id"] == qid for e in all_results):
             all_results = [new_entry if e["id"] == qid else e for e in all_results]
         else:
             all_results.append(new_entry)
 
-        # Restore original QUESTIONS order before saving
         order = {q["id"]: i for i, q in enumerate(all_questions)}
         all_results.sort(key=lambda e: order.get(e["id"], 999))
 
-        # Progress
         err_str = ""
         for sys_name in SYSTEMS:
             r = results.get(sys_name)
@@ -385,7 +354,6 @@ def main() -> None:
             status += f"\n{err_str}"
         print(status, flush=True)
 
-        # Save incrementally after each question
         json_path = _save_json(all_results, errors, total_reported)
         md_path = _save_markdown(all_results, errors, total_reported)
         print(f"  Saved ({idx}/{total_target})", flush=True)

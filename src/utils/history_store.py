@@ -1,16 +1,4 @@
-"""
-HistoryStore — lưu lịch sử hội thoại vào file JSON local.
-
-Mỗi entry bao gồm: timestamp, trang nguồn, câu hỏi, câu trả lời, metadata.
-File được lưu tại data/chat_history.json.
-
-Usage:
-    from src.utils.history_store import HistoryStore
-
-    HistoryStore.append("graphrag", query, answer, {"num_nodes": 74, ...})
-    entries = HistoryStore.load()   # newest first
-    HistoryStore.clear()
-"""
+"""HistoryStore — lưu lịch sử hội thoại vào file JSON local."""
 from __future__ import annotations
 
 import json
@@ -26,8 +14,6 @@ _MAX_ENTRIES = 500  # cap để tránh file phình to
 class HistoryStore:
     """Thread-safe (single-process) JSON-backed chat history."""
 
-    # ── Write ─────────────────────────────────────────────────────────────────
-
     @classmethod
     def append(
         cls,
@@ -36,14 +22,6 @@ class HistoryStore:
         answer: str,
         metadata: dict[str, Any] | None = None,
     ) -> None:
-        """Append one entry to the history file.
-
-        Args:
-            page:     Source page label — ``"graphrag"``, ``"rag"``, or ``"chat"``.
-            query:    The user's question.
-            answer:   The system's response.
-            metadata: Optional extra fields (num_nodes, retrieval_time, etc.)
-        """
         entry = {
             "id":        str(uuid.uuid4())[:8],
             "timestamp": datetime.now().isoformat(timespec="seconds"),
@@ -54,22 +32,15 @@ class HistoryStore:
         }
         try:
             entries = cls._read_raw()
-            entries.insert(0, entry)          # newest first
-            entries = entries[:_MAX_ENTRIES]  # trim
+            entries.insert(0, entry)
+            entries = entries[:_MAX_ENTRIES]
             cls._write_raw(entries)
         except Exception:
             pass  # never crash the main pipeline
 
-    # ── Read ──────────────────────────────────────────────────────────────────
-
     @classmethod
     def load(cls, page_filter: str | None = None, limit: int = 200) -> list[dict]:
-        """Load history entries, newest first.
-
-        Args:
-            page_filter: If set, only return entries for that page.
-            limit:       Maximum number of entries to return.
-        """
+        """Load history entries, newest first."""
         try:
             entries = cls._read_raw()
             if page_filter:
@@ -92,15 +63,9 @@ class HistoryStore:
         except Exception:
             return {"total": 0}
 
-    # ── Delete ────────────────────────────────────────────────────────────────
-
     @classmethod
     def clear(cls, page_filter: str | None = None) -> int:
-        """Delete entries. Returns number deleted.
-
-        Args:
-            page_filter: If set, only delete entries for that page.
-        """
+        """Delete entries. Returns number deleted."""
         try:
             entries = cls._read_raw()
             before = len(entries)
@@ -112,8 +77,6 @@ class HistoryStore:
             return before - len(entries)
         except Exception:
             return 0
-
-    # ── Internal ──────────────────────────────────────────────────────────────
 
     @classmethod
     def _read_raw(cls) -> list[dict]:

@@ -1,16 +1,8 @@
-"""
-Settings management — singleton, type-safe, .env-backed.
+"""Settings management — singleton, type-safe, .env-backed.
 
-Model names follow the LiteLLM provider-prefix format::
-
-    gemini/gemini-2.0-flash              → Google Gemini
-    anthropic/claude-3-5-sonnet-20241022 → Anthropic Claude
-    openai/gpt-4o                        → OpenAI
-    ollama/llama3.2                      → local Ollama
-    openrouter/google/gemini-2.0-flash   → OpenRouter
-
-Switching providers only requires updating LLM_MODEL (and the matching API
-key) in .env — no code changes needed.
+Model names follow the LiteLLM provider-prefix format (e.g.
+``gemini/gemini-2.0-flash``, ``anthropic/claude-3-5-sonnet-20241022``).
+Switching providers only requires updating LLM_MODEL + the matching API key.
 """
 
 from __future__ import annotations
@@ -23,10 +15,8 @@ from typing import Iterator, List, Optional
 
 from dotenv import load_dotenv
 
-# Curated default models per provider — used by LLMSettings.available_models
-# when the user has not supplied an explicit LLM_MODELS_AVAILABLE allowlist.
-# Kept conservative (well-known stable names) so the dropdown doesn't offer
-# models LiteLLM will 404 on.
+# Curated defaults — used by LLMSettings.available_models when LLM_MODELS_AVAILABLE
+# is not set. Kept conservative so the dropdown doesn't offer models LiteLLM 404s on.
 _DEFAULT_MODEL_CATALOG: dict[str, list[str]] = {
     "openai": [
         "openai/gpt-4o-mini",
@@ -55,25 +45,9 @@ from src.utils.logger import get_logger  # noqa: E402
 _logger = get_logger(__name__)
 
 
-# ── LLM Settings ──────────────────────────────────────────────────────────────
-
 @dataclass
 class LLMSettings:
-    """
-    Provider-agnostic LLM configuration, routed via LiteLLM.
-
-    ``model`` and ``embedding_model`` must use LiteLLM's
-    ``<provider>/<model-name>`` format.
-
-    API keys are loaded from the standard env vars each provider expects
-    (LiteLLM reads them automatically):
-
-        GEMINI_API_KEY      → gemini/...
-        ANTHROPIC_API_KEY   → anthropic/...
-        OPENAI_API_KEY      → openai/...
-        OPENROUTER_API_KEY  → openrouter/...
-        (none needed)       → ollama/...
-    """
+    """Provider-agnostic LLM configuration, routed via LiteLLM."""
 
     model: str = field(
         default_factory=lambda: os.getenv("LLM_MODEL", "gemini/gemini-2.0-flash")
@@ -112,7 +86,6 @@ class LLMSettings:
 
     @property
     def provider(self) -> str:
-        """Extract provider prefix, e.g. 'gemini' from 'gemini/gemini-2.0-flash'."""
         return self.model.split("/")[0] if "/" in self.model else self.model
 
     def __post_init__(self) -> None:
@@ -121,11 +94,7 @@ class LLMSettings:
             _logger.warning(msg)
 
     def validate_api_key(self) -> tuple[bool, str]:
-        """Check if the required API key env var is set.
-
-        Returns:
-            (True, "") if OK, or (False, error_message) if missing.
-        """
+        """Check if the required API key env var is set."""
         required_env = self._PROVIDER_KEY_MAP.get(self.provider)
         if required_env is not None and not os.getenv(required_env):
             msg = (
@@ -142,26 +111,16 @@ class LLMSettings:
         """True if the provider of ``model_name`` has its API key configured."""
         required = self._PROVIDER_KEY_MAP.get(self._provider_of(model_name))
         if required is None:
-            return True  # e.g. ollama — no key needed
+            return True
         return bool(os.getenv(required))
 
     @property
     def available_models(self) -> List[str]:
         """Models the user can pick at runtime.
 
-        Two sources, in priority order:
-
-        1. **User allowlist** — ``LLM_MODELS_AVAILABLE`` in .env (comma-
-           separated). When set, only these are offered (plus the current
-           model so it's always selectable).
-
-        2. **Auto-detect** — when the allowlist is empty, every model in
-           :data:`_DEFAULT_MODEL_CATALOG` whose provider has a valid API
-           key is offered. This means configuring ``GEMINI_API_KEY`` and
-           ``OPENAI_API_KEY`` in .env is enough to see both providers'
-           models in the dropdown without any extra config.
-
-        Final list is always filtered to providers with a valid API key.
+        Source: LLM_MODELS_AVAILABLE allowlist if set, else providers with a
+        valid API key from _DEFAULT_MODEL_CATALOG. The current model is always
+        included so it stays selectable.
         """
         raw = os.getenv("LLM_MODELS_AVAILABLE", "").strip()
         if raw:
@@ -172,7 +131,6 @@ class LLMSettings:
                 for m in models
                 if self.has_key_for(f"{provider}/_probe")
             ]
-        # Preserve order, ensure current model is first and deduped
         seen: set = set()
         ordered: List[str] = []
         for m in [self.model, *listed]:
@@ -183,25 +141,14 @@ class LLMSettings:
 
     @property
     def available_models_source(self) -> str:
-        """Which branch of ``available_models`` produced the current list.
-
-        Returns ``"allowlist"`` when ``LLM_MODELS_AVAILABLE`` is set,
-        ``"auto"`` otherwise. Useful for UI hints.
-        """
+        """``"allowlist"`` when LLM_MODELS_AVAILABLE is set, else ``"auto"``."""
         return "allowlist" if os.getenv("LLM_MODELS_AVAILABLE", "").strip() else "auto"
 
     @contextmanager
     def override_model(self, model_name: Optional[str]) -> Iterator[str]:
         """Temporarily swap ``settings.llm.model`` for the duration of a block.
 
-        Usage::
-
-            with settings.llm.override_model("anthropic/claude-3-5-haiku-20241022"):
-                runner.run(...)   # all pipelines + metrics now use Claude
-
-        Pass ``None`` or the current model to no-op. Restores on exit even if
-        the block raises. BaseModel instances created inside (or already cached
-        outside) will see the override because ``BaseModel.model_name`` reads
+        BaseModel instances see the override because ``model_name`` reads
         ``settings.llm.model`` dynamically when not pinned at init.
         """
         if not model_name or model_name == self.model:
@@ -236,7 +183,6 @@ class Neo4jSettings:
 
     @property
     def is_configured(self) -> bool:
-        """True if a password has been supplied."""
         return bool(self.password)
 
 
@@ -256,21 +202,12 @@ class GmailSettings:
 
     @property
     def is_configured(self) -> bool:
-        """True nếu đủ 3 biến môi trường EMAIL_USER / EMAIL_PASS / ADMIN_EMAIL."""
         return bool(self.sender and self.app_password and self.receiver)
 
 
 @dataclass
 class AppSettings:
-    """Application-level toggles.
-
-    - ``guest_mode``: when true, ``main.py`` hides admin-only pages from the
-      sidebar navigation. Typically set in production (Cloud Run) so the
-      public only sees user-facing study pages (Experiment, Preference).
-    - ``admin_password``: enables a password prompt in the sidebar that
-      toggles admin mode back on when ``guest_mode`` is true. Leave empty to
-      disable the unlock path entirely.
-    """
+    """Application-level toggles for guest-mode and admin unlock."""
 
     guest_mode: bool = field(
         default_factory=lambda: os.getenv("GUEST_MODE", "").strip().lower()
@@ -282,7 +219,6 @@ class AppSettings:
 
     @property
     def admin_unlock_available(self) -> bool:
-        """True if an ADMIN_PASSWORD is configured, so unlock UI can render."""
         return bool(self.admin_password)
 
 
@@ -291,9 +227,6 @@ class OntologySettings:
     """Chèo domain ontology file configuration."""
 
     file_path: Path = field(
-        # Canonical: v4 — v3 schema extensions + inference rules from Phụ lục B.
-        # CheoOntology.ttl (v1) is kept on disk only as the source for re-running
-        # the migration chain — see scripts/_archive/README.md.
         default_factory=lambda: _PROJECT_ROOT / "data" / "CheoOntology_v4.ttl"
     )
     namespace: str = "http://www.semanticweb.org/asus/ontologies/2025/5/Cheo#"
@@ -302,20 +235,8 @@ class OntologySettings:
         pass  # File existence is checked lazily when the ontology is actually loaded
 
 
-# ── Main Settings singleton ───────────────────────────────────────────────────
-
 class Settings:
-    """
-    Application-wide settings — singleton.
-
-    Usage::
-
-        from src.core.settings import settings
-
-        print(settings.llm.model)     # 'gemini/gemini-2.0-flash'
-        print(settings.llm.provider)  # 'gemini'
-        print(settings.neo4j.uri)
-    """
+    """Application-wide settings — singleton."""
 
     _instance: Optional[Settings] = None
 
@@ -338,7 +259,6 @@ class Settings:
 
     @classmethod
     def get_instance(cls) -> Settings:
-        """Return the singleton instance, creating it if necessary."""
         if cls._instance is None:
             cls()
         return cls._instance  # type: ignore[return-value]
@@ -377,5 +297,4 @@ class Settings:
         )
 
 
-# Module-level singleton — import this everywhere
 settings = Settings.get_instance()

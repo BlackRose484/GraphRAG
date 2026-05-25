@@ -4,9 +4,54 @@
 
 from __future__ import annotations
 
+import time
+from typing import Any, Optional
+
 import streamlit as st
 
 from ui.components import render_retrieval_detail as _render_retrieval_detail
+
+
+# ── Demo cache helper ─────────────────────────────────────────────────────────
+
+def _try_demo_cache(query: str) -> Optional[dict[str, Any]]:
+    """Trả về history_item đã build từ cache nếu DEMO_MODE bật & câu hỏi có
+    sẵn; ngược lại trả ``None`` để fallback live pipeline.
+
+    Có giả lập độ trễ ≈ pipeline thật để video trông tự nhiên (cap 30s)."""
+    from src.utils import demo_cache
+
+    if not demo_cache.is_enabled():
+        return None
+    entry = demo_cache.lookup(query)
+    if not entry:
+        return None
+    gr = entry["answers"].get("graphrag", {})
+    if not gr.get("answer"):
+        return None
+    detail = gr.get("retrieval_detail") or {}
+    meta = gr.get("metadata") or {}
+
+    # Sleep để trông như đang gọi pipeline thật
+    time.sleep(min(float(gr.get("elapsed", 0.0)), 30))
+
+    return {
+        "query":              query,
+        "answer":             gr["answer"],
+        "num_nodes":          detail.get("num_nodes",   meta.get("num_nodes", 0)),
+        "num_triplets":       detail.get("num_triplets", meta.get("num_triplets", 0)),
+        "num_paths":          detail.get("num_paths", 0),
+        "retrieval_time":     detail.get("retrieval_time", meta.get("retrieval_time", 0.0)),
+        "gen_time":           detail.get("gen_time", 0.0),
+        "total_time":         detail.get("total_time", meta.get("total_time", 0.0)),
+        "processed_query":    detail.get("processed_query", {}),
+        "entities":           detail.get("entities", {}),
+        "nodes":               list(detail.get("nodes", [])),
+        "triplets":            list(detail.get("triplets", [])),
+        "paths":               list(detail.get("paths", [])),
+        "subgraph":            dict(detail.get("subgraph", {})),
+        "formatted_contexts":  dict(detail.get("formatted_contexts", {})),
+    }
 
 
 # ── Helper ────────────────────────────────────────────────────────────────────
@@ -79,7 +124,6 @@ def render() -> None:
             FormatKey.ADJACENCY_TABLE,
             FormatKey.CODE_LIKE,
             FormatKey.NODE_SEQUENCE,
-            FormatKey.EMBEDDING_TEXT,
         ],
         default=[FormatKey.NATURAL_LANGUAGE, FormatKey.CODE_LIKE],
     )
@@ -172,6 +216,19 @@ def render() -> None:
 
         with st.chat_message("assistant"):
             with st.spinner("Đang truy xuất graph và sinh câu trả lời..."):
+                # ── Demo cache check (DEMO_MODE=1) ─────────────────────────
+                history_item = _try_demo_cache(query)
+                if history_item is not None:
+                    st.markdown(history_item["answer"])
+                    if show_detail:
+                        with st.expander("📊 Chi tiết retrieval", expanded=True):
+                            _render_retrieval_detail(
+                                history_item,
+                                key_prefix=f"gr_new_{len(st.session_state.graphrag_history)}_",
+                            )
+                    st.session_state.graphrag_history.append(history_item)
+                    return  # bỏ qua live pipeline
+
                 try:
                     pipeline = _get_pipeline(
                         strategy=strategy,

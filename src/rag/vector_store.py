@@ -1,13 +1,4 @@
-"""
-SimpleVectorStore — in-memory vector store backed by LiteLLM embeddings.
-
-Embedding is delegated to ``BaseModel.safe_embed`` so the embedding model
-is configured centrally via ``LLM_EMBEDDING_MODEL`` (default:
-``gemini/text-embedding-004``).
-
-Persistent storage uses pickle so the store can be built once and reused
-across runs without re-embedding.
-"""
+"""SimpleVectorStore — in-memory vector store backed by LiteLLM embeddings."""
 
 from __future__ import annotations
 
@@ -24,15 +15,7 @@ logger = logging.getLogger(__name__)
 
 
 class SimpleVectorStore:
-    """
-    In-memory vector store with cosine-similarity search.
-
-    Usage
-    -----
-    >>> store = SimpleVectorStore()
-    >>> store.add_chunks([{"text": "...", "metadata": {"type": "character"}}])
-    >>> results = store.query("Trần Phương là ai?", top_k=5)
-    """
+    """In-memory vector store with cosine-similarity search."""
 
     def __init__(self) -> None:
         self._base: BaseModel = BaseModel()
@@ -40,16 +23,8 @@ class SimpleVectorStore:
         self._embeddings: List[np.ndarray]      = []
         self._metadata:   List[Dict[str, Any]]  = []
 
-    # ── Public API ────────────────────────────────────────────────────────────
-
     def add_chunks(self, chunks: List[Dict[str, Any]]) -> None:
-        """
-        Embed and store a list of text chunks.
-
-        Args:
-            chunks: Each item must have a ``"text"`` key and an optional
-                    ``"metadata"`` dict.
-        """
+        """Embed and store a list of text chunks (each needs ``"text"`` key)."""
         texts = [c["text"] for c in chunks]
         logger.info("Embedding %d chunks …", len(texts))
 
@@ -63,13 +38,7 @@ class SimpleVectorStore:
         logger.info("Store now contains %d chunks.", len(self._chunks))
 
     def query(self, question: str, top_k: int = 5) -> List[Dict[str, Any]]:
-        """
-        Embed *question* and return the *top_k* most-similar chunks.
-
-        Returns:
-            List of dicts with ``"text"``, ``"metadata"``, and ``"score"``
-            keys, sorted by descending similarity.
-        """
+        """Embed *question* and return the *top_k* most-similar chunks."""
         if not self._chunks:
             return []
 
@@ -87,8 +56,6 @@ class SimpleVectorStore:
             }
             for i in top_idxs
         ]
-
-    # ── Persistence ───────────────────────────────────────────────────────────
 
     def save(self, filepath: str | Path) -> None:
         """Pickle the store to *filepath*."""
@@ -117,8 +84,6 @@ class SimpleVectorStore:
         store._metadata   = data["metadata"]
         logger.info("VectorStore loaded ← %s  (%d chunks)", filepath, len(store._chunks))
         return store
-
-    # ── Helpers ───────────────────────────────────────────────────────────────
 
     @staticmethod
     def _cosine(a: np.ndarray, b: np.ndarray) -> float:

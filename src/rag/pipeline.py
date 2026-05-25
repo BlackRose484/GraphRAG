@@ -1,42 +1,26 @@
-"""
-VectorRAGPipeline — traditional retrieval-augmented generation using a
+"""VectorRAGPipeline — traditional retrieval-augmented generation using a
 pre-built ``SimpleVectorStore``.
 
-Architecture
-------------
- query
-   │
-   ├─ 1. embed query              (BaseModel.safe_embed)
-   ├─ 2. vector search top-k      (SimpleVectorStore.query)
-   ├─ 3. build graph_data struct  (metrics-compatible)
-   ├─ 4. format context string
-   └─ 5. LLM generation           (BaseModel.safe_generate)
-
-The ``PipelineResult`` dataclass mirrors the structure used by the
-GraphRAG pipeline so the benchmark module can evaluate both systems
-with the same metrics code.
+PipelineResult mirrors the GraphRAG pipeline so benchmark metrics work
+unchanged across both systems.
 """
 
 from __future__ import annotations
 
 import time
 import logging
-from dataclasses import dataclass, asdict, field
+from dataclasses import dataclass, asdict
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 from src.core.base import BaseModel
-from src.core.settings import settings
 from src.rag.vector_store import SimpleVectorStore
 
 logger = logging.getLogger(__name__)
 
-# Default store path lives in project-root/data/
 _DEFAULT_STORE = Path(__file__).resolve().parents[2] / "data" / "vector_store.pkl"
 _TOP_K_DEFAULT = 10
 
-
-# ── Result dataclasses ────────────────────────────────────────────────────────
 
 @dataclass
 class RetrievalResult:
@@ -76,7 +60,6 @@ class PipelineResult:
 
     @property
     def answer(self) -> str:
-        """Shortcut — the generated answer text."""
         return self.generation.response
 
     def to_dict(self) -> Dict[str, Any]:
@@ -86,19 +69,8 @@ class PipelineResult:
         }
 
 
-# ── Pipeline ──────────────────────────────────────────────────────────────────
-
 class VectorRAGPipeline(BaseModel):
-    """
-    End-to-end traditional RAG pipeline.
-
-    Args:
-        vector_store: Pre-built ``SimpleVectorStore``.  If *None* the pipeline
-                      tries to load from *store_path*.
-        store_path:   Path to a pickled store; ignored when *vector_store* is
-                      already supplied.
-        top_k:        Number of chunks to retrieve per query.
-    """
+    """End-to-end traditional RAG pipeline."""
 
     def __init__(
         self,
@@ -120,22 +92,10 @@ class VectorRAGPipeline(BaseModel):
                 )
             self._store = SimpleVectorStore.load(path)
 
-    # ── Public ────────────────────────────────────────────────────────────────
-
     def run(self, question: str, top_k: Optional[int] = None) -> PipelineResult:
-        """
-        Execute the full RAG pipeline for *question*.
-
-        Args:
-            question: User query (Vietnamese natural language).
-            top_k:    Override the instance-level ``top_k`` for this call.
-
-        Returns:
-            A ``PipelineResult`` with full retrieval and generation details.
-        """
+        """Execute the full RAG pipeline for *question*."""
         k = top_k if top_k is not None else self._top_k
 
-        # ── Retrieval ─────────────────────────────────────────────────────────
         t0 = time.time()
         try:
             chunks = self._store.query(question, top_k=k)
@@ -164,7 +124,6 @@ class VectorRAGPipeline(BaseModel):
             error              = retrieval_error,
         )
 
-        # ── Generation ────────────────────────────────────────────────────────
         t1 = time.time()
         try:
             prompt   = self._build_prompt(question, context)
@@ -190,13 +149,9 @@ class VectorRAGPipeline(BaseModel):
 
         return PipelineResult(retrieval=retrieval, generation=generation)
 
-    # ── Private helpers ───────────────────────────────────────────────────────
-
     def _build_graph_data(self, chunks: List[Dict[str, Any]]) -> Dict[str, Any]:
-        """
-        Wrap retrieved chunks in the same ``graph_data`` schema used by the
-        GraphRAG pipeline so benchmark metrics work without modification.
-        """
+        """Wrap retrieved chunks in the GraphRAG ``graph_data`` schema so
+        benchmark metrics work without modification."""
         nodes = [
             {
                 "id":          f"chunk_{i}",

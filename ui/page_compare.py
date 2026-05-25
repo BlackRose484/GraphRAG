@@ -159,6 +159,29 @@ def _run_chat(query: str) -> _SystemResult:
 
 # ── Parallel executor ─────────────────────────────────────────────────────────
 
+def _from_cache(query: str) -> Optional[dict[str, _SystemResult]]:
+    """Tra cache demo nếu DEMO_MODE bật & câu hỏi có sẵn. Trả ``None`` nếu miss."""
+    from src.utils import demo_cache
+
+    if not demo_cache.is_enabled():
+        return None
+    entry = demo_cache.lookup(query)
+    if not entry:
+        return None
+
+    out: dict[str, _SystemResult] = {}
+    for sk in ("graphrag", "rag", "chat"):
+        a = entry["answers"].get(sk, {})
+        out[sk] = _SystemResult(
+            answer=a.get("answer", ""),
+            elapsed=float(a.get("elapsed", 0.0)),
+            error=a.get("error"),
+            metadata=a.get("metadata"),
+            retrieval_detail=a.get("retrieval_detail"),
+        )
+    return out
+
+
 def _run_all(
     query: str,
     disable_query_enhancement: bool = False,
@@ -170,6 +193,13 @@ def _run_all(
         disable_query_enhancement: Forwarded to GraphRAG; skips query expand/
             decompose. RAG and Chat are unaffected (they don't enhance).
     """
+    cached = _from_cache(query)
+    if cached is not None:
+        # Giả lập độ trễ ≈ pipeline thật. 3 hệ thống chạy "song song" nên chỉ
+        # cần sleep theo cột chậm nhất. Cap 30s để khỏi chờ quá lâu khi quay.
+        time.sleep(min(max((r.elapsed for r in cached.values()), default=0), 30))
+        return cached
+
     runners = {
         "graphrag": lambda q: _run_graphrag(q, disable_query_enhancement),
         "rag":      _run_rag,

@@ -1,16 +1,4 @@
-"""
-Weighted score aggregation for the CheoBench benchmark.
-
-Composes per-question metric scores into three composite scores:
-
-    S_retrieval  = Σ wᵢ · mᵢ   (over IR + RAGAs context metrics)
-    S_generation = Σ wⱼ · mⱼ   (over RAGAs answer metrics)
-    S_overall    = (S_retrieval + S_generation) / 2
-
-Weight schema follows the thesis specification:
-    Retrieval (1.00) — 55% deterministic IR + 45% LLM-judged context
-    Generation (1.00) — 100% LLM-judged answer quality (RAGAs canonical 50/50)
-"""
+"""Weighted score aggregation for the CheoBench benchmark."""
 
 from __future__ import annotations
 
@@ -18,18 +6,18 @@ from dataclasses import dataclass
 from typing import Dict, Optional
 
 
-# ── Weight tables (thesis spec — total 1.00 each) ─────────────────────────────
-
+# Retrieval (1.00) — 60% deterministic IR + 40% LLM-judged context
+# Generation (1.00) — 100% LLM-judged answer quality (RAGAs canonical 50/50)
 RETRIEVAL_WEIGHTS: Dict[str, float] = {
-    # Deterministic IR (Manning 2008 / Järvelin & Kekäläinen 2002)
-    "MAP":                    0.20,
+    # Manning 2008 / Järvelin & Kekäläinen 2002
+    "MAP":                    0.15,
     "NDCG@10":                0.15,
     "Precision":              0.10,
-    "Recall":                 0.10,
-    # RAGAs context-side (Es et al. 2023)
-    "ContextPrecision":       0.20,
+    "Recall":                 0.20,
+    # Es et al. 2023
+    "ContextPrecision":       0.10,
     "ContextRecall":          0.15,
-    "ContextEntitiesRecall":  0.10,
+    "ContextEntitiesRecall":  0.15,
 }
 
 GENERATION_WEIGHTS: Dict[str, float] = {
@@ -41,11 +29,8 @@ OVERALL_RETRIEVAL_WEIGHT  = 0.5
 OVERALL_GENERATION_WEIGHT = 0.5
 
 
-# ── Result container ──────────────────────────────────────────────────────────
-
 @dataclass
 class CompositeScores:
-    """Three composite scores for a single case (or averaged across cases)."""
     s_retrieval:  Optional[float]
     s_generation: Optional[float]
     s_overall:    Optional[float]
@@ -57,8 +42,6 @@ class CompositeScores:
             "S_overall":    self.s_overall,
         }
 
-
-# ── Aggregation ───────────────────────────────────────────────────────────────
 
 def _weighted_average(
     scores:  Dict[str, Optional[float]],
@@ -83,7 +66,6 @@ def _weighted_average(
 
 
 def aggregate(scores: Dict[str, Optional[float]]) -> CompositeScores:
-    """Compute (S_retrieval, S_generation, S_overall) from raw metric scores."""
     s_ret = _weighted_average(scores, RETRIEVAL_WEIGHTS)
     s_gen = _weighted_average(scores, GENERATION_WEIGHTS)
 
